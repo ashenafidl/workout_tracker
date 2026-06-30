@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/routing/router.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +14,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text("Hello World!"))),
+    return MaterialApp.router(
+      title: "Workout Tracker",
+      routerConfig: appRouter,
+      themeMode: .system,
     );
   }
 }
