@@ -27,6 +27,15 @@ class ExerciseListViewModel extends ChangeNotifier {
     });
   }
 
+  Future<bool> deleteExercise(int id) async {
+    try {
+      await _exerciseRepository.deleteExercise(id);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _exercisesSub?.cancel();

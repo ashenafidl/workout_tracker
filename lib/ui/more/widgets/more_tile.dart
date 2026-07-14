@@ -19,6 +19,7 @@ class MoreTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

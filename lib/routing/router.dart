@@ -39,6 +39,7 @@ final GoRouter appRouter = GoRouter(
               routes: [
                 GoRoute(
                   path: "exercises",
+                  parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const ExercisesScreen(),
                 ),
               ],

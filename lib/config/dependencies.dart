@@ -1,6 +1,7 @@
 import "package:get_it/get_it.dart";
 import "package:workout_tracker/data/repositories/exercise_repository.dart";
 import "package:workout_tracker/database/database.dart";
+import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
 
@@ -21,5 +22,8 @@ Future<void> setupDependencies() async {
   );
   getIt.registerFactory<ExerciseListViewModel>(
     () => ExerciseListViewModel(getIt<ExerciseRepository>()),
+  );
+  getIt.registerFactory<ExerciseFormViewModel>(
+    () => ExerciseFormViewModel(getIt<ExerciseRepository>()),
   );
 }
