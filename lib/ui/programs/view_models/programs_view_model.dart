@@ -1,0 +1,35 @@
+import "dart:async";
+
+import "package:flutter/foundation.dart";
+import "package:workout_tracker/data/models/programs.dart";
+import "package:workout_tracker/data/repositories/program_repository.dart";
+
+class ProgramsViewModel extends ChangeNotifier {
+  ProgramsViewModel(this._programRepository) {
+    _subscribeToPrograms();
+  }
+
+  final ProgramRepository _programRepository;
+
+  StreamSubscription<List<ProgramWithWorkoutCount>>? _programsSub;
+
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+
+  List<ProgramWithWorkoutCount> _programs = [];
+  List<ProgramWithWorkoutCount> get programs => _programs;
+
+  void _subscribeToPrograms() {
+    _programsSub = _programRepository.watchPrograms().listen((list) {
+      _programs = list;
+      _isLoading = false;
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _programsSub?.cancel();
+    super.dispose();
+  }
+}

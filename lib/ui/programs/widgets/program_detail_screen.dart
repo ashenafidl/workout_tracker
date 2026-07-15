@@ -1,0 +1,236 @@
+import "package:flutter/material.dart";
+import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
+import "package:workout_tracker/ui/programs/widgets/workout_sheet.dart";
+
+class ProgramDetailScreen extends StatefulWidget {
+  const ProgramDetailScreen({super.key, required this.programId});
+
+  final int programId;
+
+  @override
+  State<ProgramDetailScreen> createState() => _ProgramDetailScreenState();
+}
+
+class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
+  late final ProgramDetailViewModel vm;
+
+  @override
+  void initState() {
+    super.initState();
+    vm = getIt<ProgramDetailViewModel>();
+    vm.loadProgram(widget.programId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: vm,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: GestureDetector(
+              onTap: _showRenameDialog,
+              child: Text(vm.program?.name ?? ""),
+            ),
+            actions: [
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == "delete") {
+                    _showDeleteDialog();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: "delete",
+                    child: Text("Delete program"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          body: _buildBody(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _showWorkoutSheet,
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody() {
+    if (vm.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (vm.workouts.isEmpty) {
+      return const Center(child: Text("No workouts yet"));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      itemCount: vm.workouts.length,
+      itemBuilder: (context, index) {
+        final workoutWithExercises = vm.workouts[index];
+        final workout = workoutWithExercises.workout;
+        final exercises = workoutWithExercises.exercises;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onLongPress: () => _showWorkoutSheet(
+              workoutId: workout.id,
+              name: workout.name,
+              sets: workout.sets,
+              exercises: exercises,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          workout.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      Text(
+                        "${workout.sets} set${workout.sets == 1 ? "" : "s"}",
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  for (final we in exercises) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.fitness_center,
+                            size: 16,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(we.exercise.name)),
+                          Text(
+                            "${we.reps} reps",
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRenameDialog() {
+    final controller = TextEditingController(text: vm.program?.name ?? "");
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Rename program"),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(labelText: "Program name"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: Navigator.of(context).pop,
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: () {
+              vm.renameProgram(controller.text);
+              Navigator.of(context).pop();
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog() {
+    final programName = vm.program?.name ?? "";
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete program"),
+        content: Text(
+          "This will permanently delete $programName and all its workouts. "
+          "This cannot be undone.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: Navigator.of(context).pop,
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            onPressed: () async {
+              final deleted = await vm.deleteProgram();
+              if (!context.mounted) {
+                return;
+              }
+              Navigator.of(context).pop();
+              if (deleted) {
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWorkoutSheet({
+    int? workoutId,
+    String? name,
+    int? sets,
+    List<WorkoutExerciseDetail>? exercises,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => WorkoutSheet(
+        programId: widget.programId.toString(),
+        workoutId: workoutId,
+        initialName: name,
+        initialSets: sets,
+        initialExercises: exercises,
+      ),
+    );
+  }
+}

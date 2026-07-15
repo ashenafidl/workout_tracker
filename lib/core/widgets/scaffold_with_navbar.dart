@@ -31,6 +31,11 @@ class ScaffoldWithNavbar extends StatelessWidget {
             label: "Home",
           ),
           const BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined),
+            activeIcon: Icon(Icons.calendar_month_rounded),
+            label: "Programs",
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.menu_outlined),
             activeIcon: Icon(Icons.menu_rounded),
             label: "More",
