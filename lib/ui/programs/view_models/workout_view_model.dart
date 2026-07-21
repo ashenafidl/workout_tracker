@@ -6,8 +6,8 @@ import "package:workout_tracker/data/repositories/exercise_repository.dart";
 import "package:workout_tracker/data/repositories/workout_repository.dart";
 import "package:workout_tracker/database/database.dart";
 
-class WorkoutSheetViewModel extends ChangeNotifier {
-  WorkoutSheetViewModel(this._workoutRepository, this._exerciseRepository);
+class WorkoutViewModel extends ChangeNotifier {
+  WorkoutViewModel(this._workoutRepository, this._exerciseRepository);
 
   final WorkoutRepository _workoutRepository;
   final ExerciseRepository _exerciseRepository;
@@ -60,14 +60,14 @@ class WorkoutSheetViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addExercise(Exercise exercise) {
+  void addExercise(Exercise exercise, {int reps = 10}) {
     final position = _exercises.length;
     _exercises = List.from(_exercises)
       ..add(
         WorkoutExerciseInput(
           exerciseId: exercise.id,
           exerciseName: exercise.name,
-          reps: 10,
+          reps: reps,
           position: position,
         ),
       );

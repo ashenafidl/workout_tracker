@@ -125,7 +125,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                           : null,
                       onTap: () {
                         widget.onExerciseSelected(exercise);
-                        Navigator.pop(context);
+                        Navigator.pop(context, exercise);
                       },
                     );
                   },
@@ -141,7 +141,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                     final navigator = Navigator.of(context);
                     final exercise = await widget.onCreateExercise(name);
                     if (exercise != null && mounted) {
-                      navigator.pop();
+                      navigator.pop(exercise);
                     }
                   },
                 ),

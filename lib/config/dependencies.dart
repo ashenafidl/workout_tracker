@@ -8,7 +8,7 @@ import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_mode
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
-import "package:workout_tracker/ui/programs/view_models/workout_sheet_view_model.dart";
+import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 
 final getIt = GetIt.instance;
 
@@ -46,8 +46,8 @@ Future<void> setupDependencies() async {
       getIt<WorkoutRepository>(),
     ),
   );
-  getIt.registerFactory<WorkoutSheetViewModel>(
-    () => WorkoutSheetViewModel(
+  getIt.registerFactory<WorkoutViewModel>(
+    () => WorkoutViewModel(
       getIt<WorkoutRepository>(),
       getIt<ExerciseRepository>(),
     ),

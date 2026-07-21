@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
-import "package:workout_tracker/ui/programs/widgets/workout_sheet.dart";
+import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
 
 class ProgramDetailScreen extends StatefulWidget {
   const ProgramDetailScreen({super.key, required this.programId});
@@ -52,7 +52,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           ),
           body: _buildBody(),
           floatingActionButton: FloatingActionButton(
-            onPressed: _showWorkoutSheet,
+            onPressed: _openWorkoutScreen,
             child: const Icon(Icons.add),
           ),
         );
@@ -84,7 +84,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onLongPress: () => _showWorkoutSheet(
+            onLongPress: () => _openWorkoutScreen(
               workoutId: workout.id,
               name: workout.name,
               sets: workout.sets,
@@ -214,22 +214,22 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     );
   }
 
-  void _showWorkoutSheet({
+  void _openWorkoutScreen({
     int? workoutId,
     String? name,
     int? sets,
     List<WorkoutExerciseDetail>? exercises,
   }) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => WorkoutSheet(
-        programId: widget.programId.toString(),
-        workoutId: workoutId,
-        initialName: name,
-        initialSets: sets,
-        initialExercises: exercises,
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutScreen(
+          programId: widget.programId.toString(),
+          workoutId: workoutId,
+          initialName: name,
+          initialSets: sets,
+          initialExercises: exercises,
+        ),
       ),
     );
   }
