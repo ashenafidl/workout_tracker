@@ -42,9 +42,18 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: "delete",
-                    child: Text("Delete program"),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_rounded,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text("Delete program"),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -84,7 +93,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onLongPress: () => _openWorkoutScreen(
+            onTap: () => _openWorkoutScreen(
               workoutId: workout.id,
               name: workout.name,
               sets: workout.sets,

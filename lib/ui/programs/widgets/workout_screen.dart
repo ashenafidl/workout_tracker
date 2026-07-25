@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
-import "package:workout_tracker/ui/programs/widgets/exercise_input_sheet.dart";
 import "package:workout_tracker/ui/programs/widgets/exercise_picker_sheet.dart";
 
 class WorkoutScreen extends StatefulWidget {
@@ -228,16 +230,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
 
     if (exercise != null && mounted) {
-      final result = await showModalBottomSheet<ExerciseInputResult>(
+      final result = await showModalBottomSheet<UnitInputResult>(
         context: context,
         isScrollControlled: true,
         useSafeArea: true,
-        builder: (sheetContext) =>
-            ExerciseInputSheet(exerciseName: exercise.name),
+        builder: (sheetContext) => UnitInputSheet(
+          title: exercise.name,
+          subtitle: "Reps",
+          config: const IntegerInputConfig(initialValue: 10),
+        ),
       );
 
-      if (result is RepsInputResult) {
-        _viewModel.addExercise(exercise, reps: result.reps);
+      if (result case IntegerInputResult(:final value)) {
+        _viewModel.addExercise(exercise, reps: value);
       }
     }
   }
@@ -279,17 +284,18 @@ class _ExerciseRow extends StatelessWidget {
   }
 
   void _showRepsSheet(BuildContext context) {
-    showModalBottomSheet<ExerciseInputResult>(
+    showModalBottomSheet<UnitInputResult>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (sheetContext) => ExerciseInputSheet(
-        exerciseName: input.exerciseName,
-        initialReps: input.reps,
+      builder: (sheetContext) => UnitInputSheet(
+        title: input.exerciseName,
+        subtitle: "Reps",
+        config: IntegerInputConfig(initialValue: input.reps),
       ),
     ).then((result) {
-      if (result is RepsInputResult) {
-        viewModel.updateExerciseReps(index, result.reps);
+      if (result case IntegerInputResult(:final value)) {
+        viewModel.updateExerciseReps(index, value);
       }
     });
   }
