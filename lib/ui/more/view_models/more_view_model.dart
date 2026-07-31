@@ -1,11 +1,11 @@
 import "dart:async";
 
 import "package:flutter/foundation.dart";
-import "package:workout_tracker/data/repositories/exercise_repository.dart";
+import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/services/settings_service.dart";
 
 class MoreViewModel extends ChangeNotifier {
-  final ExerciseRepository _exerciseRepository;
+  final ExerciseRepo _exerciseRepository;
   final SettingsService _settings;
 
   MoreViewModel(this._exerciseRepository, this._settings) {

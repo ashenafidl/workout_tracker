@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/data/repositories/exercise_repository.dart";
+import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExercisePickerSheet extends StatefulWidget {
@@ -29,7 +29,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
   @override
   void initState() {
     super.initState();
-    _subscription = getIt<ExerciseRepository>().watchAllExercises().listen((
+    _subscription = getIt<ExerciseRepo>().watchAllExercises().listen((
       exercises,
     ) {
       if (!mounted) {

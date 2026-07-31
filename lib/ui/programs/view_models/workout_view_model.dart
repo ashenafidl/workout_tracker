@@ -2,15 +2,15 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
-import "package:workout_tracker/data/repositories/exercise_repository.dart";
-import "package:workout_tracker/data/repositories/workout_repository.dart";
+import "package:workout_tracker/data/repositories/exercise_repo.dart";
+import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class WorkoutViewModel extends ChangeNotifier {
   WorkoutViewModel(this._workoutRepository, this._exerciseRepository);
 
-  final WorkoutRepository _workoutRepository;
-  final ExerciseRepository _exerciseRepository;
+  final WorkoutRepo _workoutRepository;
+  final ExerciseRepo _exerciseRepository;
 
   int? _workoutId;
   bool get isEditing => _workoutId != null;

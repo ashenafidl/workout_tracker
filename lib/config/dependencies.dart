@@ -1,12 +1,13 @@
 import "package:get_it/get_it.dart";
 import "package:shared_preferences/shared_preferences.dart";
-import "package:workout_tracker/data/repositories/exercise_repository.dart";
-import "package:workout_tracker/data/repositories/program_repository.dart";
-import "package:workout_tracker/data/repositories/workout_repository.dart";
+import "package:workout_tracker/data/repositories/exercise_repo.dart";
+import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/settings_service.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
+import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
@@ -25,39 +26,34 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<SettingsService>(SettingsService(prefs));
 
   // Repositories
-  getIt.registerLazySingleton<ExerciseRepository>(
-    () => ExerciseRepository(getIt<AppDatabase>()),
+  getIt.registerLazySingleton<ExerciseRepo>(
+    () => ExerciseRepo(getIt<AppDatabase>()),
   );
-  getIt.registerLazySingleton<ProgramRepository>(
-    () => ProgramRepository(getIt<AppDatabase>()),
+  getIt.registerLazySingleton<ProgramRepo>(
+    () => ProgramRepo(getIt<AppDatabase>()),
   );
-  getIt.registerLazySingleton<WorkoutRepository>(
-    () => WorkoutRepository(getIt<AppDatabase>()),
+  getIt.registerLazySingleton<WorkoutRepo>(
+    () => WorkoutRepo(getIt<AppDatabase>()),
   );
 
   // ViewModels
   getIt.registerFactory<MoreViewModel>(
-    () => MoreViewModel(getIt<ExerciseRepository>(), getIt<SettingsService>()),
+    () => MoreViewModel(getIt<ExerciseRepo>(), getIt<SettingsService>()),
   );
   getIt.registerFactory<ExerciseListViewModel>(
-    () => ExerciseListViewModel(getIt<ExerciseRepository>()),
+    () => ExerciseListViewModel(getIt<ExerciseRepo>()),
   );
   getIt.registerFactory<ExerciseFormViewModel>(
-    () => ExerciseFormViewModel(getIt<ExerciseRepository>()),
+    () => ExerciseFormViewModel(getIt<ExerciseRepo>()),
   );
   getIt.registerFactory<ProgramsViewModel>(
-    () => ProgramsViewModel(getIt<ProgramRepository>()),
+    () => ProgramsViewModel(getIt<ProgramRepo>()),
   );
   getIt.registerFactory<ProgramDetailViewModel>(
-    () => ProgramDetailViewModel(
-      getIt<ProgramRepository>(),
-      getIt<WorkoutRepository>(),
-    ),
+    () => ProgramDetailViewModel(getIt<ProgramRepo>(), getIt<WorkoutRepo>()),
   );
   getIt.registerFactory<WorkoutViewModel>(
-    () => WorkoutViewModel(
-      getIt<WorkoutRepository>(),
-      getIt<ExerciseRepository>(),
-    ),
+    () => WorkoutViewModel(getIt<WorkoutRepo>(), getIt<ExerciseRepo>()),
   );
+  getIt.registerFactory<HomeViewModel>(HomeViewModel.new);
 }

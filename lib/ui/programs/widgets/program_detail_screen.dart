@@ -60,9 +60,26 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
             ],
           ),
           body: _buildBody(),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _openWorkoutScreen,
-            child: const Icon(Icons.add),
+          floatingActionButton: Column(
+            mainAxisSize: .min,
+            crossAxisAlignment: .end,
+            children: [
+              if (vm.workouts.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: FloatingActionButton.extended(
+                    heroTag: "start",
+                    onPressed: () {},
+                    icon: const Icon(Icons.play_arrow_rounded),
+                    label: const Text("Start program"),
+                  ),
+                ),
+              FloatingActionButton(
+                heroTag: "add",
+                onPressed: _openWorkoutScreen,
+                child: const Icon(Icons.add_rounded),
+              ),
+            ],
           ),
         );
       },
@@ -104,6 +121,12 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    "Day ${index + 1}",
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                   Row(
                     children: [
                       Expanded(

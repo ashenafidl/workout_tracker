@@ -3,15 +3,15 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
-import "package:workout_tracker/data/repositories/program_repository.dart";
-import "package:workout_tracker/data/repositories/workout_repository.dart";
+import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ProgramDetailViewModel extends ChangeNotifier {
-  ProgramDetailViewModel(this._programRepository, this._workoutRepository);
+  ProgramDetailViewModel(this._programRepo, this._workoutRepo);
 
-  final ProgramRepository _programRepository;
-  final WorkoutRepository _workoutRepository;
+  final ProgramRepo _programRepo;
+  final WorkoutRepo _workoutRepo;
 
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
   StreamSubscription<List<ProgramWithWorkoutCount>>? _programSub;
@@ -38,18 +38,18 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   void _subscribeToWorkouts() {
     _workoutsSub?.cancel();
-    _workoutsSub = _workoutRepository
-        .watchWorkoutsForProgram(_programId!)
-        .listen((list) {
-          _workouts = list;
-          _isLoading = false;
-          notifyListeners();
-        });
+    _workoutsSub = _workoutRepo.watchWorkoutsForProgram(_programId!).listen((
+      list,
+    ) {
+      _workouts = list;
+      _isLoading = false;
+      notifyListeners();
+    });
   }
 
   void _subscribeToProgram() {
     _programSub?.cancel();
-    _programSub = _programRepository.watchPrograms().listen((list) {
+    _programSub = _programRepo.watchPrograms().listen((list) {
       final match = list.where((p) => p.program.id == _programId);
       if (match.isNotEmpty) {
         _program = match.first.program;
@@ -67,7 +67,7 @@ class ProgramDetailViewModel extends ChangeNotifier {
     }
 
     try {
-      await _programRepository.updateProgram(id: _programId!, name: trimmed);
+      await _programRepo.updateProgram(id: _programId!, name: trimmed);
       _errorMessage = null;
     } catch (error) {
       _errorMessage = error.toString().replaceFirst("Exception: ", "");
@@ -77,7 +77,7 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   Future<bool> deleteProgram() async {
     try {
-      await _programRepository.deleteProgram(_programId!);
+      await _programRepo.deleteProgram(_programId!);
       return true;
     } catch (error) {
       _errorMessage = error.toString().replaceFirst("Exception: ", "");
@@ -88,11 +88,15 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   Future<void> deleteWorkout(int workoutId) async {
     try {
-      await _workoutRepository.deleteWorkout(workoutId);
+      await _workoutRepo.deleteWorkout(workoutId);
     } catch (error) {
       _errorMessage = error.toString().replaceFirst("Exception: ", "");
       notifyListeners();
     }
+  }
+
+  Future<void> setActive(int id) async {
+    await _programRepo.setActiveProgram(id);
   }
 
   @override

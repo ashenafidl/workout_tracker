@@ -3,14 +3,12 @@ import "package:flutter/material.dart";
 class ScrollWheel extends StatefulWidget {
   final int value;
   final int max;
-  final String label;
   final ValueChanged<int> onChanged;
 
   const ScrollWheel({
     super.key,
     required this.value,
     required this.max,
-    required this.label,
     required this.onChanged,
   });
 
@@ -35,47 +33,37 @@ class _ScrollWheelState extends State<ScrollWheel> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: .min,
-      children: [
-        SizedBox(
-          width: 80,
-          height: 140,
-          child: ListWheelScrollView.useDelegate(
-            controller: _controller,
-            itemExtent: 48,
-            diameterRatio: 1.6,
-            physics: const FixedExtentScrollPhysics(),
-            onSelectedItemChanged: widget.onChanged,
-            childDelegate: ListWheelChildBuilderDelegate(
-              builder: (context, index) {
-                if (index < 0 || index > widget.max) return null;
-                final selected = index == widget.value;
+    return SizedBox(
+      width: 80,
+      height: 140,
+      child: ListWheelScrollView.useDelegate(
+        controller: _controller,
+        itemExtent: 48,
+        diameterRatio: 1.6,
+        physics: const FixedExtentScrollPhysics(),
+        onSelectedItemChanged: widget.onChanged,
+        childDelegate: ListWheelChildBuilderDelegate(
+          builder: (context, index) {
+            if (index < 0 || index > widget.max) return null;
+            final selected = index == widget.value;
 
-                return Center(
-                  child: Text(
-                    index.toString().padLeft(2, "0"),
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: selected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.3),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+            return Center(
+              child: Text(
+                index.toString().padLeft(2, "0"),
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
+                textAlign: .center,
+              ),
+            );
+          },
         ),
-        Text(
-          widget.label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

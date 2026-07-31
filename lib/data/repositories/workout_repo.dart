@@ -2,45 +2,59 @@ import "package:drift/drift.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 
-class WorkoutRepository {
-  WorkoutRepository(this._db);
+class WorkoutRepo {
+  WorkoutRepo(this._db);
 
   final AppDatabase _db;
 
   Stream<List<WorkoutWithExercises>> watchWorkoutsForProgram(int programId) {
-    final query = _db.select(_db.workouts)
-      ..where((w) => w.programId.equals(programId))
-      ..orderBy([(w) => OrderingTerm(expression: w.position)]);
+    final query =
+        _db.select(_db.workouts).join([
+            leftOuterJoin(
+              _db.workoutExercises,
+              _db.workoutExercises.workoutId.equalsExp(_db.workouts.id),
+            ),
+            leftOuterJoin(
+              _db.exercises,
+              _db.exercises.id.equalsExp(_db.workoutExercises.exerciseId),
+            ),
+          ])
+          ..where(_db.workouts.programId.equals(programId))
+          ..orderBy([
+            OrderingTerm(expression: _db.workouts.position),
+            OrderingTerm(expression: _db.workoutExercises.position),
+          ]);
 
-    return query.watch().asyncMap((workouts) async {
-      final results = <WorkoutWithExercises>[];
-      for (final workout in workouts) {
-        final weQuery =
-            _db.select(_db.workoutExercises).join([
-                innerJoin(
-                  _db.exercises,
-                  _db.exercises.id.equalsExp(_db.workoutExercises.exerciseId),
-                ),
-              ])
-              ..where(_db.workoutExercises.workoutId.equals(workout.id))
-              ..orderBy([
-                OrderingTerm(expression: _db.workoutExercises.position),
-              ]);
+    return query.watch().map((rows) {
+      final grouped = <int, _WorkoutGrouping>{};
+      for (final row in rows) {
+        final workout = row.readTable(_db.workouts);
+        final grouping = grouped.putIfAbsent(
+          workout.id,
+          () => _WorkoutGrouping(workout: workout, exercises: []),
+        );
 
-        final rows = await weQuery.get();
-        final details = rows.map((row) {
-          final exercise = row.readTable(_db.exercises);
-          final we = row.readTable(_db.workoutExercises);
-          return WorkoutExerciseDetail(
-            exercise: exercise,
-            reps: we.reps,
-            position: we.position,
+        final exercise = row.readTableOrNull(_db.exercises);
+        final we = row.readTableOrNull(_db.workoutExercises);
+        if (exercise != null && we != null) {
+          grouping.exercises.add(
+            WorkoutExerciseDetail(
+              exercise: exercise,
+              reps: we.reps,
+              position: we.position,
+            ),
           );
-        }).toList();
-
-        results.add(WorkoutWithExercises(workout: workout, exercises: details));
+        }
       }
-      return results;
+
+      return grouped.values
+          .map(
+            (g) => WorkoutWithExercises(
+              workout: g.workout,
+              exercises: g.exercises,
+            ),
+          )
+          .toList();
     });
   }
 
@@ -151,4 +165,11 @@ class WorkoutRepository {
     }
     return rows.first.position + 1;
   }
+}
+
+class _WorkoutGrouping {
+  _WorkoutGrouping({required this.workout, required this.exercises});
+
+  final Workout workout;
+  final List<WorkoutExerciseDetail> exercises;
 }

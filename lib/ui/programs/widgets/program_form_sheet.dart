@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/data/repositories/program_repository.dart";
+import "package:workout_tracker/data/repositories/program_repo.dart";
 
 class ProgramFormSheet extends StatefulWidget {
   const ProgramFormSheet({super.key, this.programId, this.initialName});
@@ -39,7 +39,7 @@ class _ProgramFormSheetState extends State<ProgramFormSheet> {
       _isLoading = true;
     });
 
-    final repository = getIt<ProgramRepository>();
+    final repository = getIt<ProgramRepo>();
 
     try {
       if (widget.programId != null) {

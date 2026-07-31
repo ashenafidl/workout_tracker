@@ -2,14 +2,14 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/programs.dart";
-import "package:workout_tracker/data/repositories/program_repository.dart";
+import "package:workout_tracker/data/repositories/program_repo.dart";
 
 class ProgramsViewModel extends ChangeNotifier {
   ProgramsViewModel(this._programRepository) {
     _subscribeToPrograms();
   }
 
-  final ProgramRepository _programRepository;
+  final ProgramRepo _programRepository;
 
   StreamSubscription<List<ProgramWithWorkoutCount>>? _programsSub;
 

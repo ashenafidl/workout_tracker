@@ -133,35 +133,69 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Duration picker (mm:ss scroll wheels) ───────────────────────────────
 
   Widget _buildDurationPicker() {
-    return Row(
-      mainAxisAlignment: .center,
+    final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+
+    return Column(
+      mainAxisSize: .min,
       children: [
-        ScrollWheel(
-          value: _duration.inMinutes,
-          max: 99,
-          label: "min",
-          onChanged: (m) {
-            setState(() {
-              _duration = Duration(
-                minutes: m,
-                seconds: _duration.inSeconds % 60,
-              );
-            });
-          },
+        Row(
+          mainAxisAlignment: .center,
+          crossAxisAlignment: .center,
+          children: [
+            ScrollWheel(
+              value: _duration.inMinutes,
+              max: 99,
+              onChanged: (m) {
+                setState(() {
+                  _duration = Duration(
+                    minutes: m,
+                    seconds: _duration.inSeconds % 60,
+                  );
+                });
+              },
+            ),
+            SizedBox(
+              width: 24,
+              child: Text(
+                "⁚",
+                style: Theme.of(
+                  context,
+                ).textTheme.displaySmall?.copyWith(fontWeight: .bold),
+                textAlign: .center,
+              ),
+            ),
+            ScrollWheel(
+              value: _duration.inSeconds % 60,
+              max: 59,
+              onChanged: (s) {
+                setState(() {
+                  _duration = Duration(
+                    minutes: _duration.inMinutes,
+                    seconds: s,
+                  );
+                });
+              },
+            ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(":", style: Theme.of(context).textTheme.displaySmall),
-        ),
-        ScrollWheel(
-          value: _duration.inSeconds % 60,
-          max: 59,
-          label: "sec",
-          onChanged: (s) {
-            setState(() {
-              _duration = Duration(minutes: _duration.inMinutes, seconds: s);
-            });
-          },
+        const SizedBox(height: 4),
+        // Labels sit below the whole row, aligned to their respective wheels
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: .min,
+          children: [
+            SizedBox(
+              width: 80,
+              child: Text("min", textAlign: .center, style: labelStyle),
+            ),
+            const SizedBox(width: 24),
+            SizedBox(
+              width: 80,
+              child: Text("sec", textAlign: .center, style: labelStyle),
+            ),
+          ],
         ),
       ],
     );

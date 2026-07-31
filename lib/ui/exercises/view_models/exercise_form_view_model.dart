@@ -1,11 +1,11 @@
 import "package:flutter/foundation.dart";
-import "package:workout_tracker/data/repositories/exercise_repository.dart";
+import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseFormViewModel extends ChangeNotifier {
   ExerciseFormViewModel(this._exerciseRepository);
 
-  final ExerciseRepository _exerciseRepository;
+  final ExerciseRepo _exerciseRepository;
 
   int? _exerciseId;
   bool get isEditing => _exerciseId != null;
