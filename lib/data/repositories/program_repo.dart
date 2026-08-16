@@ -73,4 +73,15 @@ class ProgramRepo {
       );
     });
   }
+
+  Future<int> getWorkoutCount(int id) async {
+    final countExp = _db.workouts.id.count();
+
+    final query = _db.selectOnly(_db.workouts)
+      ..addColumns([countExp])
+      ..where(_db.workouts.programId.equals(id));
+
+    final result = await query.getSingle();
+    return result.read(countExp) ?? 0;
+  }
 }

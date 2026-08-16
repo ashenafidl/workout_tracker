@@ -2,15 +2,15 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
-import "package:workout_tracker/data/services/settings_service.dart";
+import "package:workout_tracker/data/services/shared_preference_service.dart";
 
 class MoreViewModel extends ChangeNotifier {
-  final ExerciseRepo _exerciseRepository;
-  final SettingsService _settings;
-
   MoreViewModel(this._exerciseRepository, this._settings) {
     _subscribeToExerciseCount();
   }
+
+  final ExerciseRepo _exerciseRepository;
+  final SharedPreferenceService _settings;
 
   StreamSubscription<int>? _exerciseCountSub;
 

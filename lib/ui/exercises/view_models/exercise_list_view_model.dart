@@ -5,11 +5,11 @@ import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseListViewModel extends ChangeNotifier {
-  final ExerciseRepo _exerciseRepository;
-
   ExerciseListViewModel(this._exerciseRepository) {
     _subscribeToExercises();
   }
+
+  final ExerciseRepo _exerciseRepository;
 
   StreamSubscription<List<Exercise>>? _exercisesSub;
 

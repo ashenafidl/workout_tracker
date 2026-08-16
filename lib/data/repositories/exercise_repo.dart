@@ -2,9 +2,9 @@ import "package:drift/drift.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseRepo {
-  final AppDatabase _db;
-
   ExerciseRepo(this._db);
+
+  final AppDatabase _db;
 
   Stream<int> watchExerciseCount() {
     final query = _db.exercises.count();

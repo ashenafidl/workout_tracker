@@ -20,6 +20,7 @@ class ScaffoldWithNavbar extends StatelessWidget {
       body: navigationShell,
 
       bottomNavigationBar: BottomNavigationBar(
+        type: .fixed,
         currentIndex: navigationShell.currentIndex,
         showSelectedLabels: false,
         showUnselectedLabels: false,
@@ -34,6 +35,11 @@ class ScaffoldWithNavbar extends StatelessWidget {
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month_rounded),
             label: "Programs",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history_rounded),
+            label: "History",
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.menu_outlined),

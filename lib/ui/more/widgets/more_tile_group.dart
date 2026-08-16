@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/ui/more/widgets/more_tile.dart";
 
 class MoreTileGroup extends StatelessWidget {
+  const MoreTileGroup({super.key, required this.title, required this.children});
+
   final String title;
   final List<MoreTile> children;
-
-  const MoreTileGroup({super.key, required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {

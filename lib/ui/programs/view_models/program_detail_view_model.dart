@@ -5,13 +5,19 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
+import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ProgramDetailViewModel extends ChangeNotifier {
-  ProgramDetailViewModel(this._programRepo, this._workoutRepo);
+  ProgramDetailViewModel(
+    this._programRepo,
+    this._workoutRepo,
+    this._preferenceService,
+  );
 
   final ProgramRepo _programRepo;
   final WorkoutRepo _workoutRepo;
+  final SharedPreferenceService _preferenceService;
 
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
   StreamSubscription<List<ProgramWithWorkoutCount>>? _programSub;
@@ -95,8 +101,19 @@ class ProgramDetailViewModel extends ChangeNotifier {
     }
   }
 
+  int getWorkoutIndex() {
+    return _preferenceService.workoutIndexForProgram(_program!.id);
+  }
+
   Future<void> setActive(int id) async {
     await _programRepo.setActiveProgram(id);
+  }
+
+  WorkoutWithExercises? get nextWorkoutIndex =>
+      _workouts.isNotEmpty ? _workouts[getWorkoutIndex()] : null;
+
+  Future<int> getWorkoutCount(int programId) async {
+    return await _programRepo.getWorkoutCount(programId);
   }
 
   @override

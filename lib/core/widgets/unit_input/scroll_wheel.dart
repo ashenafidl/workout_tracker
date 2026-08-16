@@ -1,16 +1,16 @@
 import "package:flutter/material.dart";
 
 class ScrollWheel extends StatefulWidget {
-  final int value;
-  final int max;
-  final ValueChanged<int> onChanged;
-
   const ScrollWheel({
     super.key,
     required this.value,
     required this.max,
     required this.onChanged,
   });
+
+  final int value;
+  final int max;
+  final ValueChanged<int> onChanged;
 
   @override
   State<ScrollWheel> createState() => _ScrollWheelState();

@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
+import "package:go_router/go_router.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
 
@@ -21,6 +23,23 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     super.initState();
     vm = getIt<ProgramDetailViewModel>();
     vm.loadProgram(widget.programId);
+  }
+
+  Future<void> _startProgram() async {
+    final nextWorkout = vm.nextWorkoutIndex;
+    if (!mounted || nextWorkout == null) return;
+
+    vm.setActive(widget.programId);
+
+    context.push(
+      "/session",
+      extra: WorkoutSessionArgs(
+        workoutWithExercises: nextWorkout,
+        programId: widget.programId,
+        workoutIndex: nextWorkout.workout.position,
+        totalWorkoutsInProgram: await vm.getWorkoutCount(widget.programId),
+      ),
+    );
   }
 
   @override
@@ -69,7 +88,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: FloatingActionButton.extended(
                     heroTag: "start",
-                    onPressed: () {},
+                    onPressed: _startProgram,
                     icon: const Icon(Icons.play_arrow_rounded),
                     label: const Text("Start program"),
                   ),

@@ -13,8 +13,15 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
+
       inputDecorationTheme: const InputDecorationTheme(
         border: OutlineInputBorder(),
+      ),
+
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: .circular(8)),
+        ),
       ),
     );
   }
