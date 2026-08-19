@@ -2,7 +2,7 @@ import "package:drift/drift.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseRepo {
-  ExerciseRepo(this._db);
+  new(this._db);
 
   final AppDatabase _db;
 

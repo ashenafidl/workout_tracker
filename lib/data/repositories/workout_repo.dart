@@ -3,7 +3,7 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 
 class WorkoutRepo {
-  WorkoutRepo(this._db);
+  new(this._db);
 
   final AppDatabase _db;
 
@@ -168,7 +168,7 @@ class WorkoutRepo {
 }
 
 class _WorkoutGrouping {
-  _WorkoutGrouping({required this.workout, required this.exercises});
+  new({required this.workout, required this.exercises});
 
   final Workout workout;
   final List<WorkoutExerciseDetail> exercises;

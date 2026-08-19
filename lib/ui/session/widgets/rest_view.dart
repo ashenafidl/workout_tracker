@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class RestView extends StatelessWidget {
-  const RestView({
+  const new({
     super.key,
     required this.secondsRemaining,
     required this.nextCircuit,
@@ -31,10 +31,8 @@ class RestView extends StatelessWidget {
           Text(
             formatDuration(Duration(seconds: secondsRemaining)),
             key: ValueKey(secondsRemaining),
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 80,
-            ),
+            style: Theme.of(context).textTheme.displayLarge
+                ?.copyWith(fontWeight: FontWeight.bold, fontSize: 80),
           ),
           const SizedBox(height: 16),
           Text(

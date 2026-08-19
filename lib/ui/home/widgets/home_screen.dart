@@ -4,7 +4,7 @@ import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/home/widgets/todays_workout_card.dart";
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

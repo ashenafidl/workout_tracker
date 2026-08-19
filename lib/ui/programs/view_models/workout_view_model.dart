@@ -7,7 +7,7 @@ import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class WorkoutViewModel extends ChangeNotifier {
-  WorkoutViewModel(this._workoutRepository, this._exerciseRepository);
+  new(this._workoutRepository, this._exerciseRepository);
 
   final WorkoutRepo _workoutRepository;
   final ExerciseRepo _exerciseRepository;
@@ -138,7 +138,7 @@ class WorkoutViewModel extends ChangeNotifier {
         }
       });
 
-      return completer.future;
+      return await completer.future;
     } catch (_) {
       return null;
     }

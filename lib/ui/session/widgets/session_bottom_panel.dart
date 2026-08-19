@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 
 class SessionBottomPanel extends StatelessWidget {
-  const SessionBottomPanel({super.key, required this.vm});
+  const new({super.key, required this.vm});
 
   final WorkoutSessionViewModel vm;
 

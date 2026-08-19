@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
 class ScrollWheel extends StatefulWidget {
-  const ScrollWheel({
+  const new({
     super.key,
     required this.value,
     required this.max,
@@ -54,9 +54,8 @@ class _ScrollWheelState extends State<ScrollWheel> {
                   fontWeight: FontWeight.bold,
                   color: selected
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.3),
+                      : Theme.of(context).colorScheme.onSurface
+                            .withValues(alpha: 0.3),
                 ),
                 textAlign: .center,
               ),

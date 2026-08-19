@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 
 class TodaysWorkoutCard extends StatelessWidget {
-  const TodaysWorkoutCard({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

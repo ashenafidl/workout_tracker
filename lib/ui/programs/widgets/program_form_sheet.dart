@@ -3,7 +3,7 @@ import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 
 class ProgramFormSheet extends StatefulWidget {
-  const ProgramFormSheet({super.key, this.programId, this.initialName});
+  const new({super.key, this.programId, this.initialName});
 
   final int? programId;
   final String? initialName;

@@ -3,7 +3,7 @@ import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseFormViewModel extends ChangeNotifier {
-  ExerciseFormViewModel(this._exerciseRepository);
+  new(this._exerciseRepository);
 
   final ExerciseRepo _exerciseRepository;
 

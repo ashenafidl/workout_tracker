@@ -7,7 +7,7 @@ import "package:workout_tracker/ui/programs/view_models/program_detail_view_mode
 import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
 
 class ProgramDetailScreen extends StatefulWidget {
-  const ProgramDetailScreen({super.key, required this.programId});
+  const new({super.key, required this.programId});
 
   final int programId;
 
@@ -171,9 +171,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           Icon(
                             Icons.fitness_center,
                             size: 16,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                           const SizedBox(width: 8),
                           Expanded(child: Text(we.exercise.name)),
@@ -181,9 +181,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             "${we.reps} reps",
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                         ],

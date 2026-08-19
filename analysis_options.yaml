@@ -1,6 +1,14 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   language:
     strict-casts: true
     strict-inference: true
@@ -28,3 +36,9 @@ linter:
     unnecessary_lambdas: true
     unnecessary_null_aware_assignments: true
     prefer_const_constructors: true
+    empty_container_bodies: true
+    initialize_in_field_declaration: true
+    use_declaring_parameters: true
+    unnecessary_type_name_in_constructor: true
+    unnecessary_primary_constructor_body: true
+    unnecessary_const_in_enum_constructor: true

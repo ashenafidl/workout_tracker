@@ -1,7 +1,7 @@
 import "package:workout_tracker/database/database.dart";
 
 class WorkoutExerciseInput {
-  const WorkoutExerciseInput({
+  const new({
     required this.exerciseId,
     required this.exerciseName,
     required this.reps,
@@ -15,7 +15,7 @@ class WorkoutExerciseInput {
 }
 
 class WorkoutExerciseDetail {
-  const WorkoutExerciseDetail({
+  const new({
     required this.exercise,
     required this.reps,
     required this.position,
@@ -27,7 +27,7 @@ class WorkoutExerciseDetail {
 }
 
 class WorkoutWithExercises {
-  const WorkoutWithExercises({required this.workout, required this.exercises});
+  const new({required this.workout, required this.exercises});
 
   final Workout workout;
   final List<WorkoutExerciseDetail> exercises;

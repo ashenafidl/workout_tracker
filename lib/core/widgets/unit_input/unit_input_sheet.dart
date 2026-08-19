@@ -5,7 +5,7 @@ import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class UnitInputSheet extends StatefulWidget {
-  const UnitInputSheet({
+  const new({
     super.key,
     required this.title,
     required this.config,
@@ -133,9 +133,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Duration picker (mm:ss scroll wheels) ───────────────────────────────
 
   Widget _buildDurationPicker() {
-    final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-    );
+    final labelStyle = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
 
     return Column(
       mainAxisSize: .min,
@@ -160,9 +159,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
               width: 24,
               child: Text(
                 "⁚",
-                style: Theme.of(
-                  context,
-                ).textTheme.displaySmall?.copyWith(fontWeight: .bold),
+                style: Theme.of(context).textTheme.displaySmall
+                    ?.copyWith(fontWeight: .bold),
                 textAlign: .center,
               ),
             ),
@@ -284,9 +282,9 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                                     _unitLabel(),
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                   ),
                               ],

@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
 class CountdownView extends StatelessWidget {
-  const CountdownView({super.key, required this.value});
+  const new({super.key, required this.value});
 
   final int value;
 
@@ -20,10 +20,8 @@ class CountdownView extends StatelessWidget {
             child: Text(
               "$value",
               key: ValueKey(value),
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                fontSize: 100,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.displayLarge
+                  ?.copyWith(fontSize: 100, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),

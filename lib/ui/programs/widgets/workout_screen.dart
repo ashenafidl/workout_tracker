@@ -9,7 +9,7 @@ import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart"
 import "package:workout_tracker/ui/programs/widgets/exercise_picker_sheet.dart";
 
 class WorkoutScreen extends StatefulWidget {
-  const WorkoutScreen({
+  const new({
     super.key,
     required this.programId,
     this.workoutId,
@@ -95,9 +95,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     }
 
     final message = _viewModel.errorMessage ?? "Unable to save workout";
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -166,9 +165,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                             "No exercises added yet",
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                         )
@@ -249,7 +248,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 }
 
 class _ExerciseRow extends StatelessWidget {
-  const _ExerciseRow({
+  const new({
     super.key,
     required this.index,
     required this.input,

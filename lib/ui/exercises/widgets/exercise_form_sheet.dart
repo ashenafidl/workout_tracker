@@ -4,7 +4,7 @@ import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 
 class ExerciseFormSheet extends StatefulWidget {
-  const ExerciseFormSheet({super.key, this.exercise});
+  const new({super.key, this.exercise});
 
   final Exercise? exercise;
 
@@ -66,9 +66,8 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
     }
 
     final message = _viewModel.errorMessage ?? "Unable to add exercise";
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override

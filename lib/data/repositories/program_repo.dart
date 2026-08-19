@@ -3,7 +3,7 @@ import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ProgramRepo {
-  ProgramRepo(this._db);
+  new(this._db);
 
   final AppDatabase _db;
 

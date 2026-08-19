@@ -5,7 +5,7 @@ import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart
 import "package:workout_tracker/ui/programs/widgets/program_form_sheet.dart";
 
 class ProgramsScreen extends StatelessWidget {
-  const ProgramsScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

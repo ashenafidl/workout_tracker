@@ -9,11 +9,7 @@ import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ProgramDetailViewModel extends ChangeNotifier {
-  ProgramDetailViewModel(
-    this._programRepo,
-    this._workoutRepo,
-    this._preferenceService,
-  );
+  new(this._programRepo, this._workoutRepo, this._preferenceService);
 
   final ProgramRepo _programRepo;
   final WorkoutRepo _workoutRepo;

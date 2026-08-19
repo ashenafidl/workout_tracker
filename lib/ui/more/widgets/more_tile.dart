@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
 class MoreTile extends StatelessWidget {
-  const MoreTile({
+  const new({
     super.key,
     required this.icon,
     required this.title,
@@ -29,9 +29,8 @@ class MoreTile extends StatelessWidget {
           if (trailingText != null) ...[
             Text(
               trailingText!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: Theme.of(context).colorScheme.outline),
             ),
             const SizedBox(width: 8),
           ],

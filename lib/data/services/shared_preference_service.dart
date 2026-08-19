@@ -1,7 +1,7 @@
 import "package:shared_preferences/shared_preferences.dart";
 
 class SharedPreferenceService {
-  SharedPreferenceService(this._prefs);
+  new(this._prefs);
 
   final SharedPreferences _prefs;
 

@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 
 class SessionProgressBar extends StatelessWidget {
-  const SessionProgressBar({super.key, required this.vm});
+  const new({super.key, required this.vm});
 
   final WorkoutSessionViewModel vm;
 
@@ -28,7 +28,7 @@ class SessionProgressBar extends StatelessWidget {
 }
 
 class _SetBar extends StatelessWidget {
-  const _SetBar({required this.completed});
+  const new({required this.completed});
 
   final bool completed;
 
@@ -47,7 +47,7 @@ class _SetBar extends StatelessWidget {
 }
 
 class _CurrentSetBar extends StatelessWidget {
-  const _CurrentSetBar({required this.vm});
+  const new({required this.vm});
 
   final WorkoutSessionViewModel vm;
 

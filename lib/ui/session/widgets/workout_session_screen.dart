@@ -11,7 +11,7 @@ import "package:workout_tracker/ui/session/widgets/session_bottom_panel.dart";
 import "package:workout_tracker/ui/session/widgets/session_progress_bar.dart";
 
 class WorkoutSessionScreen extends StatefulWidget {
-  const WorkoutSessionScreen({super.key, required this.args});
+  const new({super.key, required this.args});
 
   final WorkoutSessionArgs args;
 

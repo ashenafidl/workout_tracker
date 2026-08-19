@@ -13,7 +13,7 @@ enum SessionPhase { countdown, exercising, resting, completed }
 enum SegmentStatus { completed, current, upcoming }
 
 class WorkoutSessionViewModel extends ChangeNotifier {
-  WorkoutSessionViewModel({
+  new({
     required this.args,
     required this.sharedPreferenceService,
     required this.database,

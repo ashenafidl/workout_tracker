@@ -6,7 +6,7 @@ import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExercisePickerSheet extends StatefulWidget {
-  const ExercisePickerSheet({
+  const new({
     super.key,
     required this.onExerciseSelected,
     required this.onCreateExercise,

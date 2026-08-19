@@ -1,13 +1,13 @@
 sealed class UnitInputResult {
-  const UnitInputResult();
+  const new();
 }
 
 class IntegerInputResult extends UnitInputResult {
-  const IntegerInputResult(this.value);
+  const new(this.value);
   final int value;
 }
 
 class DurationInputResult extends UnitInputResult {
-  const DurationInputResult(this.duration);
+  const new(this.duration);
   final Duration duration;
 }

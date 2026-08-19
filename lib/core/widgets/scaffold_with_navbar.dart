@@ -4,7 +4,7 @@ import "package:go_router/go_router.dart";
 class ScaffoldWithNavbar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const ScaffoldWithNavbar({super.key, required this.navigationShell});
+  const new({super.key, required this.navigationShell});
 
   void _onTap(int index) {
     navigationShell.goBranch(

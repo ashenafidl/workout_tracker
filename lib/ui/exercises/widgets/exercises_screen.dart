@@ -4,7 +4,7 @@ import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_mode
 import "package:workout_tracker/ui/exercises/widgets/exercise_form_sheet.dart";
 
 class ExercisesScreen extends StatelessWidget {
-  const ExercisesScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

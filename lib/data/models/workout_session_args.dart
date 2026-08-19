@@ -1,7 +1,7 @@
 import "package:workout_tracker/data/models/exercises.dart";
 
 class WorkoutSessionArgs {
-  const WorkoutSessionArgs({
+  const new({
     required this.workoutWithExercises,
     required this.programId,
     required this.workoutIndex,

@@ -3,7 +3,7 @@ import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class CompletedView extends StatelessWidget {
-  const CompletedView({super.key, required this.summary, required this.onDone});
+  const new({super.key, required this.summary, required this.onDone});
 
   final WorkoutSessionSummary? summary;
   final VoidCallback onDone;
@@ -72,7 +72,7 @@ class CompletedView extends StatelessWidget {
 }
 
 class _SummaryTile extends StatelessWidget {
-  const _SummaryTile({required this.label, required this.value});
+  const new({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -96,7 +96,7 @@ class _SummaryTile extends StatelessWidget {
 }
 
 class _CircuitSummaryCard extends StatelessWidget {
-  const _CircuitSummaryCard({required this.circuit});
+  const new({required this.circuit});
 
   final CircuitSummary circuit;
 

@@ -1,5 +1,5 @@
 class WorkoutSessionSummary {
-  const WorkoutSessionSummary({
+  const new({
     required this.workoutName,
     required this.startedAt,
     required this.completedAt,
@@ -19,7 +19,7 @@ class WorkoutSessionSummary {
 }
 
 class CircuitSummary {
-  const CircuitSummary({
+  const new({
     required this.circuitNumber,
     required this.startedAt,
     required this.completedAt,
@@ -37,7 +37,7 @@ class CircuitSummary {
 }
 
 class ExerciseSummary {
-  const ExerciseSummary({
+  const new({
     required this.name,
     required this.targetReps,
     required this.actualReps,

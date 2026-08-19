@@ -10,7 +10,7 @@ import "package:workout_tracker/ui/more/widgets/more_tile_group.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class MoreScreen extends StatefulWidget {
-  const MoreScreen({super.key});
+  const new({super.key});
 
   @override
   State<MoreScreen> createState() => _MoreScreenState();

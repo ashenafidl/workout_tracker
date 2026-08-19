@@ -5,7 +5,7 @@ import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
 
 class MoreViewModel extends ChangeNotifier {
-  MoreViewModel(this._exerciseRepository, this._settings) {
+  new(this._exerciseRepository, this._settings) {
     _subscribeToExerciseCount();
   }
 
