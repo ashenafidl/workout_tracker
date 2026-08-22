@@ -7,6 +7,28 @@ class WorkoutRepo {
 
   final AppDatabase _db;
 
+  Stream<List<WorkoutSession>> watchCompletedSessionsForProgram(int programId) {
+    return (_db.select(_db.workoutSessions)
+          ..where(
+            (session) =>
+                session.programId.equals(programId) &
+                session.completedAt.isNotNull(),
+          )
+          ..orderBy([
+            (session) => OrderingTerm(
+              expression: session.completedAt,
+              mode: OrderingMode.desc,
+            ),
+          ]))
+        .watch();
+  }
+
+  Stream<Set<int>> watchCompletedWorkoutIds(int programId) {
+    return watchCompletedSessionsForProgram(
+      programId,
+    ).map((sessions) => sessions.map((session) => session.workoutId).toSet());
+  }
+
   Stream<List<WorkoutWithExercises>> watchWorkoutsForProgram(int programId) {
     final query =
         _db.select(_db.workouts).join([

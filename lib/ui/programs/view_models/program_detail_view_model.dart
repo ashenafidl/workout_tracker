@@ -17,6 +17,7 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
   StreamSubscription<List<ProgramWithWorkoutCount>>? _programSub;
+  StreamSubscription<Set<int>>? _completedIdsSub;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -27,6 +28,9 @@ class ProgramDetailViewModel extends ChangeNotifier {
   List<WorkoutWithExercises> _workouts = [];
   List<WorkoutWithExercises> get workouts => _workouts;
 
+  Set<int> _completedWorkoutIds = {};
+  Set<int> get completedWorkoutIds => _completedWorkoutIds;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -36,6 +40,17 @@ class ProgramDetailViewModel extends ChangeNotifier {
     _programId = programId;
     _subscribeToWorkouts();
     _subscribeToProgram();
+    _subscribeToCompletedWorkoutIds();
+  }
+
+  void _subscribeToCompletedWorkoutIds() {
+    _completedIdsSub?.cancel();
+    _completedIdsSub = _workoutRepo
+        .watchCompletedWorkoutIds(_programId!)
+        .listen((ids) {
+          _completedWorkoutIds = ids;
+          notifyListeners();
+        });
   }
 
   void _subscribeToWorkouts() {
@@ -108,6 +123,15 @@ class ProgramDetailViewModel extends ChangeNotifier {
   WorkoutWithExercises? get nextWorkoutIndex =>
       _workouts.isNotEmpty ? _workouts[getWorkoutIndex()] : null;
 
+  bool get isProgramActive => _program?.isActive ?? false;
+
+  WorkoutWithExercises? get nextWorkout {
+    for (final workout in _workouts) {
+      if (!_completedWorkoutIds.contains(workout.workout.id)) return workout;
+    }
+    return null;
+  }
+
   Future<int> getWorkoutCount(int programId) async {
     return await _programRepo.getWorkoutCount(programId);
   }
@@ -116,6 +140,7 @@ class ProgramDetailViewModel extends ChangeNotifier {
   void dispose() {
     _workoutsSub?.cancel();
     _programSub?.cancel();
+    _completedIdsSub?.cancel();
     super.dispose();
   }
 }

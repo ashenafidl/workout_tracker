@@ -7,6 +7,12 @@ class ProgramRepo {
 
   final AppDatabase _db;
 
+  Stream<Program?> watchActiveProgram() {
+    return (_db.select(
+      _db.programs,
+    )..where((program) => program.isActive.equals(true))).watchSingleOrNull();
+  }
+
   Stream<List<ProgramWithWorkoutCount>> watchPrograms() {
     final count = _db.workouts.id.count();
     final query =

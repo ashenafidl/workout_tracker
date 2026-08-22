@@ -3,11 +3,13 @@ import "package:shared_preferences/shared_preferences.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/session_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
+import "package:workout_tracker/ui/history/view_models/history_view_model.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
@@ -39,6 +41,9 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<WorkoutRepo>(
     () => WorkoutRepo(getIt<AppDatabase>()),
   );
+  getIt.registerLazySingleton<SessionRepository>(
+    () => SessionRepository(getIt<AppDatabase>()),
+  );
 
   // ViewModels
   getIt.registerFactory<MoreViewModel>(
@@ -54,7 +59,7 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<ProgramsViewModel>(
     () => ProgramsViewModel(getIt<ProgramRepo>()),
   );
-  getIt.registerFactory<ProgramDetailViewModel>(
+  getIt.registerLazySingleton<ProgramDetailViewModel>(
     () => ProgramDetailViewModel(
       getIt<ProgramRepo>(),
       getIt<WorkoutRepo>(),
@@ -64,7 +69,12 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<WorkoutViewModel>(
     () => WorkoutViewModel(getIt<WorkoutRepo>(), getIt<ExerciseRepo>()),
   );
-  getIt.registerFactory<HomeViewModel>(HomeViewModel.new);
+  getIt.registerLazySingleton<HomeViewModel>(
+    () => HomeViewModel(getIt<ProgramRepo>(), getIt<WorkoutRepo>()),
+  );
+  getIt.registerLazySingleton<HistoryViewModel>(
+    () => HistoryViewModel(getIt<SessionRepository>()),
+  );
   getIt.registerFactoryParam<
     WorkoutSessionViewModel,
     WorkoutSessionArgs,

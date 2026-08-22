@@ -232,9 +232,41 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     if (_sessionId == null) return;
 
     final now = DateTime.now();
-    await (database.update(database.workoutSessions)
-          ..where((session) => session.id.equals(_sessionId!)))
-        .write(WorkoutSessionsCompanion(completedAt: Value(now)));
+    await database.transaction(() async {
+      await (database.update(database.workoutSessions)
+            ..where((session) => session.id.equals(_sessionId!)))
+          .write(WorkoutSessionsCompanion(completedAt: Value(now)));
+
+      await _deactivateProgramIfFinished();
+    });
+  }
+
+  /// Completing the last workout finishes the program, so it loses its
+  /// active flag and stops showing up as today's workout on the home screen.
+  Future<void> _deactivateProgramIfFinished() async {
+    final workouts = await (database.select(
+      database.workouts,
+    )..where((w) => w.programId.equals(args.programId))).get();
+
+    if (workouts.isEmpty) return;
+
+    final sessions =
+        await (database.select(database.workoutSessions)..where(
+              (session) =>
+                  session.programId.equals(args.programId) &
+                  session.completedAt.isNotNull(),
+            ))
+            .get();
+    final completedIds = sessions.map((session) => session.workoutId).toSet();
+
+    final allCompleted = workouts.every(
+      (workout) => completedIds.contains(workout.id),
+    );
+    if (allCompleted) {
+      await (database.update(database.programs)
+            ..where((program) => program.id.equals(args.programId)))
+          .write(const ProgramsCompanion(isActive: Value(false)));
+    }
   }
 
   Future<void> _loadSessionSummary() async {

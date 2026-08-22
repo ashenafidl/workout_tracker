@@ -1,75 +1,45 @@
 # AGENTS.md
 
-## Quick Commands
+## Commands
 
 ```bash
-# Run the app (Android only, no iOS/web/desktop configured)
+# Run the app (Android only - no iOS/web/desktop targets exist)
 flutter run
 
-# Code generation (required after changing database schema)
+# Codegen (required after editing lib/database/database.dart)
 dart run build_runner build --delete-conflicting-outputs
 
-# Lint (strict mode enabled, will fail on many rules)
+# Lint/typecheck (strict rules - treat as the verification gate)
 flutter analyze
 
-# Test
+# Test - NOTE: no test/ directory exists yet; this fails with "No test files found"
 flutter test
 ```
 
 ## Architecture
 
-- **Type:** Flutter app (not a package)
-- **Database:** Drift (SQLite) with code generation - `lib/database/database.dart` + generated `database.g.dart`
-- **DI:** get_it - configured in `lib/config/dependencies.dart`
-- **Routing:** go_router with StatefulShellRoute for bottom nav - `lib/routing/router.dart`
-- **State management:** ChangeNotifier-based ViewModels in `ui/*/view_models/`
+Flutter app. Entry: `lib/main.dart` -> `setupDependencies()` (`lib/config/dependencies.dart`) -> `MaterialApp.router` with `appRouter`.
 
-**Directory structure:**
-```
-lib/
-├── config/        # DI setup (get_it)
-├── core/          # Theme, shared widgets
-├── data/          # Repositories (business logic)
-├── database/      # Drift tables + migrations
-├── routing/       # go_router config
-└── ui/            # Feature screens, view models, widgets
-    ├── exercises/
-    ├── home/
-    ├── more/
-    └── programs/
-```
+- **Database:** Drift (SQLite) - tables + schema in `lib/database/database.dart`, generated code in `database.g.dart` (never edit). Drift builder is wired via `build.yaml`.
+- **DI:** get_it - repositories/services as singletons, most ViewModels as factories. `WorkoutSessionViewModel` uses `registerFactoryParam<..., WorkoutSessionArgs, AppDatabase?>` because it needs per-navigation args.
+- **Routing:** go_router `StatefulShellRoute.indexedStack` with 4 bottom-nav branches (Home `/`, Programs `/programs`, History `/history`, More `/more`). Detail screens (program detail, exercises) pop out of the shell via `parentNavigatorKey: _rootNavigatorKey`. The workout session lives at root `/session` and receives `WorkoutSessionArgs` via `state.extra`.
+- **State:** ChangeNotifier ViewModels in `lib/ui/<feature>/view_models/`, screens/widgets in `widgets/`.
 
-## Code Generation
+## Database / Migrations
 
-After editing `lib/database/database.dart` (adding/modifying tables), run:
-```bash
-dart run build_runner build --delete-conflicting-outputs
-```
-This regenerates `lib/database/database.g.dart`. Do not edit the `.g.dart` file directly.
+- `schemaVersion` is **1** (`database.dart`). `MigrationStrategy` currently only has `onCreate`; if you add/alter tables you must bump the version AND write an `onUpgrade` step, then run build_runner.
+- FKs mix cascade deletes (Workouts->WorkoutExercises, Sessions->Circuits->Logs) and restrict deletes (Programs/Sessions/Exercises) - deleting a referenced Exercise or Program fails by design.
+- Timestamps use client defaults (`DateTime.now()`), not DB-side.
 
-Database schema is at **version 2** (see `schemaVersion` in `database.dart:31`). Add migrations in `onUpgrade` when changing tables.
+## Style (strict analyzer - `flutter analyze` fails on these)
 
-## Lint Rules (Non-Default)
-
-The following are enforced beyond default flutter_lints (`analysis_options.yaml`):
-- **Double quotes only** (`prefer_double_quotes`) - not single quotes
-- **Strict casts/inference/raw types** enabled
-- **Trailing commas required** on all parameter/argument lists
-- **`prefer_const_constructors`** and **`prefer_final_locals`** enforced
-- **`avoid_print`** - no print statements
-
-## Conventions
-
-- **Strings:** Always double quotes (`"hello"`, not `'hello'`)
-- **Null safety:** Strict mode, nullable fields use `Value<T?>` in Drift companions
-- **Input trimming:** All user input is trimmed before storage (see repositories)
-- **ViewModels:** Registered as factories in DI (new instance per screen), repositories as singletons
-- **Forms:** Use bottom sheets with `showModalBottomSheet`, handle keyboard inset via `MediaQuery.viewInsetsOf`
+- Double quotes only; trailing commas required everywhere; `const` where possible.
+- `strict-casts/inference/raw-types` on; `avoid_print`; `no_default_cases`; exhaustive switch handling enforced.
+- User-facing text input is trimmed before storage (see repos in `lib/data/repositories/`).
 
 ## Gotchas
 
-- Only Android platform is configured in `.metadata` - no iOS, web, or desktop targets exist
-- Puro is used for Flutter version management (`.puro.json` set to "stable")
-- Generated `database.g.dart` is large (~970 lines) - don't manually edit it
-- Database uses client-default timestamps (`DateTime.now()`) - not server-side
-- No CI/CD workflows configured
+- Only Android platform configured (`.metadata`); don't try `flutter run -d ios/chrome/windows`.
+- Puro manages the Flutter SDK here (`.puro.json`: env "stable"); plain `flutter` assumes the right env is active.
+- Generated `database.g.dart` is ~6000 lines - regenerate, never hand-edit.
+- No CI configured; no tests exist yet.

@@ -108,108 +108,114 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           appBar: AppBar(
             title: Text(_viewModel.isEditing ? "Edit workout" : "Add workout"),
           ),
-          body: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: TextFormField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    maxLength: 100,
-                    decoration: const InputDecoration(
-                      labelText: "Workout name",
-                    ),
-                    validator: (value) {
-                      final trimmed = (value ?? "").trim();
-                      if (trimmed.isEmpty) {
-                        return "Workout name is required";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  child: TextFormField(
-                    controller: _setsController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Sets (circuit repeats)",
-                    ),
-                    validator: (value) {
-                      final parsed = int.tryParse(value ?? "");
-                      if (parsed == null || parsed < 1) {
-                        return "Must be at least 1";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (_viewModel.exercises.isNotEmpty)
+          body: GestureDetector(
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            behavior:
+                HitTestBehavior.opaque, // ← catches taps on empty space too
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Exercises",
-                      style: Theme.of(context).textTheme.titleSmall,
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: TextFormField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      maxLength: 100,
+                      decoration: const InputDecoration(
+                        labelText: "Workout name",
+                      ),
+                      validator: (value) {
+                        final trimmed = (value ?? "").trim();
+                        if (trimmed.isEmpty) {
+                          return "Workout name is required";
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                if (_viewModel.exercises.isNotEmpty) const SizedBox(height: 8),
-                Expanded(
-                  child: _viewModel.exercises.isEmpty
-                      ? Center(
-                          child: Text(
-                            "No exercises added yet",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        )
-                      : ReorderableListView.builder(
-                          itemCount: _viewModel.exercises.length,
-                          onReorderItem: _viewModel.reorderExercises,
-                          itemBuilder: (context, index) {
-                            final input = _viewModel.exercises[index];
-                            return _ExerciseRow(
-                              key: ValueKey("exercise_$index"),
-                              index: index,
-                              input: input,
-                              viewModel: _viewModel,
-                            );
-                          },
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                  child: OutlinedButton.icon(
-                    onPressed: _showExercisePicker,
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add exercise"),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: TextFormField(
+                      controller: _setsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Sets (circuit repeats)",
+                      ),
+                      validator: (value) {
+                        final parsed = int.tryParse(value ?? "");
+                        if (parsed == null || parsed < 1) {
+                          return "Must be at least 1";
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  child: SizedBox(
-                    height: 48,
-                    child: _viewModel.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : FilledButton(
-                            onPressed: _submit,
+                  const SizedBox(height: 16),
+                  if (_viewModel.exercises.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        "Exercises",
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                  if (_viewModel.exercises.isNotEmpty)
+                    const SizedBox(height: 8),
+                  Expanded(
+                    child: _viewModel.exercises.isEmpty
+                        ? Center(
                             child: Text(
-                              _viewModel.isEditing
-                                  ? "Save changes"
-                                  : "Add workout",
+                              "No exercises added yet",
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
+                          )
+                        : ReorderableListView.builder(
+                            itemCount: _viewModel.exercises.length,
+                            onReorderItem: _viewModel.reorderExercises,
+                            itemBuilder: (context, index) {
+                              final input = _viewModel.exercises[index];
+                              return _ExerciseRow(
+                                key: ValueKey("exercise_$index"),
+                                index: index,
+                                input: input,
+                                viewModel: _viewModel,
+                              );
+                            },
                           ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                    child: OutlinedButton.icon(
+                      onPressed: _showExercisePicker,
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add exercise"),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: SizedBox(
+                      height: 48,
+                      child: _viewModel.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : FilledButton(
+                              onPressed: _submit,
+                              child: Text(
+                                _viewModel.isEditing
+                                    ? "Save changes"
+                                    : "Add workout",
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -218,6 +224,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Future<void> _showExercisePicker() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final exercise = await showModalBottomSheet<Exercise>(
       context: context,
       isScrollControlled: true,
@@ -229,6 +236,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     );
 
     if (exercise != null && mounted) {
+      FocusManager.instance.primaryFocus?.unfocus();
       final result = await showModalBottomSheet<UnitInputResult>(
         context: context,
         isScrollControlled: true,
@@ -283,6 +291,7 @@ class _ExerciseRow extends StatelessWidget {
   }
 
   void _showRepsSheet(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
     showModalBottomSheet<UnitInputResult>(
       context: context,
       isScrollControlled: true,
