@@ -125,11 +125,24 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   bool get isProgramActive => _program?.isActive ?? false;
 
+  bool get isProgramCompleted =>
+      _workouts.isNotEmpty &&
+      _workouts.every(
+        (workout) => _completedWorkoutIds.contains(workout.workout.id),
+      );
+
   WorkoutWithExercises? get nextWorkout {
+    if (_workouts.isEmpty) return null;
+
+    if (isProgramCompleted) {
+      return _workouts.first;
+    }
+
     for (final workout in _workouts) {
       if (!_completedWorkoutIds.contains(workout.workout.id)) return workout;
     }
-    return null;
+
+    return _workouts.first;
   }
 
   Future<int> getWorkoutCount(int programId) async {

@@ -102,7 +102,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
             mainAxisSize: .min,
             crossAxisAlignment: .end,
             children: [
-              if (vm.nextWorkout != null)
+              if (vm.workouts.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: FloatingActionButton.extended(
@@ -110,7 +110,11 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     onPressed: _startProgram,
                     icon: const Icon(Icons.play_arrow_rounded),
                     label: Text(
-                      vm.isProgramActive ? "Continue" : "Start program",
+                      vm.isProgramCompleted
+                          ? "Restart program"
+                          : vm.isProgramActive
+                          ? "Continue"
+                          : "Start program",
                     ),
                   ),
                 ),

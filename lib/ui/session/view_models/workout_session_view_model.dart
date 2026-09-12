@@ -6,6 +6,7 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
+import "package:workout_tracker/data/services/sound_serivce.dart";
 import "package:workout_tracker/database/database.dart";
 
 enum SessionPhase { countdown, exercising, resting, completed }
@@ -16,11 +17,13 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   new({
     required this.args,
     required this.sharedPreferenceService,
+    required this.soundService,
     required this.database,
   });
 
   final WorkoutSessionArgs args;
   final SharedPreferenceService sharedPreferenceService;
+  final SoundService soundService;
   final AppDatabase database;
 
   SessionPhase _phase = SessionPhase.countdown;
@@ -175,17 +178,22 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     _timer?.cancel();
     _phase = SessionPhase.resting;
     _restSecondsRemaining = sharedPreferenceService.restDurationSeconds;
+    soundService.playRestStart();
     notifyListeners();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_restSecondsRemaining > 1) {
         _restSecondsRemaining--;
+        if (_restSecondsRemaining <= 3) {
+          soundService.playCountdownTick();
+        }
         notifyListeners();
         return;
+      } else {
+        timer.cancel();
+        soundService.playRestEnd();
+        unawaited(_advanceCircuit());
       }
-
-      timer.cancel();
-      unawaited(_advanceCircuit());
     });
   }
 

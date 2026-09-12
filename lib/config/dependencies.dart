@@ -6,6 +6,7 @@ import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
+import "package:workout_tracker/data/services/sound_serivce.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
@@ -30,6 +31,7 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<SharedPreferenceService>(
     SharedPreferenceService(prefs),
   );
+  getIt.registerSingleton<SoundService>(SoundService());
 
   // Repositories
   getIt.registerLazySingleton<ExerciseRepo>(
@@ -83,6 +85,7 @@ Future<void> setupDependencies() async {
     (args, db) => WorkoutSessionViewModel(
       args: args,
       sharedPreferenceService: getIt<SharedPreferenceService>(),
+      soundService: getIt<SoundService>(),
       database: db ?? getIt<AppDatabase>(),
     ),
   );

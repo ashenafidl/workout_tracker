@@ -27,7 +27,8 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Text("No active program"),
                   TextButton(
-                    onPressed: () => context.push("/programs"),
+                    onPressed: () =>
+                        StatefulNavigationShell.of(context).goBranch(1),
                     child: const Text("Browse programs"),
                   ),
                 ],
