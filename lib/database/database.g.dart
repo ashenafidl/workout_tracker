@@ -3021,6 +3021,529 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
   }
 }
 
+class $StreakStatsTable extends StreakStats
+    with TableInfo<$StreakStatsTable, StreakStat> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StreakStatsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currentStreakMeta = const VerificationMeta(
+    'currentStreak',
+  );
+  @override
+  late final GeneratedColumn<int> currentStreak = GeneratedColumn<int>(
+    'current_streak',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _longestStreakMeta = const VerificationMeta(
+    'longestStreak',
+  );
+  @override
+  late final GeneratedColumn<int> longestStreak = GeneratedColumn<int>(
+    'longest_streak',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _currentStreakStartDateMeta =
+      const VerificationMeta('currentStreakStartDate');
+  @override
+  late final GeneratedColumn<DateTime> currentStreakStartDate =
+      GeneratedColumn<DateTime>(
+        'current_streak_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _currentStreakEndDateMeta =
+      const VerificationMeta('currentStreakEndDate');
+  @override
+  late final GeneratedColumn<DateTime> currentStreakEndDate =
+      GeneratedColumn<DateTime>(
+        'current_streak_end_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _longestStreakStartDateMeta =
+      const VerificationMeta('longestStreakStartDate');
+  @override
+  late final GeneratedColumn<DateTime> longestStreakStartDate =
+      GeneratedColumn<DateTime>(
+        'longest_streak_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _longestStreakEndDateMeta =
+      const VerificationMeta('longestStreakEndDate');
+  @override
+  late final GeneratedColumn<DateTime> longestStreakEndDate =
+      GeneratedColumn<DateTime>(
+        'longest_streak_end_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    currentStreak,
+    longestStreak,
+    currentStreakStartDate,
+    currentStreakEndDate,
+    longestStreakStartDate,
+    longestStreakEndDate,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'streak_stats';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StreakStat> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('current_streak')) {
+      context.handle(
+        _currentStreakMeta,
+        currentStreak.isAcceptableOrUnknown(
+          data['current_streak']!,
+          _currentStreakMeta,
+        ),
+      );
+    }
+    if (data.containsKey('longest_streak')) {
+      context.handle(
+        _longestStreakMeta,
+        longestStreak.isAcceptableOrUnknown(
+          data['longest_streak']!,
+          _longestStreakMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_streak_start_date')) {
+      context.handle(
+        _currentStreakStartDateMeta,
+        currentStreakStartDate.isAcceptableOrUnknown(
+          data['current_streak_start_date']!,
+          _currentStreakStartDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_streak_end_date')) {
+      context.handle(
+        _currentStreakEndDateMeta,
+        currentStreakEndDate.isAcceptableOrUnknown(
+          data['current_streak_end_date']!,
+          _currentStreakEndDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('longest_streak_start_date')) {
+      context.handle(
+        _longestStreakStartDateMeta,
+        longestStreakStartDate.isAcceptableOrUnknown(
+          data['longest_streak_start_date']!,
+          _longestStreakStartDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('longest_streak_end_date')) {
+      context.handle(
+        _longestStreakEndDateMeta,
+        longestStreakEndDate.isAcceptableOrUnknown(
+          data['longest_streak_end_date']!,
+          _longestStreakEndDateMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StreakStat map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StreakStat(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      currentStreak: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_streak'],
+      )!,
+      longestStreak: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}longest_streak'],
+      )!,
+      currentStreakStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}current_streak_start_date'],
+      ),
+      currentStreakEndDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}current_streak_end_date'],
+      ),
+      longestStreakStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}longest_streak_start_date'],
+      ),
+      longestStreakEndDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}longest_streak_end_date'],
+      ),
+    );
+  }
+
+  @override
+  $StreakStatsTable createAlias(String alias) {
+    return $StreakStatsTable(attachedDatabase, alias);
+  }
+}
+
+class StreakStat extends DataClass implements Insertable<StreakStat> {
+  final int id;
+  final int currentStreak;
+  final int longestStreak;
+  final DateTime? currentStreakStartDate;
+  final DateTime? currentStreakEndDate;
+  final DateTime? longestStreakStartDate;
+  final DateTime? longestStreakEndDate;
+  const StreakStat({
+    required this.id,
+    required this.currentStreak,
+    required this.longestStreak,
+    this.currentStreakStartDate,
+    this.currentStreakEndDate,
+    this.longestStreakStartDate,
+    this.longestStreakEndDate,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['current_streak'] = Variable<int>(currentStreak);
+    map['longest_streak'] = Variable<int>(longestStreak);
+    if (!nullToAbsent || currentStreakStartDate != null) {
+      map['current_streak_start_date'] = Variable<DateTime>(
+        currentStreakStartDate,
+      );
+    }
+    if (!nullToAbsent || currentStreakEndDate != null) {
+      map['current_streak_end_date'] = Variable<DateTime>(currentStreakEndDate);
+    }
+    if (!nullToAbsent || longestStreakStartDate != null) {
+      map['longest_streak_start_date'] = Variable<DateTime>(
+        longestStreakStartDate,
+      );
+    }
+    if (!nullToAbsent || longestStreakEndDate != null) {
+      map['longest_streak_end_date'] = Variable<DateTime>(longestStreakEndDate);
+    }
+    return map;
+  }
+
+  StreakStatsCompanion toCompanion(bool nullToAbsent) {
+    return StreakStatsCompanion(
+      id: Value(id),
+      currentStreak: Value(currentStreak),
+      longestStreak: Value(longestStreak),
+      currentStreakStartDate: currentStreakStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentStreakStartDate),
+      currentStreakEndDate: currentStreakEndDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentStreakEndDate),
+      longestStreakStartDate: longestStreakStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longestStreakStartDate),
+      longestStreakEndDate: longestStreakEndDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longestStreakEndDate),
+    );
+  }
+
+  factory StreakStat.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StreakStat(
+      id: serializer.fromJson<int>(json['id']),
+      currentStreak: serializer.fromJson<int>(json['currentStreak']),
+      longestStreak: serializer.fromJson<int>(json['longestStreak']),
+      currentStreakStartDate: serializer.fromJson<DateTime?>(
+        json['currentStreakStartDate'],
+      ),
+      currentStreakEndDate: serializer.fromJson<DateTime?>(
+        json['currentStreakEndDate'],
+      ),
+      longestStreakStartDate: serializer.fromJson<DateTime?>(
+        json['longestStreakStartDate'],
+      ),
+      longestStreakEndDate: serializer.fromJson<DateTime?>(
+        json['longestStreakEndDate'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'currentStreak': serializer.toJson<int>(currentStreak),
+      'longestStreak': serializer.toJson<int>(longestStreak),
+      'currentStreakStartDate': serializer.toJson<DateTime?>(
+        currentStreakStartDate,
+      ),
+      'currentStreakEndDate': serializer.toJson<DateTime?>(
+        currentStreakEndDate,
+      ),
+      'longestStreakStartDate': serializer.toJson<DateTime?>(
+        longestStreakStartDate,
+      ),
+      'longestStreakEndDate': serializer.toJson<DateTime?>(
+        longestStreakEndDate,
+      ),
+    };
+  }
+
+  StreakStat copyWith({
+    int? id,
+    int? currentStreak,
+    int? longestStreak,
+    Value<DateTime?> currentStreakStartDate = const Value.absent(),
+    Value<DateTime?> currentStreakEndDate = const Value.absent(),
+    Value<DateTime?> longestStreakStartDate = const Value.absent(),
+    Value<DateTime?> longestStreakEndDate = const Value.absent(),
+  }) => StreakStat(
+    id: id ?? this.id,
+    currentStreak: currentStreak ?? this.currentStreak,
+    longestStreak: longestStreak ?? this.longestStreak,
+    currentStreakStartDate: currentStreakStartDate.present
+        ? currentStreakStartDate.value
+        : this.currentStreakStartDate,
+    currentStreakEndDate: currentStreakEndDate.present
+        ? currentStreakEndDate.value
+        : this.currentStreakEndDate,
+    longestStreakStartDate: longestStreakStartDate.present
+        ? longestStreakStartDate.value
+        : this.longestStreakStartDate,
+    longestStreakEndDate: longestStreakEndDate.present
+        ? longestStreakEndDate.value
+        : this.longestStreakEndDate,
+  );
+  StreakStat copyWithCompanion(StreakStatsCompanion data) {
+    return StreakStat(
+      id: data.id.present ? data.id.value : this.id,
+      currentStreak: data.currentStreak.present
+          ? data.currentStreak.value
+          : this.currentStreak,
+      longestStreak: data.longestStreak.present
+          ? data.longestStreak.value
+          : this.longestStreak,
+      currentStreakStartDate: data.currentStreakStartDate.present
+          ? data.currentStreakStartDate.value
+          : this.currentStreakStartDate,
+      currentStreakEndDate: data.currentStreakEndDate.present
+          ? data.currentStreakEndDate.value
+          : this.currentStreakEndDate,
+      longestStreakStartDate: data.longestStreakStartDate.present
+          ? data.longestStreakStartDate.value
+          : this.longestStreakStartDate,
+      longestStreakEndDate: data.longestStreakEndDate.present
+          ? data.longestStreakEndDate.value
+          : this.longestStreakEndDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StreakStat(')
+          ..write('id: $id, ')
+          ..write('currentStreak: $currentStreak, ')
+          ..write('longestStreak: $longestStreak, ')
+          ..write('currentStreakStartDate: $currentStreakStartDate, ')
+          ..write('currentStreakEndDate: $currentStreakEndDate, ')
+          ..write('longestStreakStartDate: $longestStreakStartDate, ')
+          ..write('longestStreakEndDate: $longestStreakEndDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    currentStreak,
+    longestStreak,
+    currentStreakStartDate,
+    currentStreakEndDate,
+    longestStreakStartDate,
+    longestStreakEndDate,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StreakStat &&
+          other.id == this.id &&
+          other.currentStreak == this.currentStreak &&
+          other.longestStreak == this.longestStreak &&
+          other.currentStreakStartDate == this.currentStreakStartDate &&
+          other.currentStreakEndDate == this.currentStreakEndDate &&
+          other.longestStreakStartDate == this.longestStreakStartDate &&
+          other.longestStreakEndDate == this.longestStreakEndDate);
+}
+
+class StreakStatsCompanion extends UpdateCompanion<StreakStat> {
+  final Value<int> id;
+  final Value<int> currentStreak;
+  final Value<int> longestStreak;
+  final Value<DateTime?> currentStreakStartDate;
+  final Value<DateTime?> currentStreakEndDate;
+  final Value<DateTime?> longestStreakStartDate;
+  final Value<DateTime?> longestStreakEndDate;
+  const StreakStatsCompanion({
+    this.id = const Value.absent(),
+    this.currentStreak = const Value.absent(),
+    this.longestStreak = const Value.absent(),
+    this.currentStreakStartDate = const Value.absent(),
+    this.currentStreakEndDate = const Value.absent(),
+    this.longestStreakStartDate = const Value.absent(),
+    this.longestStreakEndDate = const Value.absent(),
+  });
+  StreakStatsCompanion.insert({
+    this.id = const Value.absent(),
+    this.currentStreak = const Value.absent(),
+    this.longestStreak = const Value.absent(),
+    this.currentStreakStartDate = const Value.absent(),
+    this.currentStreakEndDate = const Value.absent(),
+    this.longestStreakStartDate = const Value.absent(),
+    this.longestStreakEndDate = const Value.absent(),
+  });
+  static Insertable<StreakStat> custom({
+    Expression<int>? id,
+    Expression<int>? currentStreak,
+    Expression<int>? longestStreak,
+    Expression<DateTime>? currentStreakStartDate,
+    Expression<DateTime>? currentStreakEndDate,
+    Expression<DateTime>? longestStreakStartDate,
+    Expression<DateTime>? longestStreakEndDate,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (currentStreak != null) 'current_streak': currentStreak,
+      if (longestStreak != null) 'longest_streak': longestStreak,
+      if (currentStreakStartDate != null)
+        'current_streak_start_date': currentStreakStartDate,
+      if (currentStreakEndDate != null)
+        'current_streak_end_date': currentStreakEndDate,
+      if (longestStreakStartDate != null)
+        'longest_streak_start_date': longestStreakStartDate,
+      if (longestStreakEndDate != null)
+        'longest_streak_end_date': longestStreakEndDate,
+    });
+  }
+
+  StreakStatsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? currentStreak,
+    Value<int>? longestStreak,
+    Value<DateTime?>? currentStreakStartDate,
+    Value<DateTime?>? currentStreakEndDate,
+    Value<DateTime?>? longestStreakStartDate,
+    Value<DateTime?>? longestStreakEndDate,
+  }) {
+    return StreakStatsCompanion(
+      id: id ?? this.id,
+      currentStreak: currentStreak ?? this.currentStreak,
+      longestStreak: longestStreak ?? this.longestStreak,
+      currentStreakStartDate:
+          currentStreakStartDate ?? this.currentStreakStartDate,
+      currentStreakEndDate: currentStreakEndDate ?? this.currentStreakEndDate,
+      longestStreakStartDate:
+          longestStreakStartDate ?? this.longestStreakStartDate,
+      longestStreakEndDate: longestStreakEndDate ?? this.longestStreakEndDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (currentStreak.present) {
+      map['current_streak'] = Variable<int>(currentStreak.value);
+    }
+    if (longestStreak.present) {
+      map['longest_streak'] = Variable<int>(longestStreak.value);
+    }
+    if (currentStreakStartDate.present) {
+      map['current_streak_start_date'] = Variable<DateTime>(
+        currentStreakStartDate.value,
+      );
+    }
+    if (currentStreakEndDate.present) {
+      map['current_streak_end_date'] = Variable<DateTime>(
+        currentStreakEndDate.value,
+      );
+    }
+    if (longestStreakStartDate.present) {
+      map['longest_streak_start_date'] = Variable<DateTime>(
+        longestStreakStartDate.value,
+      );
+    }
+    if (longestStreakEndDate.present) {
+      map['longest_streak_end_date'] = Variable<DateTime>(
+        longestStreakEndDate.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StreakStatsCompanion(')
+          ..write('id: $id, ')
+          ..write('currentStreak: $currentStreak, ')
+          ..write('longestStreak: $longestStreak, ')
+          ..write('currentStreakStartDate: $currentStreakStartDate, ')
+          ..write('currentStreakEndDate: $currentStreakEndDate, ')
+          ..write('longestStreakStartDate: $longestStreakStartDate, ')
+          ..write('longestStreakEndDate: $longestStreakEndDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3038,6 +3561,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $SessionExerciseLogsTable sessionExerciseLogs =
       $SessionExerciseLogsTable(this);
+  late final $StreakStatsTable streakStats = $StreakStatsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3050,6 +3574,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workoutSessions,
     sessionCircuits,
     sessionExerciseLogs,
+    streakStats,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6315,6 +6840,259 @@ typedef $$SessionExerciseLogsTableProcessedTableManager =
       SessionExerciseLog,
       PrefetchHooks Function({bool circuitId, bool exerciseId})
     >;
+typedef $$StreakStatsTableCreateCompanionBuilder =
+    StreakStatsCompanion Function({
+      Value<int> id,
+      Value<int> currentStreak,
+      Value<int> longestStreak,
+      Value<DateTime?> currentStreakStartDate,
+      Value<DateTime?> currentStreakEndDate,
+      Value<DateTime?> longestStreakStartDate,
+      Value<DateTime?> longestStreakEndDate,
+    });
+typedef $$StreakStatsTableUpdateCompanionBuilder =
+    StreakStatsCompanion Function({
+      Value<int> id,
+      Value<int> currentStreak,
+      Value<int> longestStreak,
+      Value<DateTime?> currentStreakStartDate,
+      Value<DateTime?> currentStreakEndDate,
+      Value<DateTime?> longestStreakStartDate,
+      Value<DateTime?> longestStreakEndDate,
+    });
+
+class $$StreakStatsTableFilterComposer
+    extends Composer<_$AppDatabase, $StreakStatsTable> {
+  $$StreakStatsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get longestStreak => $composableBuilder(
+    column: $table.longestStreak,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get currentStreakStartDate => $composableBuilder(
+    column: $table.currentStreakStartDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get currentStreakEndDate => $composableBuilder(
+    column: $table.currentStreakEndDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get longestStreakStartDate => $composableBuilder(
+    column: $table.longestStreakStartDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get longestStreakEndDate => $composableBuilder(
+    column: $table.longestStreakEndDate,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StreakStatsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StreakStatsTable> {
+  $$StreakStatsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get longestStreak => $composableBuilder(
+    column: $table.longestStreak,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get currentStreakStartDate => $composableBuilder(
+    column: $table.currentStreakStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get currentStreakEndDate => $composableBuilder(
+    column: $table.currentStreakEndDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get longestStreakStartDate => $composableBuilder(
+    column: $table.longestStreakStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get longestStreakEndDate => $composableBuilder(
+    column: $table.longestStreakEndDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StreakStatsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StreakStatsTable> {
+  $$StreakStatsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get currentStreak => $composableBuilder(
+    column: $table.currentStreak,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get longestStreak => $composableBuilder(
+    column: $table.longestStreak,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get currentStreakStartDate => $composableBuilder(
+    column: $table.currentStreakStartDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get currentStreakEndDate => $composableBuilder(
+    column: $table.currentStreakEndDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get longestStreakStartDate => $composableBuilder(
+    column: $table.longestStreakStartDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get longestStreakEndDate => $composableBuilder(
+    column: $table.longestStreakEndDate,
+    builder: (column) => column,
+  );
+}
+
+class $$StreakStatsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StreakStatsTable,
+          StreakStat,
+          $$StreakStatsTableFilterComposer,
+          $$StreakStatsTableOrderingComposer,
+          $$StreakStatsTableAnnotationComposer,
+          $$StreakStatsTableCreateCompanionBuilder,
+          $$StreakStatsTableUpdateCompanionBuilder,
+          (
+            StreakStat,
+            BaseReferences<_$AppDatabase, $StreakStatsTable, StreakStat>,
+          ),
+          StreakStat,
+          PrefetchHooks Function()
+        > {
+  $$StreakStatsTableTableManager(_$AppDatabase db, $StreakStatsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StreakStatsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StreakStatsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StreakStatsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> currentStreak = const Value.absent(),
+                Value<int> longestStreak = const Value.absent(),
+                Value<DateTime?> currentStreakStartDate = const Value.absent(),
+                Value<DateTime?> currentStreakEndDate = const Value.absent(),
+                Value<DateTime?> longestStreakStartDate = const Value.absent(),
+                Value<DateTime?> longestStreakEndDate = const Value.absent(),
+              }) => StreakStatsCompanion(
+                id: id,
+                currentStreak: currentStreak,
+                longestStreak: longestStreak,
+                currentStreakStartDate: currentStreakStartDate,
+                currentStreakEndDate: currentStreakEndDate,
+                longestStreakStartDate: longestStreakStartDate,
+                longestStreakEndDate: longestStreakEndDate,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> currentStreak = const Value.absent(),
+                Value<int> longestStreak = const Value.absent(),
+                Value<DateTime?> currentStreakStartDate = const Value.absent(),
+                Value<DateTime?> currentStreakEndDate = const Value.absent(),
+                Value<DateTime?> longestStreakStartDate = const Value.absent(),
+                Value<DateTime?> longestStreakEndDate = const Value.absent(),
+              }) => StreakStatsCompanion.insert(
+                id: id,
+                currentStreak: currentStreak,
+                longestStreak: longestStreak,
+                currentStreakStartDate: currentStreakStartDate,
+                currentStreakEndDate: currentStreakEndDate,
+                longestStreakStartDate: longestStreakStartDate,
+                longestStreakEndDate: longestStreakEndDate,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$StreakStatsTable, StreakStat>(table),
+                  BaseReferences<_$AppDatabase, $StreakStatsTable, StreakStat>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StreakStatsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StreakStatsTable,
+      StreakStat,
+      $$StreakStatsTableFilterComposer,
+      $$StreakStatsTableOrderingComposer,
+      $$StreakStatsTableAnnotationComposer,
+      $$StreakStatsTableCreateCompanionBuilder,
+      $$StreakStatsTableUpdateCompanionBuilder,
+      (
+        StreakStat,
+        BaseReferences<_$AppDatabase, $StreakStatsTable, StreakStat>,
+      ),
+      StreakStat,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6333,4 +7111,6 @@ class $AppDatabaseManager {
       $$SessionCircuitsTableTableManager(_db, _db.sessionCircuits);
   $$SessionExerciseLogsTableTableManager get sessionExerciseLogs =>
       $$SessionExerciseLogsTableTableManager(_db, _db.sessionExerciseLogs);
+  $$StreakStatsTableTableManager get streakStats =>
+      $$StreakStatsTableTableManager(_db, _db.streakStats);
 }

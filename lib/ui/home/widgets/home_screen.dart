@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
+import "package:workout_tracker/ui/home/widgets/streak_row.dart";
 import "package:workout_tracker/ui/home/widgets/todays_workout_card.dart";
 
 class HomeScreen extends StatelessWidget {
@@ -16,39 +17,55 @@ class HomeScreen extends StatelessWidget {
       body: ListenableBuilder(
         listenable: vm,
         builder: (context, _) {
-          if (vm.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          final streak = vm.streakStats;
 
-          if (vm.activeProgram == null) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("No active program"),
-                  TextButton(
-                    onPressed: () =>
-                        StatefulNavigationShell.of(context).goBranch(1),
-                    child: const Text("Browse programs"),
-                  ),
-                ],
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StreakRow(
+                currentStreak: streak?.currentStreak ?? 0,
+                longestStreak: streak?.longestStreak ?? 0,
               ),
-            );
-          }
-
-          final workout = vm.todaysWorkout;
-          if (workout == null) {
-            return const Center(child: Text("No workouts in this program"));
-          }
-
-          return TodaysWorkoutCard(
-            workout: workout,
-            programName: vm.activeProgram!.name,
-            totalWorkouts: vm.totalWorkouts,
-            isDoneToday: vm.isDoneToday,
+              Expanded(child: _buildBody(context, vm)),
+            ],
           );
         },
       ),
     );
   }
+}
+
+Widget _buildBody(BuildContext context, HomeViewModel vm) {
+  if (vm.isLoading) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (vm.activeProgram == null) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text("No active program"),
+          TextButton(
+            onPressed: () => StatefulNavigationShell.of(context).goBranch(1),
+            child: const Text("Browse programs"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final workout = vm.todaysWorkout;
+  if (workout == null) {
+    return const Center(child: Text("No workouts in this program"));
+  }
+
+  return SingleChildScrollView(
+    child: TodaysWorkoutCard(
+      workout: workout,
+      programName: vm.activeProgram!.name,
+      totalWorkouts: vm.totalWorkouts,
+      isDoneToday: vm.isDoneToday,
+    ),
+  );
 }

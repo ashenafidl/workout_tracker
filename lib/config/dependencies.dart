@@ -4,9 +4,11 @@ import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
+import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
-import "package:workout_tracker/data/services/sound_serivce.dart";
+import "package:workout_tracker/data/services/sound_service.dart";
+import "package:workout_tracker/data/services/streak_service.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
@@ -32,6 +34,7 @@ Future<void> setupDependencies() async {
     SharedPreferenceService(prefs),
   );
   getIt.registerSingleton<SoundService>(SoundService());
+  getIt.registerSingleton<StreakService>(StreakService(getIt<AppDatabase>()));
 
   // Repositories
   getIt.registerLazySingleton<ExerciseRepo>(
@@ -45,6 +48,9 @@ Future<void> setupDependencies() async {
   );
   getIt.registerLazySingleton<SessionRepository>(
     () => SessionRepository(getIt<AppDatabase>()),
+  );
+  getIt.registerLazySingleton<StreakRepo>(
+    () => StreakRepo(getIt<AppDatabase>()),
   );
 
   // ViewModels
@@ -72,7 +78,11 @@ Future<void> setupDependencies() async {
     () => WorkoutViewModel(getIt<WorkoutRepo>(), getIt<ExerciseRepo>()),
   );
   getIt.registerLazySingleton<HomeViewModel>(
-    () => HomeViewModel(getIt<ProgramRepo>(), getIt<WorkoutRepo>()),
+    () => HomeViewModel(
+      getIt<ProgramRepo>(),
+      getIt<WorkoutRepo>(),
+      getIt<StreakRepo>(),
+    ),
   );
   getIt.registerLazySingleton<HistoryViewModel>(
     () => HistoryViewModel(getIt<SessionRepository>()),
@@ -87,6 +97,7 @@ Future<void> setupDependencies() async {
       sharedPreferenceService: getIt<SharedPreferenceService>(),
       soundService: getIt<SoundService>(),
       database: db ?? getIt<AppDatabase>(),
+      streakService: getIt<StreakService>(),
     ),
   );
 }

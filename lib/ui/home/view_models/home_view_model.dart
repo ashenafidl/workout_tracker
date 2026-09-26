@@ -3,11 +3,12 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class HomeViewModel extends ChangeNotifier {
-  new(this._programRepo, this._workoutRepo) {
+  new(this._programRepo, this._workoutRepo, this._streakRepo) {
     _activeProgramSub = _programRepo.watchActiveProgram().listen((program) {
       _activeProgram = program;
       _sessionsSub?.cancel();
@@ -34,13 +35,23 @@ class HomeViewModel extends ChangeNotifier {
       _isLoading = program != null;
       notifyListeners();
     });
+
+    _streakSub = _streakRepo.watchStreakStats().listen((stats) {
+      _streakStats = stats;
+      notifyListeners();
+    });
   }
 
   final ProgramRepo _programRepo;
   final WorkoutRepo _workoutRepo;
+  final StreakRepo _streakRepo;
   StreamSubscription<Program?>? _activeProgramSub;
   StreamSubscription<List<WorkoutSession>>? _sessionsSub;
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
+  StreamSubscription<StreakStat>? _streakSub;
+
+  StreakStat? _streakStats;
+  StreakStat? get streakStats => _streakStats;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -112,6 +123,7 @@ class HomeViewModel extends ChangeNotifier {
     _activeProgramSub?.cancel();
     _sessionsSub?.cancel();
     _workoutsSub?.cancel();
+    _streakSub?.cancel();
     super.dispose();
   }
 }

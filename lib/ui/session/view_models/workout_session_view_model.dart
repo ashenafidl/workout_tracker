@@ -6,7 +6,8 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
-import "package:workout_tracker/data/services/sound_serivce.dart";
+import "package:workout_tracker/data/services/sound_service.dart";
+import "package:workout_tracker/data/services/streak_service.dart";
 import "package:workout_tracker/database/database.dart";
 
 enum SessionPhase {
@@ -25,12 +26,14 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     required this.sharedPreferenceService,
     required this.soundService,
     required this.database,
+    required this.streakService,
   });
 
   final WorkoutSessionArgs args;
   final SharedPreferenceService sharedPreferenceService;
   final SoundService soundService;
   final AppDatabase database;
+  final StreakService streakService;
 
   SessionPhase _phase = SessionPhase.countdown;
   int _countdown = 3;
@@ -336,6 +339,8 @@ class WorkoutSessionViewModel extends ChangeNotifier {
       await (database.update(database.workoutSessions)
             ..where((session) => session.id.equals(_sessionId!)))
           .write(WorkoutSessionsCompanion(completedAt: Value(now)));
+
+      await streakService.recordCompletedSession(excludeSessionId: _sessionId);
 
       await _deactivateProgramIfFinished();
     });

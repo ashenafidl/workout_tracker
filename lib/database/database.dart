@@ -98,6 +98,21 @@ class SessionExerciseLogs extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
 }
 
+// Singleton table: always exactly one row (id = 1) holding the streak counters.
+// Updated incrementally on every completed session, never recomputed from scratch.
+class StreakStats extends Table {
+  IntColumn get id => integer()();
+  IntColumn get currentStreak => integer().withDefault(const Constant(0))();
+  IntColumn get longestStreak => integer().withDefault(const Constant(0))();
+  DateTimeColumn get currentStreakStartDate => dateTime().nullable()();
+  DateTimeColumn get currentStreakEndDate => dateTime().nullable()();
+  DateTimeColumn get longestStreakStartDate => dateTime().nullable()();
+  DateTimeColumn get longestStreakEndDate => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Exercises,
@@ -107,20 +122,27 @@ class SessionExerciseLogs extends Table {
     WorkoutSessions,
     SessionCircuits,
     SessionExerciseLogs,
+    StreakStats,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+      await _seedStreakStats();
     },
   );
+
+  Future<void> _seedStreakStats() {
+    return into(streakStats)
+        .insertOnConflictUpdate(const StreakStatsCompanion(id: Value(1)));
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
