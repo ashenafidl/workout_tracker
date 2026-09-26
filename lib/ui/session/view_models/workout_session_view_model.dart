@@ -31,6 +31,8 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   int _currentCircuit = 1;
   int _currentExerciseIndex = 0;
   int _restSecondsRemaining = 0;
+  int _durationTargetSeconds = 0;
+  int _durationSecondsRemaining = 0;
 
   int? _sessionId;
   int? _currentCircuitId;
@@ -40,10 +42,24 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   SessionPhase get phase => _phase;
   int get countdown => _countdown;
   int get currentCircuit => _currentCircuit;
+  int get currentExerciseIndex => _currentExerciseIndex;
   int get restSecondsRemaining => _restSecondsRemaining;
+  bool get isCurrentExerciseDuration =>
+      _phase == SessionPhase.exercising &&
+      _currentExerciseIndex < exercises.length &&
+      currentExercise.exercise.type == ExerciseType.duration;
+  int get durationSecondsRemaining => _durationSecondsRemaining;
+  double get durationProgress {
+    if (_durationTargetSeconds == 0) {
+      return 0;
+    }
+    return 1 - (_durationSecondsRemaining / _durationTargetSeconds);
+  }
+
   WorkoutSessionSummary? get summary => _summary;
 
   Timer? _timer;
+  Timer? _exerciseTimer;
 
   int get totalSets => args.workoutWithExercises.workout.sets;
   List<WorkoutExerciseDetail> get exercises =>
@@ -123,6 +139,34 @@ class WorkoutSessionViewModel extends ChangeNotifier {
         );
   }
 
+  void _startDurationTimer() {
+    _exerciseTimer?.cancel();
+    _durationTargetSeconds = currentExercise.targetDurationSeconds ?? 0;
+    _durationSecondsRemaining = _durationTargetSeconds;
+    if (!isCurrentExerciseDuration || _durationSecondsRemaining == 0) {
+      return;
+    }
+
+    _exerciseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_durationSecondsRemaining > 1) {
+        _durationSecondsRemaining--;
+
+        if (_durationSecondsRemaining <= 3) {
+          soundService.playCountdownTick();
+        }
+
+        notifyListeners();
+        return;
+      }
+
+      _durationSecondsRemaining = 0;
+      timer.cancel();
+      _exerciseTimer = null;
+      notifyListeners();
+      unawaited(advance());
+    });
+  }
+
   Future<void> _startExercise() async {
     if (_currentCircuitId == null) {
       throw StateError("Circuit must be created before an exercise can start.");
@@ -137,13 +181,19 @@ class WorkoutSessionViewModel extends ChangeNotifier {
             circuitId: _currentCircuitId!,
             exerciseId: exercise.exercise.id,
             position: _currentExerciseIndex,
-            targetReps: exercise.reps,
+            exerciseType: Value(exercise.exercise.type),
+            targetReps: Value(exercise.targetReps),
+            targetDurationSeconds: Value(exercise.targetDurationSeconds),
             startedAt: now,
           ),
         );
+    _startDurationTimer();
+    notifyListeners();
   }
 
   Future<void> advance() async {
+    _exerciseTimer?.cancel();
+    _exerciseTimer = null;
     if (_phase != SessionPhase.exercising) return;
 
     final isLastExercise = _currentExerciseIndex == exercises.length - 1;
@@ -220,7 +270,12 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     )..where((log) => log.id.equals(_currentExerciseLogId!))).write(
       SessionExerciseLogsCompanion(
         completedAt: Value(now),
-        actualReps: Value(currentExercise.reps),
+        actualReps: Value(currentExercise.targetReps),
+        actualDurationSeconds: Value(
+          isCurrentExerciseDuration
+              ? _durationTargetSeconds - _durationSecondsRemaining
+              : currentExercise.targetDurationSeconds,
+        ),
       ),
     );
 
@@ -317,8 +372,12 @@ class WorkoutSessionViewModel extends ChangeNotifier {
 
         return ExerciseSummary(
           name: exercise.name,
+          type: log.exerciseType,
           targetReps: log.targetReps,
           actualReps: log.actualReps ?? log.targetReps,
+          targetDurationSeconds: log.targetDurationSeconds,
+          actualDurationSeconds:
+              log.actualDurationSeconds ?? log.targetDurationSeconds,
           startedAt: log.startedAt,
           completedAt: log.completedAt ?? log.startedAt,
         );
@@ -361,6 +420,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    _exerciseTimer?.cancel();
     super.dispose();
   }
 }

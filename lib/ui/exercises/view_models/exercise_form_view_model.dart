@@ -1,4 +1,5 @@
 import "package:flutter/foundation.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
@@ -24,6 +25,13 @@ class ExerciseFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  ExerciseType _type = ExerciseType.reps;
+  ExerciseType get type => _type;
+  set type(ExerciseType value) {
+    _type = value;
+    notifyListeners();
+  }
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -34,6 +42,7 @@ class ExerciseFormViewModel extends ChangeNotifier {
     _exerciseId = exercise.id;
     _name = exercise.name;
     _description = exercise.description ?? "";
+    _type = exercise.type;
     notifyListeners();
   }
 
@@ -63,11 +72,13 @@ class ExerciseFormViewModel extends ChangeNotifier {
           id: _exerciseId!,
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
+          type: type,
         );
       } else {
         await _exerciseRepository.addExercise(
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
+          type: type,
         );
       }
       return true;

@@ -1,3 +1,6 @@
+import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/utils/exercise_label.dart";
+
 class WorkoutSessionSummary {
   const new({
     required this.workoutName,
@@ -39,17 +42,35 @@ class CircuitSummary {
 class ExerciseSummary {
   const new({
     required this.name,
-    required this.targetReps,
-    required this.actualReps,
+    required this.type,
     required this.startedAt,
     required this.completedAt,
+    this.targetReps,
+    this.actualReps,
+    this.targetDurationSeconds,
+    this.actualDurationSeconds,
   });
 
   final String name;
-  final int targetReps;
-  final int actualReps;
+  final ExerciseType type;
+  final int? targetReps;
+  final int? actualReps;
+  final int? targetDurationSeconds;
+  final int? actualDurationSeconds;
   final DateTime startedAt;
   final DateTime completedAt;
+
+  String get targetLabel => exerciseTargetLabel(
+    type: type,
+    targetReps: targetReps,
+    targetDurationSeconds: targetDurationSeconds,
+  );
+
+  String get actualLabel => exerciseTargetLabel(
+    type: type,
+    targetReps: actualReps,
+    targetDurationSeconds: actualDurationSeconds,
+  );
 
   Duration get duration => completedAt.difference(startedAt);
 }

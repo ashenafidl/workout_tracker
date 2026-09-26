@@ -237,6 +237,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     if (exercise != null && mounted) {
       FocusManager.instance.primaryFocus?.unfocus();
+      final config = switch (exercise.type) {
+        ExerciseType.reps => const IntegerInputConfig(
+          initialValue: 10,
+          label: "reps",
+        ),
+        ExerciseType.duration => const DurationInputConfig(
+          initialDuration: Duration(seconds: 60),
+        ),
+      };
+
       final result = await showModalBottomSheet<UnitInputResult>(
         context: context,
         isScrollControlled: true,
@@ -244,12 +254,17 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         builder: (sheetContext) => UnitInputSheet(
           title: exercise.name,
           subtitle: "Reps",
-          config: const IntegerInputConfig(initialValue: 10),
+          config: config,
         ),
       );
 
       if (result case IntegerInputResult(:final value)) {
-        _viewModel.addExercise(exercise, reps: value);
+        _viewModel.addExercise(exercise, targetReps: value);
+      } else if (result case DurationInputResult(:final duration)) {
+        _viewModel.addExercise(
+          exercise,
+          targetDurationSeconds: duration.inSeconds,
+        );
       }
     }
   }
@@ -273,13 +288,13 @@ class _ExerciseRow extends StatelessWidget {
       key: key,
       leading: const Icon(Icons.drag_handle),
       title: Text(input.exerciseName),
-      subtitle: Text("${input.reps} reps"),
+      subtitle: Text(input.targetLabel),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () => _showRepsSheet(context),
+            onPressed: () => _showTargetSheet(context),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -290,20 +305,43 @@ class _ExerciseRow extends StatelessWidget {
     );
   }
 
-  void _showRepsSheet(BuildContext context) {
-    FocusManager.instance.primaryFocus?.unfocus();
+  void _showTargetSheet(BuildContext context) {
+    final config = switch (input.type) {
+      ExerciseType.reps => IntegerInputConfig(
+        initialValue: input.targetReps ?? 10,
+        label: "reps",
+      ),
+      ExerciseType.duration => DurationInputConfig(
+        initialDuration: Duration(seconds: input.targetDurationSeconds ?? 60),
+      ),
+    };
+
     showModalBottomSheet<UnitInputResult>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (sheetContext) => UnitInputSheet(
         title: input.exerciseName,
-        subtitle: "Reps",
-        config: IntegerInputConfig(initialValue: input.reps),
+        subtitle: input.targetLabel,
+        config: config,
       ),
     ).then((result) {
-      if (result case IntegerInputResult(:final value)) {
-        viewModel.updateExerciseReps(index, value);
+      if (result == null) {
+        return;
+      }
+
+      switch (input.type) {
+        case ExerciseType.reps:
+          if (result case IntegerInputResult(:final value)) {
+            viewModel.updateExerciseTarget(index, targetReps: value);
+          }
+        case ExerciseType.duration:
+          if (result case DurationInputResult(:final duration)) {
+            viewModel.updateExerciseTarget(
+              index,
+              targetDurationSeconds: duration.inSeconds,
+            );
+          }
       }
     });
   }

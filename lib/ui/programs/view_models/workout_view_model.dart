@@ -52,23 +52,30 @@ class WorkoutViewModel extends ChangeNotifier {
           (e) => WorkoutExerciseInput(
             exerciseId: e.exercise.id,
             exerciseName: e.exercise.name,
-            reps: e.reps,
+            type: e.exercise.type,
             position: e.position,
+            targetReps: e.targetReps,
+            targetDurationSeconds: e.targetDurationSeconds,
           ),
         )
         .toList();
     notifyListeners();
   }
 
-  void addExercise(Exercise exercise, {int reps = 10}) {
-    final position = _exercises.length;
+  void addExercise(
+    Exercise exercise, {
+    int targetReps = 10,
+    int targetDurationSeconds = 60,
+  }) {
     _exercises = List.from(_exercises)
       ..add(
         WorkoutExerciseInput(
           exerciseId: exercise.id,
           exerciseName: exercise.name,
-          reps: reps,
-          position: position,
+          type: exercise.type,
+          position: _exercises.length,
+          targetReps: targetReps,
+          targetDurationSeconds: targetDurationSeconds,
         ),
       );
     notifyListeners();
@@ -80,14 +87,21 @@ class WorkoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateExerciseReps(int index, int reps) {
+  void updateExerciseTarget(
+    int index, {
+    int? targetReps,
+    int? targetDurationSeconds,
+  }) {
     final old = _exercises[index];
     _exercises = List.from(_exercises)
       ..[index] = WorkoutExerciseInput(
         exerciseId: old.exerciseId,
         exerciseName: old.exerciseName,
-        reps: reps,
+        type: old.type,
         position: old.position,
+        targetReps: targetReps ?? old.targetReps,
+        targetDurationSeconds:
+            targetDurationSeconds ?? old.targetDurationSeconds,
       );
     notifyListeners();
   }
@@ -107,17 +121,17 @@ class WorkoutViewModel extends ChangeNotifier {
       return WorkoutExerciseInput(
         exerciseId: old.exerciseId,
         exerciseName: old.exerciseName,
-        reps: old.reps,
+        type: old.type,
         position: entry.key,
+        targetReps: old.targetReps,
+        targetDurationSeconds: old.targetDurationSeconds,
       );
     }).toList();
   }
 
   Future<Exercise?> createAndAddExercise(String name) async {
     final trimmed = name.trim();
-    if (trimmed.isEmpty) {
-      return null;
-    }
+    if (trimmed.isEmpty) return null;
 
     try {
       await _exerciseRepository.addExercise(name: trimmed);
@@ -130,14 +144,12 @@ class WorkoutViewModel extends ChangeNotifier {
           sub.cancel();
         }
       });
-
       Future.delayed(const Duration(seconds: 5), () {
         if (!completer.isCompleted) {
           sub.cancel();
           completer.complete(null);
         }
       });
-
       return await completer.future;
     } catch (_) {
       return null;
@@ -151,7 +163,6 @@ class WorkoutViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
-
     if (_exercises.isEmpty) {
       _errorMessage = "Add at least one exercise";
       notifyListeners();
@@ -161,7 +172,6 @@ class WorkoutViewModel extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-
     try {
       if (isEditing) {
         await _workoutRepository.updateWorkout(

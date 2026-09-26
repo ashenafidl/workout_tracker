@@ -139,7 +139,7 @@ class _CircuitSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${exercise.actualReps}/${exercise.targetReps}",
+                      exercise.actualLabel,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

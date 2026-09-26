@@ -244,7 +244,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                               const SizedBox(width: 8),
                               Expanded(child: Text(we.exercise.name)),
                               Text(
-                                "${we.reps} reps",
+                                we.targetLabel,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(context)

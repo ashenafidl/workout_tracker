@@ -68,6 +68,7 @@ Widget _buildBody(ExerciseListViewModel viewModel) {
         },
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+          leading: Icon(exercise.type.icon),
           title: Text(exercise.name),
           onTap: () {
             showModalBottomSheet<void>(

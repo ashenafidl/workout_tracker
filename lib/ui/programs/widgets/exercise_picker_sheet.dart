@@ -115,6 +115,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                   itemBuilder: (context, index) {
                     final exercise = _filteredExercises[index];
                     return ListTile(
+                      leading: Icon(exercise.type.icon),
                       title: Text(exercise.name),
                       subtitle: exercise.description != null
                           ? Text(

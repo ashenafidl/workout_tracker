@@ -1,6 +1,7 @@
 import "package:drift/drift.dart";
 import "package:drift_flutter/drift_flutter.dart";
 import "package:path_provider/path_provider.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 
 part "database.g.dart";
 
@@ -8,6 +9,8 @@ class Exercises extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get description => text().nullable()();
+  IntColumn get type =>
+      intEnum<ExerciseType>().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
   DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
 }
@@ -29,14 +32,21 @@ class Workouts extends Table {
   DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
 }
 
+// Template: what the user plans to do each circuit.
+// Only the columns relevant to the exercise type are non-null.
 class WorkoutExercises extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get workoutId =>
       integer().references(Workouts, #id, onDelete: KeyAction.cascade)();
   IntColumn get exerciseId =>
       integer().references(Exercises, #id, onDelete: KeyAction.restrict)();
-  IntColumn get reps => integer()();
   IntColumn get position => integer()();
+
+  // reps — ExerciseType.reps
+  IntColumn get targetReps => integer().nullable()();
+
+  // duration — ExerciseType.duration
+  IntColumn get targetDurationSeconds => integer().nullable()();
 }
 
 class WorkoutSessions extends Table {
@@ -60,10 +70,10 @@ class SessionCircuits extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
 }
 
-// One row per exercise within each circuit.
-// targetReps is copied from WorkoutExercises at session start so history is
-// stable even if the workout template is later edited.
-// actualReps is nullable — filled in as the user completes each exercise.
+// Log: what the user actually did.
+// target* columns are copied from WorkoutExercises at session start so
+// history is stable if the template is later edited.
+// actual* columns are filled in as the user completes each exercise.
 class SessionExerciseLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get circuitId =>
@@ -71,8 +81,19 @@ class SessionExerciseLogs extends Table {
   IntColumn get exerciseId =>
       integer().references(Exercises, #id, onDelete: KeyAction.restrict)();
   IntColumn get position => integer()();
-  IntColumn get targetReps => integer()();
+
+  // Snapshot of ExerciseType at session start — keeps log self-contained.
+  IntColumn get exerciseType =>
+      intEnum<ExerciseType>().withDefault(const Constant(0))();
+
+  // reps
+  IntColumn get targetReps => integer().nullable()();
   IntColumn get actualReps => integer().nullable()();
+
+  // duration
+  IntColumn get targetDurationSeconds => integer().nullable()();
+  IntColumn get actualDurationSeconds => integer().nullable()();
+
   DateTimeColumn get startedAt => dateTime()();
   DateTimeColumn get completedAt => dateTime().nullable()();
 }
@@ -92,7 +113,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

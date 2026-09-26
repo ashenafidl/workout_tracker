@@ -70,7 +70,7 @@ class TodaysWorkoutCard extends StatelessWidget {
               children: [
                 Expanded(child: Text(exercise.exercise.name)),
                 Text(
-                  "${exercise.reps} reps",
+                  exercise.targetLabel,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),

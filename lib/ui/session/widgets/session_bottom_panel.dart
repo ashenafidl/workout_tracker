@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
+import "package:workout_tracker/utils/format_time.dart";
 
 class SessionBottomPanel extends StatelessWidget {
   const new({super.key, required this.vm});
@@ -52,13 +53,27 @@ class SessionBottomPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!isRest)
-                Text(
-                  "${vm.currentExercise.reps} reps",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
+              if (!isRest) ...[
+                if (vm.isCurrentExerciseDuration) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    formatDuration(
+                      Duration(seconds: vm.durationSecondsRemaining),
+                    ),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
+                ] else ...[
+                  Text(
+                    vm.currentExercise.targetLabel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
             ],
           ),
 
@@ -85,7 +100,7 @@ class SessionBottomPanel extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${vm.nextExercise!.reps} reps",
+                      vm.nextExercise!.targetLabel,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),

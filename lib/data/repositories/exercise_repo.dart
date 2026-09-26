@@ -1,4 +1,5 @@
 import "package:drift/drift.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 
 class ExerciseRepo {
@@ -18,13 +19,18 @@ class ExerciseRepo {
     return query.watch();
   }
 
-  Future<void> addExercise({required String name, String? description}) async {
+  Future<void> addExercise({
+    required String name,
+    String? description,
+    ExerciseType type = ExerciseType.reps,
+  }) async {
     final trimmedDescription = description?.trim();
     final companion = ExercisesCompanion.insert(
       name: name.trim(),
       description: Value(
         trimmedDescription?.isNotEmpty == true ? trimmedDescription : null,
       ),
+      type: Value(type),
     );
 
     await _db.into(_db.exercises).insert(companion);
@@ -34,6 +40,7 @@ class ExerciseRepo {
     required int id,
     required String name,
     String? description,
+    required ExerciseType type,
   }) async {
     final trimmedDescription = description?.trim();
     final companion = ExercisesCompanion(
@@ -41,6 +48,7 @@ class ExerciseRepo {
       description: Value(
         trimmedDescription?.isNotEmpty == true ? trimmedDescription : null,
       ),
+      type: Value(type),
       updatedAt: Value(DateTime.now()),
     );
 

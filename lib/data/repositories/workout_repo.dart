@@ -62,7 +62,8 @@ class WorkoutRepo {
           grouping.exercises.add(
             WorkoutExerciseDetail(
               exercise: exercise,
-              reps: we.reps,
+              targetReps: we.targetReps,
+              targetDurationSeconds: we.targetDurationSeconds,
               position: we.position,
             ),
           );
@@ -108,7 +109,8 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
-          reps: input.reps,
+          targetReps: Value(input.targetReps),
+          targetDurationSeconds: Value(input.targetDurationSeconds),
           position: input.position,
         );
         await _db.into(_db.workoutExercises).insert(weCompanion);
@@ -146,7 +148,8 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
-          reps: input.reps,
+          targetReps: Value(input.targetReps),
+          targetDurationSeconds: Value(input.targetDurationSeconds),
           position: input.position,
         );
         await _db.into(_db.workoutExercises).insert(weCompanion);
