@@ -9,7 +9,13 @@ import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/data/services/sound_serivce.dart";
 import "package:workout_tracker/database/database.dart";
 
-enum SessionPhase { countdown, exercising, resting, completed }
+enum SessionPhase {
+  countdown,
+  preparingDuration,
+  exercising,
+  resting,
+  completed,
+}
 
 enum SegmentStatus { completed, current, upcoming }
 
@@ -139,6 +145,28 @@ class WorkoutSessionViewModel extends ChangeNotifier {
         );
   }
 
+  void _startDurationPreparation() {
+    _timer?.cancel();
+    _phase = SessionPhase.preparingDuration;
+    _countdown = 5;
+    soundService.playCountdownTick();
+    notifyListeners();
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown > 1) {
+        _countdown--;
+        soundService.playCountdownTick();
+        notifyListeners();
+        return;
+      }
+
+      timer.cancel();
+      _phase = SessionPhase.exercising;
+      notifyListeners();
+      unawaited(_beginExercise());
+    });
+  }
+
   void _startDurationTimer() {
     _exerciseTimer?.cancel();
     _durationTargetSeconds = currentExercise.targetDurationSeconds ?? 0;
@@ -168,6 +196,15 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   }
 
   Future<void> _startExercise() async {
+    if (currentExercise.exercise.type == ExerciseType.duration) {
+      _startDurationPreparation();
+      return;
+    }
+
+    await _beginExercise();
+  }
+
+  Future<void> _beginExercise() async {
     if (_currentCircuitId == null) {
       throw StateError("Circuit must be created before an exercise can start.");
     }

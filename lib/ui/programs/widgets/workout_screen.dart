@@ -231,7 +231,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       useSafeArea: true,
       builder: (sheetContext) => ExercisePickerSheet(
         onExerciseSelected: (_) {},
-        onCreateExercise: (name) => _viewModel.createAndAddExercise(name),
+        onCreateExercise: (name, type) =>
+            _viewModel.createAndAddExercise(name, type),
       ),
     );
 

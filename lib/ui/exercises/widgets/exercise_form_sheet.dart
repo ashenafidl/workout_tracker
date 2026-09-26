@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
+import "package:workout_tracker/ui/exercises/widgets/exercise_type_selection_view.dart";
 
 class ExerciseFormSheet extends StatefulWidget {
   const new({super.key, this.exercise});
@@ -90,14 +90,16 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: _isSelectingType
-                  ? _TypeSelectionView(
+                  ? ExerciseTypeSelectionView(
                       key: const ValueKey("type-selection"),
                       name: _nameController.text.trim(),
                       description: _descriptionController.text.trim(),
                       selectedType: _viewModel.type,
                       isLoading: _viewModel.isLoading,
-                      isEditing: _viewModel.isEditing,
                       onBack: () => setState(() => _isSelectingType = false),
+                      submitLabel: _viewModel.isEditing
+                          ? "Save changes"
+                          : "Add exercise",
                       onTypeSelected: (type) => _viewModel.type = type,
                       onSubmit: _submit,
                     )
@@ -160,94 +162,6 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
           ),
         );
       },
-    );
-  }
-}
-
-class _TypeSelectionView extends StatelessWidget {
-  const new({
-    super.key,
-    required this.name,
-    required this.description,
-    required this.selectedType,
-    required this.isLoading,
-    required this.isEditing,
-    required this.onBack,
-    required this.onTypeSelected,
-    required this.onSubmit,
-  });
-
-  final String name;
-  final String description;
-  final ExerciseType selectedType;
-  final bool isLoading;
-  final bool isEditing;
-  final VoidCallback onBack;
-  final ValueChanged<ExerciseType> onTypeSelected;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: isLoading ? null : onBack,
-              icon: const Icon(Icons.arrow_back),
-              tooltip: "Back",
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name, style: Theme.of(context).textTheme.titleLarge),
-                  if (description.isNotEmpty)
-                    Text(
-                      description,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        RadioGroup(
-          groupValue: selectedType,
-          onChanged: (value) {
-            if (value != null) onTypeSelected(value);
-          },
-          child: Column(
-            children: [
-              for (final option in ExerciseType.values)
-                RadioListTile<ExerciseType>(
-                  value: option,
-                  title: Text(option.name),
-                  subtitle: Text(option.description),
-                  secondary: Icon(option.icon),
-                  controlAffinity: .trailing,
-                  contentPadding: EdgeInsets.zero,
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 48,
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : FilledButton(
-                  onPressed: onSubmit,
-                  child: Text(isEditing ? "Save changes" : "Add exercise"),
-                ),
-        ),
-      ],
     );
   }
 }

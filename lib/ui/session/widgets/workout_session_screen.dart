@@ -101,7 +101,8 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
 
   Widget _buildCenter() {
     return switch (vm.phase) {
-      SessionPhase.countdown => CountdownView(value: vm.countdown),
+      SessionPhase.countdown ||
+      SessionPhase.preparingDuration => CountdownView(value: vm.countdown),
       SessionPhase.exercising => const SizedBox.expand(),
       SessionPhase.resting => RestView(
         secondsRemaining: vm.restSecondsRemaining,

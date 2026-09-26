@@ -129,16 +129,18 @@ class WorkoutViewModel extends ChangeNotifier {
     }).toList();
   }
 
-  Future<Exercise?> createAndAddExercise(String name) async {
+  Future<Exercise?> createAndAddExercise(String name, ExerciseType type) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
 
     try {
-      await _exerciseRepository.addExercise(name: trimmed);
+      await _exerciseRepository.addExercise(name: trimmed, type: type);
       final completer = Completer<Exercise?>();
       late final StreamSubscription<List<Exercise>> sub;
       sub = _exerciseRepository.watchAllExercises().listen((exercises) {
-        final match = exercises.where((e) => e.name == trimmed).toList();
+        final match = exercises
+            .where((e) => e.name == trimmed && e.type == type)
+            .toList();
         if (match.isNotEmpty && !completer.isCompleted) {
           completer.complete(match.first);
           sub.cancel();
