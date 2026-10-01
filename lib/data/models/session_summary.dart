@@ -45,6 +45,7 @@ class ExerciseSummary {
     required this.type,
     required this.startedAt,
     required this.completedAt,
+    this.side,
     this.targetReps,
     this.actualReps,
     this.targetDurationSeconds,
@@ -53,6 +54,7 @@ class ExerciseSummary {
 
   final String name;
   final ExerciseType type;
+  final ExerciseSide? side;
   final int? targetReps;
   final int? actualReps;
   final int? targetDurationSeconds;

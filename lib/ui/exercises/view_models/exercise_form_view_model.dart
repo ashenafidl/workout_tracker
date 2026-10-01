@@ -32,6 +32,13 @@ class ExerciseFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isBilateral = false;
+  bool get isBilateral => _isBilateral;
+  set isBilateral(bool value) {
+    _isBilateral = value;
+    notifyListeners();
+  }
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -43,6 +50,7 @@ class ExerciseFormViewModel extends ChangeNotifier {
     _name = exercise.name;
     _description = exercise.description ?? "";
     _type = exercise.type;
+    _isBilateral = exercise.isBilateral;
     notifyListeners();
   }
 
@@ -73,12 +81,14 @@ class ExerciseFormViewModel extends ChangeNotifier {
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
           type: type,
+          isBilateral: isBilateral,
         );
       } else {
         await _exerciseRepository.addExercise(
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
           type: type,
+          isBilateral: isBilateral,
         );
       }
       return true;

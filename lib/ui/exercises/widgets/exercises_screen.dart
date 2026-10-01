@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
 import "package:workout_tracker/ui/exercises/widgets/exercise_form_sheet.dart";
 
@@ -17,6 +18,7 @@ class ExercisesScreen extends StatelessWidget {
         builder: (_, _) => _buildBody(vm),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "add_exercise",
         onPressed: () {
           showModalBottomSheet<void>(
             context: context,
@@ -70,6 +72,7 @@ Widget _buildBody(ExerciseListViewModel viewModel) {
           contentPadding: const EdgeInsets.symmetric(horizontal: 20),
           leading: Icon(exercise.type.icon),
           title: Text(exercise.name),
+          trailing: exercise.isBilateral ? const BilateralMarker() : null,
           onTap: () {
             showModalBottomSheet<void>(
               context: context,

@@ -18,6 +18,7 @@ class ProgramsScreen extends StatelessWidget {
         builder: (_, _) => _buildBody(context, vm),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "add_program",
         onPressed: () => showModalBottomSheet<Widget>(
           context: context,
           builder: (context) => const ProgramFormSheet(),

@@ -74,10 +74,19 @@ class StreakService {
     });
   }
 
-  Future<StreakStat> _load() {
-    return (_db.select(
-      _db.streakStats,
-    )..where((s) => s.id.equals(_singletonId))).getSingle();
+  Future<StreakStat> _load() async {
+    final query = _db.select(_db.streakStats)
+      ..where((s) => s.id.equals(_singletonId));
+    final stats = await query.getSingleOrNull();
+    if (stats != null) return stats;
+
+    await _db
+        .into(_db.streakStats)
+        .insert(
+          const StreakStatsCompanion(id: Value(_singletonId)),
+          mode: InsertMode.insertOrIgnore,
+        );
+    return query.getSingle();
   }
 
   /// Whether a session was completed in the `[start, end)` window.

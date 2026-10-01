@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
@@ -46,8 +48,9 @@ class SessionBottomPanel extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  isRest ? "Rest" : vm.currentExercise.exercise.name,
+                child: ExerciseTitleWithSide(
+                  name: isRest ? "Rest" : vm.currentExercise.exercise.name,
+                  side: isRest ? ExerciseSide.both : vm.currentSide,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -92,8 +95,9 @@ class SessionBottomPanel extends StatelessWidget {
               ? Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        vm.nextExercise!.exercise.name,
+                      child: ExerciseTitleWithSide(
+                        name: vm.nextExercise!.exercise.name,
+                        side: vm.nextSide,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),

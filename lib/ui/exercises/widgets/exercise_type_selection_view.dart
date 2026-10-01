@@ -7,6 +7,8 @@ class ExerciseTypeSelectionView extends StatelessWidget {
     required this.name,
     required this.description,
     required this.selectedType,
+    required this.isBilateral,
+    required this.onBilateralChanged,
     required this.isLoading,
     required this.submitLabel,
     required this.onBack,
@@ -17,6 +19,8 @@ class ExerciseTypeSelectionView extends StatelessWidget {
   final String name;
   final String description;
   final ExerciseType selectedType;
+  final bool isBilateral;
+  final ValueChanged<bool> onBilateralChanged;
   final bool isLoading;
   final String submitLabel;
   final VoidCallback onBack;
@@ -75,6 +79,18 @@ class ExerciseTypeSelectionView extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+        const Divider(),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          value: isBilateral,
+          onChanged: isLoading ? null : onBilateralChanged,
+          title: const Text("Bilateral"),
+          subtitle: const Text(
+            "Performed on both sides, e.g. curls or lunges. Lets you pick a side when adding it to a workout.",
+          ),
+          secondary: const Icon(Icons.swap_horiz),
+          contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),
         SizedBox(

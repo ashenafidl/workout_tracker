@@ -1,5 +1,8 @@
+import "package:drift/drift.dart";
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/database/database.dart";
 
 class ScaffoldWithNavbar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -16,7 +19,12 @@ class ScaffoldWithNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final db = getIt<AppDatabase>();
+
     return Scaffold(
+      floatingActionButtonLocation: .startFloat,
+
       body: navigationShell,
 
       bottomNavigationBar: BottomNavigationBar(
@@ -47,6 +55,22 @@ class ScaffoldWithNavbar extends StatelessWidget {
             label: "More",
           ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        heroTag: "delete_all_tables",
+        backgroundColor: cs.errorContainer,
+        foregroundColor: cs.onErrorContainer,
+        mini: true,
+        child: const Icon(Icons.delete),
+        onPressed: () async {
+          final m = Migrator(db);
+          for (final table in db.allTables) {
+            await m.deleteTable(table.actualTableName);
+            await m.createTable(table);
+          }
+          db.markTablesUpdated(db.allTables);
+        },
       ),
     );
   }

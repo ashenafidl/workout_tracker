@@ -5,9 +5,9 @@ class StreakRepo {
 
   final AppDatabase _db;
 
-  Stream<StreakStat> watchStreakStats() {
+  Stream<StreakStat?> watchStreakStats() {
     return (_db.select(
       _db.streakStats,
-    )..where((s) => s.id.equals(1))).watchSingle();
+    )..where((s) => s.id.equals(1))).watchSingleOrNull();
   }
 }

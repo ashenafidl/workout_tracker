@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
@@ -7,6 +8,7 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/exercise_picker_sheet.dart";
+import "package:workout_tracker/ui/programs/widgets/exercise_side_sheet.dart";
 
 class WorkoutScreen extends StatefulWidget {
   const new({
@@ -231,42 +233,62 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       useSafeArea: true,
       builder: (sheetContext) => ExercisePickerSheet(
         onExerciseSelected: (_) {},
-        onCreateExercise: (name, type) =>
-            _viewModel.createAndAddExercise(name, type),
+        onCreateExercise: (name, type, {isBilateral = false}) => _viewModel
+            .createAndAddExercise(name, type, isBilateral: isBilateral),
       ),
     );
 
-    if (exercise != null && mounted) {
-      FocusManager.instance.primaryFocus?.unfocus();
-      final config = switch (exercise.type) {
-        ExerciseType.reps => const IntegerInputConfig(
-          initialValue: 10,
-          label: "reps",
-        ),
-        ExerciseType.duration => const DurationInputConfig(
-          initialDuration: Duration(seconds: 60),
-        ),
-      };
+    if (exercise == null || !mounted) {
+      return;
+    }
 
-      final result = await showModalBottomSheet<UnitInputResult>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (sheetContext) => UnitInputSheet(
-          title: exercise.name,
-          subtitle: "Reps",
-          config: config,
-        ),
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Bilateral exercises get a side before their target, so the row is fully
+    // specified in one pass. Dismissing the sheet drops the exercise.
+    ExerciseSide? side;
+    if (exercise.isBilateral) {
+      final selected = await ExerciseSideSheet.show(
+        context,
+        exerciseName: exercise.name,
       );
-
-      if (result case IntegerInputResult(:final value)) {
-        _viewModel.addExercise(exercise, targetReps: value);
-      } else if (result case DurationInputResult(:final duration)) {
-        _viewModel.addExercise(
-          exercise,
-          targetDurationSeconds: duration.inSeconds,
-        );
+      if (selected == null || !mounted) {
+        return;
       }
+      side = selected;
+    } else {
+      side = null;
+    }
+
+    final config = switch (exercise.type) {
+      ExerciseType.reps => const IntegerInputConfig(
+        initialValue: 10,
+        label: "reps",
+      ),
+      ExerciseType.duration => const DurationInputConfig(
+        initialDuration: Duration(seconds: 10),
+      ),
+    };
+
+    final result = await showModalBottomSheet<UnitInputResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => UnitInputSheet(
+        title: exercise.name,
+        subtitle: exercise.type.name,
+        config: config,
+      ),
+    );
+
+    if (result case IntegerInputResult(:final value)) {
+      _viewModel.addExercise(exercise, side: side, targetReps: value);
+    } else if (result case DurationInputResult(:final duration)) {
+      _viewModel.addExercise(
+        exercise,
+        side: side,
+        targetDurationSeconds: duration.inSeconds,
+      );
     }
   }
 }
@@ -288,8 +310,12 @@ class _ExerciseRow extends StatelessWidget {
     return ListTile(
       key: key,
       leading: const Icon(Icons.drag_handle),
-      title: Text(input.exerciseName),
-      subtitle: Text(input.targetLabel),
+      title: ExerciseTitleWithSide(name: input.exerciseName, side: input.side),
+      subtitle: Text(
+        input.side == ExerciseSide.both
+            ? "${input.targetLabel} • left then right"
+            : input.targetLabel,
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -306,18 +332,35 @@ class _ExerciseRow extends StatelessWidget {
     );
   }
 
-  void _showTargetSheet(BuildContext context) {
+  Future<void> _showTargetSheet(BuildContext context) async {
+    // Side first, so the target sheet and the row stay in sync afterwards.
+    if (input.isBilateral) {
+      final side = await ExerciseSideSheet.show(
+        context,
+        exerciseName: input.exerciseName,
+        initialSide: input.side ?? ExerciseSide.both,
+      );
+      if (side == null || !context.mounted) {
+        return;
+      }
+      viewModel.updateExerciseSide(index, side);
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
     final config = switch (input.type) {
       ExerciseType.reps => IntegerInputConfig(
         initialValue: input.targetReps ?? 10,
         label: "reps",
       ),
       ExerciseType.duration => DurationInputConfig(
-        initialDuration: Duration(seconds: input.targetDurationSeconds ?? 60),
+        initialDuration: Duration(seconds: input.targetDurationSeconds ?? 10),
       ),
     };
 
-    showModalBottomSheet<UnitInputResult>(
+    final result = await showModalBottomSheet<UnitInputResult>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -326,24 +369,24 @@ class _ExerciseRow extends StatelessWidget {
         subtitle: input.targetLabel,
         config: config,
       ),
-    ).then((result) {
-      if (result == null) {
-        return;
-      }
+    );
 
-      switch (input.type) {
-        case ExerciseType.reps:
-          if (result case IntegerInputResult(:final value)) {
-            viewModel.updateExerciseTarget(index, targetReps: value);
-          }
-        case ExerciseType.duration:
-          if (result case DurationInputResult(:final duration)) {
-            viewModel.updateExerciseTarget(
-              index,
-              targetDurationSeconds: duration.inSeconds,
-            );
-          }
-      }
-    });
+    if (result == null) {
+      return;
+    }
+
+    switch (input.type) {
+      case ExerciseType.reps:
+        if (result case IntegerInputResult(:final value)) {
+          viewModel.updateExerciseTarget(index, targetReps: value);
+        }
+      case ExerciseType.duration:
+        if (result case DurationInputResult(:final duration)) {
+          viewModel.updateExerciseTarget(
+            index,
+            targetDurationSeconds: duration.inSeconds,
+          );
+        }
+    }
   }
 }

@@ -95,6 +95,9 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
                       name: _nameController.text.trim(),
                       description: _descriptionController.text.trim(),
                       selectedType: _viewModel.type,
+                      isBilateral: _viewModel.isBilateral,
+                      onBilateralChanged: (value) =>
+                          _viewModel.isBilateral = value,
                       isLoading: _viewModel.isLoading,
                       onBack: () => setState(() => _isSelectingType = false),
                       submitLabel: _viewModel.isEditing

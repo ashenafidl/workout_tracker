@@ -56,6 +56,21 @@ class $ExercisesTable extends Exercises
         requiredDuringInsert: false,
         defaultValue: const Constant(0),
       ).withConverter<ExerciseType>($ExercisesTable.$convertertype);
+  static const VerificationMeta _isBilateralMeta = const VerificationMeta(
+    'isBilateral',
+  );
+  @override
+  late final GeneratedColumn<bool> isBilateral = GeneratedColumn<bool>(
+    'is_bilateral',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_bilateral" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -86,6 +101,7 @@ class $ExercisesTable extends Exercises
     name,
     description,
     type,
+    isBilateral,
     createdAt,
     updatedAt,
   ];
@@ -118,6 +134,15 @@ class $ExercisesTable extends Exercises
         description.isAcceptableOrUnknown(
           data['description']!,
           _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_bilateral')) {
+      context.handle(
+        _isBilateralMeta,
+        isBilateral.isAcceptableOrUnknown(
+          data['is_bilateral']!,
+          _isBilateralMeta,
         ),
       );
     }
@@ -160,6 +185,10 @@ class $ExercisesTable extends Exercises
           data['${effectivePrefix}type'],
         )!,
       ),
+      isBilateral: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_bilateral'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -185,6 +214,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
   final String name;
   final String? description;
   final ExerciseType type;
+  final bool isBilateral;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Exercise({
@@ -192,6 +222,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     required this.name,
     this.description,
     required this.type,
+    required this.isBilateral,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -206,6 +237,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     {
       map['type'] = Variable<int>($ExercisesTable.$convertertype.toSql(type));
     }
+    map['is_bilateral'] = Variable<bool>(isBilateral);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -219,6 +251,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ? const Value.absent()
           : Value(description),
       type: Value(type),
+      isBilateral: Value(isBilateral),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -236,6 +269,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       type: $ExercisesTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
       ),
+      isBilateral: serializer.fromJson<bool>(json['isBilateral']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -250,6 +284,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
       'type': serializer.toJson<int>(
         $ExercisesTable.$convertertype.toJson(type),
       ),
+      'isBilateral': serializer.toJson<bool>(isBilateral),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -260,6 +295,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     String? name,
     Value<String?> description = const Value.absent(),
     ExerciseType? type,
+    bool? isBilateral,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Exercise(
@@ -267,6 +303,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     type: type ?? this.type,
+    isBilateral: isBilateral ?? this.isBilateral,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -278,6 +315,9 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ? data.description.value
           : this.description,
       type: data.type.present ? data.type.value : this.type,
+      isBilateral: data.isBilateral.present
+          ? data.isBilateral.value
+          : this.isBilateral,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -290,6 +330,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('type: $type, ')
+          ..write('isBilateral: $isBilateral, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -297,8 +338,15 @@ class Exercise extends DataClass implements Insertable<Exercise> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, description, type, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    description,
+    type,
+    isBilateral,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -307,6 +355,7 @@ class Exercise extends DataClass implements Insertable<Exercise> {
           other.name == this.name &&
           other.description == this.description &&
           other.type == this.type &&
+          other.isBilateral == this.isBilateral &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -316,6 +365,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
   final Value<String> name;
   final Value<String?> description;
   final Value<ExerciseType> type;
+  final Value<bool> isBilateral;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const ExercisesCompanion({
@@ -323,6 +373,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.type = const Value.absent(),
+    this.isBilateral = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -331,6 +382,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     required String name,
     this.description = const Value.absent(),
     this.type = const Value.absent(),
+    this.isBilateral = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -339,6 +391,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Expression<String>? name,
     Expression<String>? description,
     Expression<int>? type,
+    Expression<bool>? isBilateral,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -347,6 +400,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (type != null) 'type': type,
+      if (isBilateral != null) 'is_bilateral': isBilateral,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -357,6 +411,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
     Value<String>? name,
     Value<String?>? description,
     Value<ExerciseType>? type,
+    Value<bool>? isBilateral,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -365,6 +420,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
       name: name ?? this.name,
       description: description ?? this.description,
       type: type ?? this.type,
+      isBilateral: isBilateral ?? this.isBilateral,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -387,6 +443,9 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
         $ExercisesTable.$convertertype.toSql(type.value),
       );
     }
+    if (isBilateral.present) {
+      map['is_bilateral'] = Variable<bool>(isBilateral.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -403,6 +462,7 @@ class ExercisesCompanion extends UpdateCompanion<Exercise> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('type: $type, ')
+          ..write('isBilateral: $isBilateral, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1213,6 +1273,15 @@ class $WorkoutExercisesTable extends WorkoutExercises
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExerciseSide?, int> side =
+      GeneratedColumn<int>(
+        'side',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<ExerciseSide?>($WorkoutExercisesTable.$convertersiden);
   static const VerificationMeta _targetRepsMeta = const VerificationMeta(
     'targetReps',
   );
@@ -1240,6 +1309,7 @@ class $WorkoutExercisesTable extends WorkoutExercises
     workoutId,
     exerciseId,
     position,
+    side,
     targetReps,
     targetDurationSeconds,
   ];
@@ -1322,6 +1392,12 @@ class $WorkoutExercisesTable extends WorkoutExercises
         DriftSqlType.int,
         data['${effectivePrefix}position'],
       )!,
+      side: $WorkoutExercisesTable.$convertersiden.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}side'],
+        ),
+      ),
       targetReps: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}target_reps'],
@@ -1337,6 +1413,11 @@ class $WorkoutExercisesTable extends WorkoutExercises
   $WorkoutExercisesTable createAlias(String alias) {
     return $WorkoutExercisesTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<ExerciseSide, int, int> $converterside =
+      const EnumIndexConverter<ExerciseSide>(ExerciseSide.values);
+  static JsonTypeConverter2<ExerciseSide?, int?, int?> $convertersiden =
+      JsonTypeConverter2.asNullable($converterside);
 }
 
 class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
@@ -1344,6 +1425,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
   final int workoutId;
   final int exerciseId;
   final int position;
+  final ExerciseSide? side;
   final int? targetReps;
   final int? targetDurationSeconds;
   const WorkoutExercise({
@@ -1351,6 +1433,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
     required this.workoutId,
     required this.exerciseId,
     required this.position,
+    this.side,
     this.targetReps,
     this.targetDurationSeconds,
   });
@@ -1361,6 +1444,11 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
     map['workout_id'] = Variable<int>(workoutId);
     map['exercise_id'] = Variable<int>(exerciseId);
     map['position'] = Variable<int>(position);
+    if (!nullToAbsent || side != null) {
+      map['side'] = Variable<int>(
+        $WorkoutExercisesTable.$convertersiden.toSql(side),
+      );
+    }
     if (!nullToAbsent || targetReps != null) {
       map['target_reps'] = Variable<int>(targetReps);
     }
@@ -1376,6 +1464,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
       workoutId: Value(workoutId),
       exerciseId: Value(exerciseId),
       position: Value(position),
+      side: side == null && nullToAbsent ? const Value.absent() : Value(side),
       targetReps: targetReps == null && nullToAbsent
           ? const Value.absent()
           : Value(targetReps),
@@ -1395,6 +1484,9 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
       workoutId: serializer.fromJson<int>(json['workoutId']),
       exerciseId: serializer.fromJson<int>(json['exerciseId']),
       position: serializer.fromJson<int>(json['position']),
+      side: $WorkoutExercisesTable.$convertersiden.fromJson(
+        serializer.fromJson<int?>(json['side']),
+      ),
       targetReps: serializer.fromJson<int?>(json['targetReps']),
       targetDurationSeconds: serializer.fromJson<int?>(
         json['targetDurationSeconds'],
@@ -1409,6 +1501,9 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
       'workoutId': serializer.toJson<int>(workoutId),
       'exerciseId': serializer.toJson<int>(exerciseId),
       'position': serializer.toJson<int>(position),
+      'side': serializer.toJson<int?>(
+        $WorkoutExercisesTable.$convertersiden.toJson(side),
+      ),
       'targetReps': serializer.toJson<int?>(targetReps),
       'targetDurationSeconds': serializer.toJson<int?>(targetDurationSeconds),
     };
@@ -1419,6 +1514,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
     int? workoutId,
     int? exerciseId,
     int? position,
+    Value<ExerciseSide?> side = const Value.absent(),
     Value<int?> targetReps = const Value.absent(),
     Value<int?> targetDurationSeconds = const Value.absent(),
   }) => WorkoutExercise(
@@ -1426,6 +1522,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
     workoutId: workoutId ?? this.workoutId,
     exerciseId: exerciseId ?? this.exerciseId,
     position: position ?? this.position,
+    side: side.present ? side.value : this.side,
     targetReps: targetReps.present ? targetReps.value : this.targetReps,
     targetDurationSeconds: targetDurationSeconds.present
         ? targetDurationSeconds.value
@@ -1439,6 +1536,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
           ? data.exerciseId.value
           : this.exerciseId,
       position: data.position.present ? data.position.value : this.position,
+      side: data.side.present ? data.side.value : this.side,
       targetReps: data.targetReps.present
           ? data.targetReps.value
           : this.targetReps,
@@ -1455,6 +1553,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
           ..write('workoutId: $workoutId, ')
           ..write('exerciseId: $exerciseId, ')
           ..write('position: $position, ')
+          ..write('side: $side, ')
           ..write('targetReps: $targetReps, ')
           ..write('targetDurationSeconds: $targetDurationSeconds')
           ..write(')'))
@@ -1467,6 +1566,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
     workoutId,
     exerciseId,
     position,
+    side,
     targetReps,
     targetDurationSeconds,
   );
@@ -1478,6 +1578,7 @@ class WorkoutExercise extends DataClass implements Insertable<WorkoutExercise> {
           other.workoutId == this.workoutId &&
           other.exerciseId == this.exerciseId &&
           other.position == this.position &&
+          other.side == this.side &&
           other.targetReps == this.targetReps &&
           other.targetDurationSeconds == this.targetDurationSeconds);
 }
@@ -1487,6 +1588,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
   final Value<int> workoutId;
   final Value<int> exerciseId;
   final Value<int> position;
+  final Value<ExerciseSide?> side;
   final Value<int?> targetReps;
   final Value<int?> targetDurationSeconds;
   const WorkoutExercisesCompanion({
@@ -1494,6 +1596,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
     this.workoutId = const Value.absent(),
     this.exerciseId = const Value.absent(),
     this.position = const Value.absent(),
+    this.side = const Value.absent(),
     this.targetReps = const Value.absent(),
     this.targetDurationSeconds = const Value.absent(),
   });
@@ -1502,6 +1605,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
     required int workoutId,
     required int exerciseId,
     required int position,
+    this.side = const Value.absent(),
     this.targetReps = const Value.absent(),
     this.targetDurationSeconds = const Value.absent(),
   }) : workoutId = Value(workoutId),
@@ -1512,6 +1616,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
     Expression<int>? workoutId,
     Expression<int>? exerciseId,
     Expression<int>? position,
+    Expression<int>? side,
     Expression<int>? targetReps,
     Expression<int>? targetDurationSeconds,
   }) {
@@ -1520,6 +1625,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
       if (workoutId != null) 'workout_id': workoutId,
       if (exerciseId != null) 'exercise_id': exerciseId,
       if (position != null) 'position': position,
+      if (side != null) 'side': side,
       if (targetReps != null) 'target_reps': targetReps,
       if (targetDurationSeconds != null)
         'target_duration_seconds': targetDurationSeconds,
@@ -1531,6 +1637,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
     Value<int>? workoutId,
     Value<int>? exerciseId,
     Value<int>? position,
+    Value<ExerciseSide?>? side,
     Value<int?>? targetReps,
     Value<int?>? targetDurationSeconds,
   }) {
@@ -1539,6 +1646,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
       workoutId: workoutId ?? this.workoutId,
       exerciseId: exerciseId ?? this.exerciseId,
       position: position ?? this.position,
+      side: side ?? this.side,
       targetReps: targetReps ?? this.targetReps,
       targetDurationSeconds:
           targetDurationSeconds ?? this.targetDurationSeconds,
@@ -1560,6 +1668,11 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
+    if (side.present) {
+      map['side'] = Variable<int>(
+        $WorkoutExercisesTable.$convertersiden.toSql(side.value),
+      );
+    }
     if (targetReps.present) {
       map['target_reps'] = Variable<int>(targetReps.value);
     }
@@ -1578,6 +1691,7 @@ class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercise> {
           ..write('workoutId: $workoutId, ')
           ..write('exerciseId: $exerciseId, ')
           ..write('position: $position, ')
+          ..write('side: $side, ')
           ..write('targetReps: $targetReps, ')
           ..write('targetDurationSeconds: $targetDurationSeconds')
           ..write(')'))
@@ -2387,6 +2501,15 @@ class $SessionExerciseLogsTable extends SessionExerciseLogs
       ).withConverter<ExerciseType>(
         $SessionExerciseLogsTable.$converterexerciseType,
       );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExerciseSide?, int> side =
+      GeneratedColumn<int>(
+        'side',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<ExerciseSide?>($SessionExerciseLogsTable.$convertersiden);
   static const VerificationMeta _targetRepsMeta = const VerificationMeta(
     'targetReps',
   );
@@ -2458,6 +2581,7 @@ class $SessionExerciseLogsTable extends SessionExerciseLogs
     exerciseId,
     position,
     exerciseType,
+    side,
     targetReps,
     actualReps,
     targetDurationSeconds,
@@ -2582,6 +2706,12 @@ class $SessionExerciseLogsTable extends SessionExerciseLogs
           data['${effectivePrefix}exercise_type'],
         )!,
       ),
+      side: $SessionExerciseLogsTable.$convertersiden.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}side'],
+        ),
+      ),
       targetReps: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}target_reps'],
@@ -2616,6 +2746,10 @@ class $SessionExerciseLogsTable extends SessionExerciseLogs
 
   static JsonTypeConverter2<ExerciseType, int, int> $converterexerciseType =
       const EnumIndexConverter<ExerciseType>(ExerciseType.values);
+  static JsonTypeConverter2<ExerciseSide, int, int> $converterside =
+      const EnumIndexConverter<ExerciseSide>(ExerciseSide.values);
+  static JsonTypeConverter2<ExerciseSide?, int?, int?> $convertersiden =
+      JsonTypeConverter2.asNullable($converterside);
 }
 
 class SessionExerciseLog extends DataClass
@@ -2625,6 +2759,7 @@ class SessionExerciseLog extends DataClass
   final int exerciseId;
   final int position;
   final ExerciseType exerciseType;
+  final ExerciseSide? side;
   final int? targetReps;
   final int? actualReps;
   final int? targetDurationSeconds;
@@ -2637,6 +2772,7 @@ class SessionExerciseLog extends DataClass
     required this.exerciseId,
     required this.position,
     required this.exerciseType,
+    this.side,
     this.targetReps,
     this.actualReps,
     this.targetDurationSeconds,
@@ -2654,6 +2790,11 @@ class SessionExerciseLog extends DataClass
     {
       map['exercise_type'] = Variable<int>(
         $SessionExerciseLogsTable.$converterexerciseType.toSql(exerciseType),
+      );
+    }
+    if (!nullToAbsent || side != null) {
+      map['side'] = Variable<int>(
+        $SessionExerciseLogsTable.$convertersiden.toSql(side),
       );
     }
     if (!nullToAbsent || targetReps != null) {
@@ -2682,6 +2823,7 @@ class SessionExerciseLog extends DataClass
       exerciseId: Value(exerciseId),
       position: Value(position),
       exerciseType: Value(exerciseType),
+      side: side == null && nullToAbsent ? const Value.absent() : Value(side),
       targetReps: targetReps == null && nullToAbsent
           ? const Value.absent()
           : Value(targetReps),
@@ -2714,6 +2856,9 @@ class SessionExerciseLog extends DataClass
       exerciseType: $SessionExerciseLogsTable.$converterexerciseType.fromJson(
         serializer.fromJson<int>(json['exerciseType']),
       ),
+      side: $SessionExerciseLogsTable.$convertersiden.fromJson(
+        serializer.fromJson<int?>(json['side']),
+      ),
       targetReps: serializer.fromJson<int?>(json['targetReps']),
       actualReps: serializer.fromJson<int?>(json['actualReps']),
       targetDurationSeconds: serializer.fromJson<int?>(
@@ -2737,6 +2882,9 @@ class SessionExerciseLog extends DataClass
       'exerciseType': serializer.toJson<int>(
         $SessionExerciseLogsTable.$converterexerciseType.toJson(exerciseType),
       ),
+      'side': serializer.toJson<int?>(
+        $SessionExerciseLogsTable.$convertersiden.toJson(side),
+      ),
       'targetReps': serializer.toJson<int?>(targetReps),
       'actualReps': serializer.toJson<int?>(actualReps),
       'targetDurationSeconds': serializer.toJson<int?>(targetDurationSeconds),
@@ -2752,6 +2900,7 @@ class SessionExerciseLog extends DataClass
     int? exerciseId,
     int? position,
     ExerciseType? exerciseType,
+    Value<ExerciseSide?> side = const Value.absent(),
     Value<int?> targetReps = const Value.absent(),
     Value<int?> actualReps = const Value.absent(),
     Value<int?> targetDurationSeconds = const Value.absent(),
@@ -2764,6 +2913,7 @@ class SessionExerciseLog extends DataClass
     exerciseId: exerciseId ?? this.exerciseId,
     position: position ?? this.position,
     exerciseType: exerciseType ?? this.exerciseType,
+    side: side.present ? side.value : this.side,
     targetReps: targetReps.present ? targetReps.value : this.targetReps,
     actualReps: actualReps.present ? actualReps.value : this.actualReps,
     targetDurationSeconds: targetDurationSeconds.present
@@ -2786,6 +2936,7 @@ class SessionExerciseLog extends DataClass
       exerciseType: data.exerciseType.present
           ? data.exerciseType.value
           : this.exerciseType,
+      side: data.side.present ? data.side.value : this.side,
       targetReps: data.targetReps.present
           ? data.targetReps.value
           : this.targetReps,
@@ -2813,6 +2964,7 @@ class SessionExerciseLog extends DataClass
           ..write('exerciseId: $exerciseId, ')
           ..write('position: $position, ')
           ..write('exerciseType: $exerciseType, ')
+          ..write('side: $side, ')
           ..write('targetReps: $targetReps, ')
           ..write('actualReps: $actualReps, ')
           ..write('targetDurationSeconds: $targetDurationSeconds, ')
@@ -2830,6 +2982,7 @@ class SessionExerciseLog extends DataClass
     exerciseId,
     position,
     exerciseType,
+    side,
     targetReps,
     actualReps,
     targetDurationSeconds,
@@ -2846,6 +2999,7 @@ class SessionExerciseLog extends DataClass
           other.exerciseId == this.exerciseId &&
           other.position == this.position &&
           other.exerciseType == this.exerciseType &&
+          other.side == this.side &&
           other.targetReps == this.targetReps &&
           other.actualReps == this.actualReps &&
           other.targetDurationSeconds == this.targetDurationSeconds &&
@@ -2860,6 +3014,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
   final Value<int> exerciseId;
   final Value<int> position;
   final Value<ExerciseType> exerciseType;
+  final Value<ExerciseSide?> side;
   final Value<int?> targetReps;
   final Value<int?> actualReps;
   final Value<int?> targetDurationSeconds;
@@ -2872,6 +3027,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
     this.exerciseId = const Value.absent(),
     this.position = const Value.absent(),
     this.exerciseType = const Value.absent(),
+    this.side = const Value.absent(),
     this.targetReps = const Value.absent(),
     this.actualReps = const Value.absent(),
     this.targetDurationSeconds = const Value.absent(),
@@ -2885,6 +3041,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
     required int exerciseId,
     required int position,
     this.exerciseType = const Value.absent(),
+    this.side = const Value.absent(),
     this.targetReps = const Value.absent(),
     this.actualReps = const Value.absent(),
     this.targetDurationSeconds = const Value.absent(),
@@ -2901,6 +3058,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
     Expression<int>? exerciseId,
     Expression<int>? position,
     Expression<int>? exerciseType,
+    Expression<int>? side,
     Expression<int>? targetReps,
     Expression<int>? actualReps,
     Expression<int>? targetDurationSeconds,
@@ -2914,6 +3072,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
       if (exerciseId != null) 'exercise_id': exerciseId,
       if (position != null) 'position': position,
       if (exerciseType != null) 'exercise_type': exerciseType,
+      if (side != null) 'side': side,
       if (targetReps != null) 'target_reps': targetReps,
       if (actualReps != null) 'actual_reps': actualReps,
       if (targetDurationSeconds != null)
@@ -2931,6 +3090,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
     Value<int>? exerciseId,
     Value<int>? position,
     Value<ExerciseType>? exerciseType,
+    Value<ExerciseSide?>? side,
     Value<int?>? targetReps,
     Value<int?>? actualReps,
     Value<int?>? targetDurationSeconds,
@@ -2944,6 +3104,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
       exerciseId: exerciseId ?? this.exerciseId,
       position: position ?? this.position,
       exerciseType: exerciseType ?? this.exerciseType,
+      side: side ?? this.side,
       targetReps: targetReps ?? this.targetReps,
       actualReps: actualReps ?? this.actualReps,
       targetDurationSeconds:
@@ -2975,6 +3136,11 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
         $SessionExerciseLogsTable.$converterexerciseType.toSql(
           exerciseType.value,
         ),
+      );
+    }
+    if (side.present) {
+      map['side'] = Variable<int>(
+        $SessionExerciseLogsTable.$convertersiden.toSql(side.value),
       );
     }
     if (targetReps.present) {
@@ -3010,6 +3176,7 @@ class SessionExerciseLogsCompanion extends UpdateCompanion<SessionExerciseLog> {
           ..write('exerciseId: $exerciseId, ')
           ..write('position: $position, ')
           ..write('exerciseType: $exerciseType, ')
+          ..write('side: $side, ')
           ..write('targetReps: $targetReps, ')
           ..write('actualReps: $actualReps, ')
           ..write('targetDurationSeconds: $targetDurationSeconds, ')
@@ -3607,6 +3774,7 @@ typedef $$ExercisesTableCreateCompanionBuilder = ExercisesCompanion Function({
   required String name,
   Value<String?> description,
   Value<ExerciseType> type,
+  Value<bool> isBilateral,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -3615,6 +3783,7 @@ typedef $$ExercisesTableUpdateCompanionBuilder = ExercisesCompanion Function({
   Value<String> name,
   Value<String?> description,
   Value<ExerciseType> type,
+  Value<bool> isBilateral,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
 });
@@ -3697,6 +3866,11 @@ class $$ExercisesTableFilterComposer
         column: $table.type,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<bool> get isBilateral => $composableBuilder(
+    column: $table.isBilateral,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
@@ -3788,6 +3962,11 @@ class $$ExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isBilateral => $composableBuilder(
+    column: $table.isBilateral,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -3821,6 +4000,11 @@ class $$ExercisesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<ExerciseType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBilateral => $composableBuilder(
+    column: $table.isBilateral,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3915,6 +4099,7 @@ class $$ExercisesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<ExerciseType> type = const Value.absent(),
+                Value<bool> isBilateral = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ExercisesCompanion(
@@ -3922,6 +4107,7 @@ class $$ExercisesTableTableManager
                 name: name,
                 description: description,
                 type: type,
+                isBilateral: isBilateral,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -3931,6 +4117,7 @@ class $$ExercisesTableTableManager
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<ExerciseType> type = const Value.absent(),
+                Value<bool> isBilateral = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ExercisesCompanion.insert(
@@ -3938,6 +4125,7 @@ class $$ExercisesTableTableManager
                 name: name,
                 description: description,
                 type: type,
+                isBilateral: isBilateral,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -4952,6 +5140,7 @@ typedef $$WorkoutExercisesTableCreateCompanionBuilder =
       required int workoutId,
       required int exerciseId,
       required int position,
+      Value<ExerciseSide?> side,
       Value<int?> targetReps,
       Value<int?> targetDurationSeconds,
     });
@@ -4961,6 +5150,7 @@ typedef $$WorkoutExercisesTableUpdateCompanionBuilder =
       Value<int> workoutId,
       Value<int> exerciseId,
       Value<int> position,
+      Value<ExerciseSide?> side,
       Value<int?> targetReps,
       Value<int?> targetDurationSeconds,
     });
@@ -5027,6 +5217,12 @@ class $$WorkoutExercisesTableFilterComposer
     column: $table.position,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<ExerciseSide?, ExerciseSide, int> get side =>
+      $composableBuilder(
+        column: $table.side,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
@@ -5104,6 +5300,11 @@ class $$WorkoutExercisesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get side => $composableBuilder(
+    column: $table.side,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
     builder: (column) => ColumnOrderings(column),
@@ -5175,6 +5376,9 @@ class $$WorkoutExercisesTableAnnotationComposer
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ExerciseSide?, int> get side =>
+      $composableBuilder(column: $table.side, builder: (column) => column);
 
   GeneratedColumn<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
@@ -5267,6 +5471,7 @@ class $$WorkoutExercisesTableTableManager
                 Value<int> workoutId = const Value.absent(),
                 Value<int> exerciseId = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<ExerciseSide?> side = const Value.absent(),
                 Value<int?> targetReps = const Value.absent(),
                 Value<int?> targetDurationSeconds = const Value.absent(),
               }) => WorkoutExercisesCompanion(
@@ -5274,6 +5479,7 @@ class $$WorkoutExercisesTableTableManager
                 workoutId: workoutId,
                 exerciseId: exerciseId,
                 position: position,
+                side: side,
                 targetReps: targetReps,
                 targetDurationSeconds: targetDurationSeconds,
               ),
@@ -5283,6 +5489,7 @@ class $$WorkoutExercisesTableTableManager
                 required int workoutId,
                 required int exerciseId,
                 required int position,
+                Value<ExerciseSide?> side = const Value.absent(),
                 Value<int?> targetReps = const Value.absent(),
                 Value<int?> targetDurationSeconds = const Value.absent(),
               }) => WorkoutExercisesCompanion.insert(
@@ -5290,6 +5497,7 @@ class $$WorkoutExercisesTableTableManager
                 workoutId: workoutId,
                 exerciseId: exerciseId,
                 position: position,
+                side: side,
                 targetReps: targetReps,
                 targetDurationSeconds: targetDurationSeconds,
               ),
@@ -6306,6 +6514,7 @@ typedef $$SessionExerciseLogsTableCreateCompanionBuilder =
       required int exerciseId,
       required int position,
       Value<ExerciseType> exerciseType,
+      Value<ExerciseSide?> side,
       Value<int?> targetReps,
       Value<int?> actualReps,
       Value<int?> targetDurationSeconds,
@@ -6320,6 +6529,7 @@ typedef $$SessionExerciseLogsTableUpdateCompanionBuilder =
       Value<int> exerciseId,
       Value<int> position,
       Value<ExerciseType> exerciseType,
+      Value<ExerciseSide?> side,
       Value<int?> targetReps,
       Value<int?> actualReps,
       Value<int?> targetDurationSeconds,
@@ -6401,6 +6611,12 @@ class $$SessionExerciseLogsTableFilterComposer
     column: $table.exerciseType,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<ExerciseSide?, ExerciseSide, int> get side =>
+      $composableBuilder(
+        column: $table.side,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
@@ -6503,6 +6719,11 @@ class $$SessionExerciseLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get side => $composableBuilder(
+    column: $table.side,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
     builder: (column) => ColumnOrderings(column),
@@ -6600,6 +6821,9 @@ class $$SessionExerciseLogsTableAnnotationComposer
         column: $table.exerciseType,
         builder: (column) => column,
       );
+
+  GeneratedColumnWithTypeConverter<ExerciseSide?, int> get side =>
+      $composableBuilder(column: $table.side, builder: (column) => column);
 
   GeneratedColumn<int> get targetReps => $composableBuilder(
     column: $table.targetReps,
@@ -6717,6 +6941,7 @@ class $$SessionExerciseLogsTableTableManager
                 Value<int> exerciseId = const Value.absent(),
                 Value<int> position = const Value.absent(),
                 Value<ExerciseType> exerciseType = const Value.absent(),
+                Value<ExerciseSide?> side = const Value.absent(),
                 Value<int?> targetReps = const Value.absent(),
                 Value<int?> actualReps = const Value.absent(),
                 Value<int?> targetDurationSeconds = const Value.absent(),
@@ -6729,6 +6954,7 @@ class $$SessionExerciseLogsTableTableManager
                 exerciseId: exerciseId,
                 position: position,
                 exerciseType: exerciseType,
+                side: side,
                 targetReps: targetReps,
                 actualReps: actualReps,
                 targetDurationSeconds: targetDurationSeconds,
@@ -6743,6 +6969,7 @@ class $$SessionExerciseLogsTableTableManager
                 required int exerciseId,
                 required int position,
                 Value<ExerciseType> exerciseType = const Value.absent(),
+                Value<ExerciseSide?> side = const Value.absent(),
                 Value<int?> targetReps = const Value.absent(),
                 Value<int?> actualReps = const Value.absent(),
                 Value<int?> targetDurationSeconds = const Value.absent(),
@@ -6755,6 +6982,7 @@ class $$SessionExerciseLogsTableTableManager
                 exerciseId: exerciseId,
                 position: position,
                 exerciseType: exerciseType,
+                side: side,
                 targetReps: targetReps,
                 actualReps: actualReps,
                 targetDurationSeconds: targetDurationSeconds,

@@ -62,6 +62,8 @@ class WorkoutRepo {
           grouping.exercises.add(
             WorkoutExerciseDetail(
               exercise: exercise,
+              isBilateral: exercise.isBilateral,
+              side: we.side,
               targetReps: we.targetReps,
               targetDurationSeconds: we.targetDurationSeconds,
               position: we.position,
@@ -109,6 +111,7 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
+          side: Value(input.isBilateral ? input.side : null),
           targetReps: Value(input.targetReps),
           targetDurationSeconds: Value(input.targetDurationSeconds),
           position: input.position,
@@ -148,6 +151,7 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
+          side: Value(input.isBilateral ? input.side : null),
           targetReps: Value(input.targetReps),
           targetDurationSeconds: Value(input.targetDurationSeconds),
           position: input.position,

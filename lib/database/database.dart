@@ -11,6 +11,7 @@ class Exercises extends Table {
   TextColumn get description => text().nullable()();
   IntColumn get type =>
       intEnum<ExerciseType>().withDefault(const Constant(0))();
+  BoolColumn get isBilateral => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
   DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
 }
@@ -41,6 +42,9 @@ class WorkoutExercises extends Table {
   IntColumn get exerciseId =>
       integer().references(Exercises, #id, onDelete: KeyAction.restrict)();
   IntColumn get position => integer()();
+
+  // Only set when this exercise is bilateral.
+  IntColumn get side => intEnum<ExerciseSide>().nullable()();
 
   // reps — ExerciseType.reps
   IntColumn get targetReps => integer().nullable()();
@@ -86,6 +90,9 @@ class SessionExerciseLogs extends Table {
   IntColumn get exerciseType =>
       intEnum<ExerciseType>().withDefault(const Constant(0))();
 
+  // Snapshot of the per-workout side at session start, so history still shows
+  // the side even if the workout template is edited later.
+  IntColumn get side => intEnum<ExerciseSide>().nullable()();
   // reps
   IntColumn get targetReps => integer().nullable()();
   IntColumn get actualReps => integer().nullable()();

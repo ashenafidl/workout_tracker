@@ -7,9 +7,9 @@ class ExerciseRepo {
 
   final AppDatabase _db;
 
-  Stream<int> watchExerciseCount() {
+  Stream<int?> watchExerciseCount() {
     final query = _db.exercises.count();
-    return query.watchSingle();
+    return query.watchSingleOrNull();
   }
 
   Stream<List<Exercise>> watchAllExercises() {
@@ -23,6 +23,7 @@ class ExerciseRepo {
     required String name,
     String? description,
     ExerciseType type = ExerciseType.reps,
+    bool isBilateral = false,
   }) async {
     final trimmedDescription = description?.trim();
     final companion = ExercisesCompanion.insert(
@@ -31,6 +32,7 @@ class ExerciseRepo {
         trimmedDescription?.isNotEmpty == true ? trimmedDescription : null,
       ),
       type: Value(type),
+      isBilateral: Value(isBilateral),
     );
 
     await _db.into(_db.exercises).insert(companion);
@@ -41,6 +43,7 @@ class ExerciseRepo {
     required String name,
     String? description,
     required ExerciseType type,
+    required bool isBilateral,
   }) async {
     final trimmedDescription = description?.trim();
     final companion = ExercisesCompanion(
@@ -49,6 +52,7 @@ class ExerciseRepo {
         trimmedDescription?.isNotEmpty == true ? trimmedDescription : null,
       ),
       type: Value(type),
+      isBilateral: Value(isBilateral),
       updatedAt: Value(DateTime.now()),
     );
 

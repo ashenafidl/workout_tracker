@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
@@ -133,8 +134,9 @@ class _CircuitSummaryCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
-                        exercise.name,
+                      child: ExerciseTitleWithSide(
+                        name: exercise.name,
+                        side: exercise.side,
                         style: theme.textTheme.bodyMedium,
                       ),
                     ),

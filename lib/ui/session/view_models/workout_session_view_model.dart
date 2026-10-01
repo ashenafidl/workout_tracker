@@ -38,7 +38,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   SessionPhase _phase = SessionPhase.countdown;
   int _countdown = 3;
   int _currentCircuit = 1;
-  int _currentExerciseIndex = 0;
+  int _currentStepIndex = 0;
   int _restSecondsRemaining = 0;
   int _durationTargetSeconds = 0;
   int _durationSecondsRemaining = 0;
@@ -51,11 +51,11 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   SessionPhase get phase => _phase;
   int get countdown => _countdown;
   int get currentCircuit => _currentCircuit;
-  int get currentExerciseIndex => _currentExerciseIndex;
+  int get currentStepIndex => _currentStepIndex;
   int get restSecondsRemaining => _restSecondsRemaining;
   bool get isCurrentExerciseDuration =>
       _phase == SessionPhase.exercising &&
-      _currentExerciseIndex < exercises.length &&
+      _currentStepIndex < _steps.length &&
       currentExercise.exercise.type == ExerciseType.duration;
   int get durationSecondsRemaining => _durationSecondsRemaining;
   double get durationProgress {
@@ -73,21 +73,54 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   int get totalSets => args.workoutWithExercises.workout.sets;
   List<WorkoutExerciseDetail> get exercises =>
       args.workoutWithExercises.exercises;
-  WorkoutExerciseDetail get currentExercise => exercises[_currentExerciseIndex];
-  WorkoutExerciseDetail? get nextExercise {
-    if (_currentExerciseIndex < exercises.length - 1) {
-      return exercises[_currentExerciseIndex + 1];
+
+  /// One unit of work inside a circuit, after expanding bilateral exercises.
+  List<SessionStep> get _steps => _stepCache ??= _buildSteps();
+
+  List<SessionStep>? _stepCache;
+
+  List<SessionStep> _buildSteps() {
+    return [for (final exercise in exercises) ..._stepsFor(exercise)];
+  }
+
+  List<SessionStep> _stepsFor(WorkoutExerciseDetail exercise) {
+    final side = exercise.side;
+    if (!exercise.isBilateral || side == null) {
+      return [SessionStep(exercise: exercise, side: null)];
     }
-    if (_currentCircuit < totalSets) return exercises[0];
+
+    return [
+      for (final performedSide in side.performedSides)
+        SessionStep(exercise: exercise, side: performedSide),
+    ];
+  }
+
+  /// Number of steps in one circuit, after expanding bilateral exercises.
+  int get stepCount => _steps.length;
+
+  SessionStep get currentStep => _steps[_currentStepIndex];
+  WorkoutExerciseDetail get currentExercise => currentStep.exercise;
+
+  /// The side to perform right now, already resolved for the current step.
+  ExerciseSide? get currentSide => currentStep.side;
+
+  SessionStep? get nextStep {
+    if (_currentStepIndex < _steps.length - 1) {
+      return _steps[_currentStepIndex + 1];
+    }
+    if (_currentCircuit < totalSets) return _steps.first;
     return null;
   }
 
+  WorkoutExerciseDetail? get nextExercise => nextStep?.exercise;
+  ExerciseSide? get nextSide => nextStep?.side;
+
   SegmentStatus exerciseStatus(int index) {
-    if (index < _currentExerciseIndex) {
+    if (index < _currentStepIndex) {
       return SegmentStatus.completed;
     }
 
-    if (index == _currentExerciseIndex && _phase == SessionPhase.exercising) {
+    if (index == _currentStepIndex && _phase == SessionPhase.exercising) {
       return SegmentStatus.current;
     }
 
@@ -220,8 +253,9 @@ class WorkoutSessionViewModel extends ChangeNotifier {
           SessionExerciseLogsCompanion.insert(
             circuitId: _currentCircuitId!,
             exerciseId: exercise.exercise.id,
-            position: _currentExerciseIndex,
+            position: _currentStepIndex,
             exerciseType: Value(exercise.exercise.type),
+            side: Value(currentSide),
             targetReps: Value(exercise.targetReps),
             targetDurationSeconds: Value(exercise.targetDurationSeconds),
             startedAt: now,
@@ -236,22 +270,22 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     _exerciseTimer = null;
     if (_phase != SessionPhase.exercising) return;
 
-    final isLastExercise = _currentExerciseIndex == exercises.length - 1;
+    final isLastStep = _currentStepIndex == _steps.length - 1;
     final isLastCircuit = _currentCircuit == totalSets;
 
-    if (isLastExercise && isLastCircuit) {
+    if (isLastStep && isLastCircuit) {
       await _completeCurrentExercise();
       await _completeCurrentCircuit();
       await _completeSession();
       _phase = SessionPhase.completed;
-      _currentExerciseIndex++;
+      _currentStepIndex++;
       notifyListeners();
       await _loadSessionSummary();
       notifyListeners();
       return;
     }
 
-    if (isLastExercise) {
+    if (isLastStep) {
       await _completeCurrentExercise();
       await _completeCurrentCircuit();
       _startRest();
@@ -259,7 +293,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     }
 
     await _completeCurrentExercise();
-    _currentExerciseIndex++;
+    _currentStepIndex++;
     await _startExercise();
     notifyListeners();
   }
@@ -294,7 +328,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
 
   Future<void> _advanceCircuit() async {
     _currentCircuit++;
-    _currentExerciseIndex = 0;
+    _currentStepIndex = 0;
     _phase = SessionPhase.exercising;
     await _createCircuit(startedAt: DateTime.now());
     notifyListeners();
@@ -415,6 +449,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
         return ExerciseSummary(
           name: exercise.name,
           type: log.exerciseType,
+          side: log.side,
           targetReps: log.targetReps,
           actualReps: log.actualReps ?? log.targetReps,
           targetDurationSeconds: log.targetDurationSeconds,
@@ -465,4 +500,14 @@ class WorkoutSessionViewModel extends ChangeNotifier {
     _exerciseTimer?.cancel();
     super.dispose();
   }
+}
+
+/// One unit of work inside a circuit. A bilateral exercise set to
+/// [ExerciseSide.both] produces two of these — left, then right — so the two
+/// sides are logged and displayed as separate entries.
+class SessionStep {
+  const new({required this.exercise, required this.side});
+
+  final WorkoutExerciseDetail exercise;
+  final ExerciseSide? side;
 }

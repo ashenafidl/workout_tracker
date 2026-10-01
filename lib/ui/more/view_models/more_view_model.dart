@@ -12,7 +12,7 @@ class MoreViewModel extends ChangeNotifier {
   final ExerciseRepo _exerciseRepository;
   final SharedPreferenceService _settings;
 
-  StreamSubscription<int>? _exerciseCountSub;
+  StreamSubscription<int?>? _exerciseCountSub;
 
   int _exerciseCount = 0;
   int get exerciseCount => _exerciseCount;
@@ -27,7 +27,7 @@ class MoreViewModel extends ChangeNotifier {
     _exerciseCountSub = _exerciseRepository.watchExerciseCount().listen((
       count,
     ) {
-      _exerciseCount = count;
+      _exerciseCount = count ?? 0;
       notifyListeners();
     });
   }

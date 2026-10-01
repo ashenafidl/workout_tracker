@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 
@@ -68,7 +69,12 @@ class TodaysWorkoutCard extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Expanded(child: Text(exercise.exercise.name)),
+                Expanded(
+                  child: ExerciseTitleWithSide(
+                    name: exercise.exercise.name,
+                    side: exercise.side,
+                  ),
+                ),
                 Text(
                   exercise.targetLabel,
                   style: theme.textTheme.bodySmall?.copyWith(

@@ -62,9 +62,9 @@ class _CurrentSetBar extends StatelessWidget {
 
     return Row(
       children: [
-        for (int i = 0; i < vm.exercises.length; i++) ...[
+        for (int i = 0; i < vm.stepCount; i++) ...[
           Expanded(
-            child: i == vm.currentExerciseIndex && vm.isCurrentExerciseDuration
+            child: i == vm.currentStepIndex && vm.isCurrentExerciseDuration
                 ? _DurationExerciseBar(
                     targetDurationSeconds:
                         vm.currentExercise.targetDurationSeconds ?? 0,
@@ -87,7 +87,7 @@ class _CurrentSetBar extends StatelessWidget {
                     ),
                   ),
           ),
-          if (i < vm.exercises.length - 1) const SizedBox(width: 2),
+          if (i < vm.stepCount - 1) const SizedBox(width: 2),
         ],
       ],
     );

@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/database/database.dart";
@@ -15,7 +16,11 @@ class ExercisePickerSheet extends StatefulWidget {
   });
 
   final void Function(Exercise exercise) onExerciseSelected;
-  final Future<Exercise?> Function(String name, ExerciseType type)
+  final Future<Exercise?> Function(
+    String name,
+    ExerciseType type, {
+    bool isBilateral,
+  })
   onCreateExercise;
 
   @override
@@ -31,6 +36,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
   bool _isCreating = false;
   String _newExerciseName = "";
   ExerciseType _selectedType = ExerciseType.reps;
+  bool _isNewExerciseBilateral = false;
   StreamSubscription<List<Exercise>>? _subscription;
 
   @override
@@ -74,6 +80,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
     setState(() {
       _newExerciseName = _searchController.text.trim();
       _selectedType = ExerciseType.reps;
+      _isNewExerciseBilateral = false;
       _isSelectingType = true;
     });
   }
@@ -83,6 +90,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
     final exercise = await widget.onCreateExercise(
       _newExerciseName,
       _selectedType,
+      isBilateral: _isNewExerciseBilateral,
     );
     if (!mounted) {
       return;
@@ -111,6 +119,9 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                   name: _newExerciseName,
                   description: "",
                   selectedType: _selectedType,
+                  isBilateral: _isNewExerciseBilateral,
+                  onBilateralChanged: (value) =>
+                      setState(() => _isNewExerciseBilateral = value),
                   isLoading: _isCreating,
                   submitLabel: "Create exercise",
                   onBack: () => setState(() => _isSelectingType = false),
@@ -170,6 +181,9 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   )
+                                : null,
+                            trailing: exercise.isBilateral
+                                ? const BilateralMarker()
                                 : null,
                             onTap: () {
                               widget.onExerciseSelected(exercise);

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
@@ -242,7 +243,12 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                     .onSurfaceVariant,
                               ),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(we.exercise.name)),
+                              Expanded(
+                                child: ExerciseTitleWithSide(
+                                  name: we.exercise.name,
+                                  side: we.side,
+                                ),
+                              ),
                               Text(
                                 we.targetLabel,
                                 style: Theme.of(context).textTheme.bodySmall

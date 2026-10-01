@@ -54,6 +54,8 @@ class WorkoutViewModel extends ChangeNotifier {
             exerciseName: e.exercise.name,
             type: e.exercise.type,
             position: e.position,
+            isBilateral: e.isBilateral,
+            side: e.side,
             targetReps: e.targetReps,
             targetDurationSeconds: e.targetDurationSeconds,
           ),
@@ -64,6 +66,7 @@ class WorkoutViewModel extends ChangeNotifier {
 
   void addExercise(
     Exercise exercise, {
+    ExerciseSide? side,
     int targetReps = 10,
     int targetDurationSeconds = 60,
   }) {
@@ -74,6 +77,8 @@ class WorkoutViewModel extends ChangeNotifier {
           exerciseName: exercise.name,
           type: exercise.type,
           position: _exercises.length,
+          isBilateral: exercise.isBilateral,
+          side: side,
           targetReps: targetReps,
           targetDurationSeconds: targetDurationSeconds,
         ),
@@ -87,6 +92,12 @@ class WorkoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateExerciseSide(int index, ExerciseSide side) {
+    final old = _exercises[index];
+    _exercises = List.from(_exercises)..[index] = old.copyWith(side: side);
+    notifyListeners();
+  }
+
   void updateExerciseTarget(
     int index, {
     int? targetReps,
@@ -94,11 +105,7 @@ class WorkoutViewModel extends ChangeNotifier {
   }) {
     final old = _exercises[index];
     _exercises = List.from(_exercises)
-      ..[index] = WorkoutExerciseInput(
-        exerciseId: old.exerciseId,
-        exerciseName: old.exerciseName,
-        type: old.type,
-        position: old.position,
+      ..[index] = old.copyWith(
         targetReps: targetReps ?? old.targetReps,
         targetDurationSeconds:
             targetDurationSeconds ?? old.targetDurationSeconds,
@@ -117,29 +124,34 @@ class WorkoutViewModel extends ChangeNotifier {
 
   void _reindexExercises() {
     _exercises = _exercises.asMap().entries.map((entry) {
-      final old = entry.value;
-      return WorkoutExerciseInput(
-        exerciseId: old.exerciseId,
-        exerciseName: old.exerciseName,
-        type: old.type,
-        position: entry.key,
-        targetReps: old.targetReps,
-        targetDurationSeconds: old.targetDurationSeconds,
-      );
+      return entry.value.copyWith(position: entry.key);
     }).toList();
   }
 
-  Future<Exercise?> createAndAddExercise(String name, ExerciseType type) async {
+  Future<Exercise?> createAndAddExercise(
+    String name,
+    ExerciseType type, {
+    bool isBilateral = false,
+  }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
 
     try {
-      await _exerciseRepository.addExercise(name: trimmed, type: type);
+      await _exerciseRepository.addExercise(
+        name: trimmed,
+        type: type,
+        isBilateral: isBilateral,
+      );
       final completer = Completer<Exercise?>();
       late final StreamSubscription<List<Exercise>> sub;
       sub = _exerciseRepository.watchAllExercises().listen((exercises) {
         final match = exercises
-            .where((e) => e.name == trimmed && e.type == type)
+            .where(
+              (e) =>
+                  e.name == trimmed &&
+                  e.type == type &&
+                  e.isBilateral == isBilateral,
+            )
             .toList();
         if (match.isNotEmpty && !completer.isCompleted) {
           completer.complete(match.first);

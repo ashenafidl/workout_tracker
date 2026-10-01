@@ -48,7 +48,7 @@ class HomeViewModel extends ChangeNotifier {
   StreamSubscription<Program?>? _activeProgramSub;
   StreamSubscription<List<WorkoutSession>>? _sessionsSub;
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
-  StreamSubscription<StreakStat>? _streakSub;
+  StreamSubscription<StreakStat?>? _streakSub;
 
   StreakStat? _streakStats;
   StreakStat? get streakStats => _streakStats;
