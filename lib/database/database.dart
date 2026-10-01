@@ -136,13 +136,20 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
       await _seedStreakStats();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        await m.addColumn(exercises, exercises.isBilateral);
+        await m.addColumn(workoutExercises, workoutExercises.side);
+        await m.addColumn(sessionExerciseLogs, sessionExerciseLogs.side);
+      }
     },
   );
 
