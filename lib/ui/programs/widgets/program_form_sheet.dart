@@ -42,18 +42,19 @@ class _ProgramFormSheetState extends State<ProgramFormSheet> {
     final repository = getIt<ProgramRepo>();
 
     try {
+      int? createdId;
       if (widget.programId != null) {
         await repository.updateProgram(
           id: widget.programId!,
           name: _nameController.text,
         );
       } else {
-        await repository.createProgram(name: _nameController.text);
+        createdId = await repository.createProgram(name: _nameController.text);
       }
       if (!mounted) {
         return;
       }
-      Navigator.pop(context);
+      Navigator.pop(context, createdId);
     } catch (error) {
       if (!mounted) {
         return;

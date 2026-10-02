@@ -19,13 +19,20 @@ class ProgramsScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "add_program",
-        onPressed: () => showModalBottomSheet<Widget>(
-          context: context,
-          builder: (context) => const ProgramFormSheet(),
-        ),
+        onPressed: () => _createProgram(context),
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _createProgram(BuildContext context) async {
+    final programId = await showModalBottomSheet<int>(
+      context: context,
+      builder: (context) => const ProgramFormSheet(),
+    );
+    if (programId != null && context.mounted) {
+      context.push("/programs/$programId");
+    }
   }
 
   Widget _buildBody(BuildContext context, ProgramsViewModel viewModel) {

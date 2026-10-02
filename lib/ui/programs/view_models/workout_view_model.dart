@@ -5,13 +5,16 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
+import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/database/database.dart";
+import "package:workout_tracker/utils/format_time.dart";
 
 class WorkoutViewModel extends ChangeNotifier {
-  new(this._workoutRepository, this._exerciseRepository);
+  new(this._workoutRepository, this._exerciseRepository, this._settings);
 
   final WorkoutRepo _workoutRepository;
   final ExerciseRepo _exerciseRepository;
+  final SharedPreferenceService _settings;
 
   int? _workoutId;
   bool get isEditing => _workoutId != null;
@@ -37,6 +40,24 @@ class WorkoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  int? _restDurationSeconds;
+  int? get restDurationSeconds => _restDurationSeconds;
+  set restDurationSeconds(int? value) {
+    _restDurationSeconds = value;
+    notifyListeners();
+  }
+
+  int get defaultRestDurationSeconds => _settings.restDurationSeconds;
+
+  /// Null means the workout inherits the global app setting.
+  String get restLabel {
+    final custom = _restDurationSeconds;
+    if (custom != null) {
+      return formatDuration(Duration(seconds: custom));
+    }
+    return "App default (${formatDuration(Duration(seconds: defaultRestDurationSeconds))})";
+  }
+
   List<WorkoutExerciseInput> _exercises = [];
   List<WorkoutExerciseInput> get exercises => _exercises;
 
@@ -52,11 +73,13 @@ class WorkoutViewModel extends ChangeNotifier {
     required int sets,
     required List<WorkoutExerciseDetail> exercises,
     WorkoutKind kind = WorkoutKind.standard,
+    int? restDurationSeconds,
   }) {
     _workoutId = workoutId;
     _name = name;
     _sets = sets;
     _kind = kind;
+    _restDurationSeconds = restDurationSeconds;
     _exercises = exercises
         .map(
           (e) => WorkoutExerciseInput(
@@ -205,6 +228,7 @@ class WorkoutViewModel extends ChangeNotifier {
           sets: effectiveSets,
           exercises: _exercises,
           kind: _kind,
+          restDurationSeconds: _restDurationSeconds,
         );
       } else {
         await _workoutRepository.addWorkout(
@@ -213,6 +237,7 @@ class WorkoutViewModel extends ChangeNotifier {
           sets: effectiveSets,
           exercises: _exercises,
           kind: _kind,
+          restDurationSeconds: _restDurationSeconds,
         );
       }
       return true;

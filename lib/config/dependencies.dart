@@ -81,7 +81,11 @@ Future<void> setupDependencies() async {
     ),
   );
   getIt.registerFactory<WorkoutViewModel>(
-    () => WorkoutViewModel(getIt<WorkoutRepo>(), getIt<ExerciseRepo>()),
+    () => WorkoutViewModel(
+      getIt<WorkoutRepo>(),
+      getIt<ExerciseRepo>(),
+      getIt<SharedPreferenceService>(),
+    ),
   );
   getIt.registerFactoryParam<ChallengeViewModel, WorkoutWithExercises, int>(
     (workout, programId) => ChallengeViewModel(

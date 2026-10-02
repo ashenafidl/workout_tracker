@@ -98,6 +98,7 @@ class WorkoutRepo {
     required int sets,
     required List<WorkoutExerciseInput> exercises,
     WorkoutKind kind = WorkoutKind.standard,
+    int? restDurationSeconds,
   }) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -112,6 +113,7 @@ class WorkoutRepo {
         name: trimmedName,
         kind: Value(kind),
         sets: sets,
+        restDurationSeconds: Value(restDurationSeconds),
         position: await _nextWorkoutPosition(programId),
         createdAt: Value(now),
         updatedAt: Value(now),
@@ -138,6 +140,7 @@ class WorkoutRepo {
     required int sets,
     required List<WorkoutExerciseInput> exercises,
     required WorkoutKind kind,
+    int? restDurationSeconds,
   }) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -152,6 +155,7 @@ class WorkoutRepo {
           name: Value(trimmedName),
           kind: Value(kind),
           sets: Value(sets),
+          restDurationSeconds: Value(restDurationSeconds),
           updatedAt: Value(DateTime.now()),
         ),
       );

@@ -301,7 +301,9 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   void _startRest() {
     _timer?.cancel();
     _phase = SessionPhase.resting;
-    _restSecondsRemaining = sharedPreferenceService.restDurationSeconds;
+    _restSecondsRemaining =
+        args.workoutWithExercises.workout.restDurationSeconds ??
+        sharedPreferenceService.restDurationSeconds;
     soundService.playRestStart();
     notifyListeners();
 

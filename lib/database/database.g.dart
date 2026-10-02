@@ -834,6 +834,16 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _restDurationSecondsMeta =
+      const VerificationMeta('restDurationSeconds');
+  @override
+  late final GeneratedColumn<int> restDurationSeconds = GeneratedColumn<int>(
+    'rest_duration_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _positionMeta = const VerificationMeta(
     'position',
   );
@@ -876,6 +886,7 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
     name,
     kind,
     sets,
+    restDurationSeconds,
     position,
     createdAt,
     updatedAt,
@@ -918,6 +929,15 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
       );
     } else if (isInserting) {
       context.missing(_setsMeta);
+    }
+    if (data.containsKey('rest_duration_seconds')) {
+      context.handle(
+        _restDurationSecondsMeta,
+        restDurationSeconds.isAcceptableOrUnknown(
+          data['rest_duration_seconds']!,
+          _restDurationSecondsMeta,
+        ),
+      );
     }
     if (data.containsKey('position')) {
       context.handle(
@@ -970,6 +990,10 @@ class $WorkoutsTable extends Workouts with TableInfo<$WorkoutsTable, Workout> {
         DriftSqlType.int,
         data['${effectivePrefix}sets'],
       )!,
+      restDurationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rest_duration_seconds'],
+      ),
       position: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}position'],
@@ -1000,6 +1024,7 @@ class Workout extends DataClass implements Insertable<Workout> {
   final String name;
   final WorkoutKind kind;
   final int sets;
+  final int? restDurationSeconds;
   final int position;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1009,6 +1034,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     required this.name,
     required this.kind,
     required this.sets,
+    this.restDurationSeconds,
     required this.position,
     required this.createdAt,
     required this.updatedAt,
@@ -1023,6 +1049,9 @@ class Workout extends DataClass implements Insertable<Workout> {
       map['kind'] = Variable<int>($WorkoutsTable.$converterkind.toSql(kind));
     }
     map['sets'] = Variable<int>(sets);
+    if (!nullToAbsent || restDurationSeconds != null) {
+      map['rest_duration_seconds'] = Variable<int>(restDurationSeconds);
+    }
     map['position'] = Variable<int>(position);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1036,6 +1065,9 @@ class Workout extends DataClass implements Insertable<Workout> {
       name: Value(name),
       kind: Value(kind),
       sets: Value(sets),
+      restDurationSeconds: restDurationSeconds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(restDurationSeconds),
       position: Value(position),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1055,6 +1087,9 @@ class Workout extends DataClass implements Insertable<Workout> {
         serializer.fromJson<int>(json['kind']),
       ),
       sets: serializer.fromJson<int>(json['sets']),
+      restDurationSeconds: serializer.fromJson<int?>(
+        json['restDurationSeconds'],
+      ),
       position: serializer.fromJson<int>(json['position']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1071,6 +1106,7 @@ class Workout extends DataClass implements Insertable<Workout> {
         $WorkoutsTable.$converterkind.toJson(kind),
       ),
       'sets': serializer.toJson<int>(sets),
+      'restDurationSeconds': serializer.toJson<int?>(restDurationSeconds),
       'position': serializer.toJson<int>(position),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1083,6 +1119,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     String? name,
     WorkoutKind? kind,
     int? sets,
+    Value<int?> restDurationSeconds = const Value.absent(),
     int? position,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -1092,6 +1129,9 @@ class Workout extends DataClass implements Insertable<Workout> {
     name: name ?? this.name,
     kind: kind ?? this.kind,
     sets: sets ?? this.sets,
+    restDurationSeconds: restDurationSeconds.present
+        ? restDurationSeconds.value
+        : this.restDurationSeconds,
     position: position ?? this.position,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1103,6 +1143,9 @@ class Workout extends DataClass implements Insertable<Workout> {
       name: data.name.present ? data.name.value : this.name,
       kind: data.kind.present ? data.kind.value : this.kind,
       sets: data.sets.present ? data.sets.value : this.sets,
+      restDurationSeconds: data.restDurationSeconds.present
+          ? data.restDurationSeconds.value
+          : this.restDurationSeconds,
       position: data.position.present ? data.position.value : this.position,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1117,6 +1160,7 @@ class Workout extends DataClass implements Insertable<Workout> {
           ..write('name: $name, ')
           ..write('kind: $kind, ')
           ..write('sets: $sets, ')
+          ..write('restDurationSeconds: $restDurationSeconds, ')
           ..write('position: $position, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -1131,6 +1175,7 @@ class Workout extends DataClass implements Insertable<Workout> {
     name,
     kind,
     sets,
+    restDurationSeconds,
     position,
     createdAt,
     updatedAt,
@@ -1144,6 +1189,7 @@ class Workout extends DataClass implements Insertable<Workout> {
           other.name == this.name &&
           other.kind == this.kind &&
           other.sets == this.sets &&
+          other.restDurationSeconds == this.restDurationSeconds &&
           other.position == this.position &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -1155,6 +1201,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
   final Value<String> name;
   final Value<WorkoutKind> kind;
   final Value<int> sets;
+  final Value<int?> restDurationSeconds;
   final Value<int> position;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1164,6 +1211,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     this.name = const Value.absent(),
     this.kind = const Value.absent(),
     this.sets = const Value.absent(),
+    this.restDurationSeconds = const Value.absent(),
     this.position = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1174,6 +1222,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     required String name,
     this.kind = const Value.absent(),
     required int sets,
+    this.restDurationSeconds = const Value.absent(),
     required int position,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1187,6 +1236,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     Expression<String>? name,
     Expression<int>? kind,
     Expression<int>? sets,
+    Expression<int>? restDurationSeconds,
     Expression<int>? position,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1197,6 +1247,8 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
       if (name != null) 'name': name,
       if (kind != null) 'kind': kind,
       if (sets != null) 'sets': sets,
+      if (restDurationSeconds != null)
+        'rest_duration_seconds': restDurationSeconds,
       if (position != null) 'position': position,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1209,6 +1261,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     Value<String>? name,
     Value<WorkoutKind>? kind,
     Value<int>? sets,
+    Value<int?>? restDurationSeconds,
     Value<int>? position,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -1219,6 +1272,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
       name: name ?? this.name,
       kind: kind ?? this.kind,
       sets: sets ?? this.sets,
+      restDurationSeconds: restDurationSeconds ?? this.restDurationSeconds,
       position: position ?? this.position,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1245,6 +1299,9 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
     if (sets.present) {
       map['sets'] = Variable<int>(sets.value);
     }
+    if (restDurationSeconds.present) {
+      map['rest_duration_seconds'] = Variable<int>(restDurationSeconds.value);
+    }
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
@@ -1265,6 +1322,7 @@ class WorkoutsCompanion extends UpdateCompanion<Workout> {
           ..write('name: $name, ')
           ..write('kind: $kind, ')
           ..write('sets: $sets, ')
+          ..write('restDurationSeconds: $restDurationSeconds, ')
           ..write('position: $position, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -5281,6 +5339,7 @@ typedef $$WorkoutsTableCreateCompanionBuilder = WorkoutsCompanion Function({
   required String name,
   Value<WorkoutKind> kind,
   required int sets,
+  Value<int?> restDurationSeconds,
   required int position,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -5291,6 +5350,7 @@ typedef $$WorkoutsTableUpdateCompanionBuilder = WorkoutsCompanion Function({
   Value<String> name,
   Value<WorkoutKind> kind,
   Value<int> sets,
+  Value<int?> restDurationSeconds,
   Value<int> position,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -5385,6 +5445,11 @@ class $$WorkoutsTableFilterComposer
 
   ColumnFilters<int> get sets => $composableBuilder(
     column: $table.sets,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get restDurationSeconds => $composableBuilder(
+    column: $table.restDurationSeconds,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5506,6 +5571,11 @@ class $$WorkoutsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get restDurationSeconds => $composableBuilder(
+    column: $table.restDurationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get position => $composableBuilder(
     column: $table.position,
     builder: (column) => ColumnOrderings(column),
@@ -5565,6 +5635,11 @@ class $$WorkoutsTableAnnotationComposer
 
   GeneratedColumn<int> get sets =>
       $composableBuilder(column: $table.sets, builder: (column) => column);
+
+  GeneratedColumn<int> get restDurationSeconds => $composableBuilder(
+    column: $table.restDurationSeconds,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
@@ -5686,6 +5761,7 @@ class $$WorkoutsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<WorkoutKind> kind = const Value.absent(),
                 Value<int> sets = const Value.absent(),
+                Value<int?> restDurationSeconds = const Value.absent(),
                 Value<int> position = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -5695,6 +5771,7 @@ class $$WorkoutsTableTableManager
                 name: name,
                 kind: kind,
                 sets: sets,
+                restDurationSeconds: restDurationSeconds,
                 position: position,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -5706,6 +5783,7 @@ class $$WorkoutsTableTableManager
                 required String name,
                 Value<WorkoutKind> kind = const Value.absent(),
                 required int sets,
+                Value<int?> restDurationSeconds = const Value.absent(),
                 required int position,
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -5715,6 +5793,7 @@ class $$WorkoutsTableTableManager
                 name: name,
                 kind: kind,
                 sets: sets,
+                restDurationSeconds: restDurationSeconds,
                 position: position,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

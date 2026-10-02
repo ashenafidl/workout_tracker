@@ -19,6 +19,7 @@ class WorkoutScreen extends StatefulWidget {
     this.initialName,
     this.initialSets,
     this.initialKind,
+    this.initialRestDurationSeconds,
     this.initialExercises,
   });
 
@@ -27,6 +28,7 @@ class WorkoutScreen extends StatefulWidget {
   final String? initialName;
   final int? initialSets;
   final WorkoutKind? initialKind;
+  final int? initialRestDurationSeconds;
   final List<WorkoutExerciseDetail>? initialExercises;
 
   @override
@@ -56,6 +58,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         name: widget.initialName!,
         sets: widget.initialSets ?? 1,
         kind: widget.initialKind ?? WorkoutKind.standard,
+        restDurationSeconds: widget.initialRestDurationSeconds,
         exercises: widget.initialExercises!,
       );
     }
@@ -123,9 +126,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             behavior: HitTestBehavior.opaque,
             child: Form(
               key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Column(
+              child: ReorderableListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                header: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextFormField(
@@ -177,42 +182,48 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                           return null;
                         },
                       ),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.timer_outlined),
+                        title: const Text("Rest between sets"),
+                        subtitle: Text(_viewModel.restLabel),
+                        trailing: _viewModel.restDurationSeconds != null
+                            ? IconButton(
+                                icon: const Icon(Icons.restart_alt),
+                                tooltip: "Use app default",
+                                onPressed: () =>
+                                    _viewModel.restDurationSeconds = null,
+                              )
+                            : null,
+                        onTap: _showRestDurationPicker,
+                      ),
                     ],
                     const SizedBox(height: 16),
-                    if (_viewModel.exercises.isNotEmpty)
+                    if (_viewModel.exercises.isNotEmpty) ...[
                       Text(
                         "Exercises",
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                    if (_viewModel.exercises.isNotEmpty)
                       const SizedBox(height: 8),
-                    Expanded(
-                      child: _viewModel.exercises.isEmpty
-                          ? Center(
-                              child: Text(
-                                "No exercises added yet",
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
+                    ] else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          "No exercises added yet",
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
-                            )
-                          : ReorderableListView.builder(
-                              itemCount: _viewModel.exercises.length,
-                              onReorderItem: _viewModel.reorderExercises,
-                              itemBuilder: (context, index) {
-                                final input = _viewModel.exercises[index];
-                                return _ExerciseRow(
-                                  key: ValueKey("exercise_$index"),
-                                  index: index,
-                                  input: input,
-                                  viewModel: _viewModel,
-                                );
-                              },
-                            ),
-                    ),
+                        ),
+                      ),
+                  ],
+                ),
+                footer: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     OutlinedButton.icon(
                       onPressed: _showExercisePicker,
                       icon: const Icon(Icons.add),
@@ -232,15 +243,48 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                               ),
                             ),
                     ),
-                    const SizedBox(height: 16),
                   ],
                 ),
+                itemCount: _viewModel.exercises.length,
+                onReorderItem: _viewModel.reorderExercises,
+                itemBuilder: (context, index) {
+                  final input = _viewModel.exercises[index];
+                  return _ExerciseRow(
+                    key: ValueKey("exercise_$index"),
+                    index: index,
+                    input: input,
+                    viewModel: _viewModel,
+                  );
+                },
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Future<void> _showRestDurationPicker() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final result = await showModalBottomSheet<UnitInputResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => UnitInputSheet(
+        title: "Rest Duration",
+        config: DurationInputConfig(
+          initialDuration: Duration(
+            seconds:
+                _viewModel.restDurationSeconds ??
+                _viewModel.defaultRestDurationSeconds,
+          ),
+        ),
+      ),
+    );
+
+    if (result case DurationInputResult(:final duration)) {
+      _viewModel.restDurationSeconds = duration.inSeconds;
+    }
   }
 
   Future<void> _showExercisePicker() async {

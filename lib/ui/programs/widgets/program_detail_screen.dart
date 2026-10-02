@@ -199,6 +199,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   kind: workout.kind,
                   name: workout.name,
                   sets: workout.sets,
+                  restDurationSeconds: workout.restDurationSeconds,
                   exercises: exercises,
                 ),
                 child: Padding(
@@ -367,6 +368,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     int? workoutId,
     String? name,
     int? sets,
+    int? restDurationSeconds,
     WorkoutKind? kind,
     List<WorkoutExerciseDetail>? exercises,
   }) {
@@ -379,6 +381,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           initialName: name,
           initialSets: sets,
           initialKind: kind,
+          initialRestDurationSeconds: restDurationSeconds,
           initialExercises: exercises,
         ),
       ),

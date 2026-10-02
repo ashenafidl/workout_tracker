@@ -32,6 +32,7 @@ class Workouts extends Table {
   TextColumn get name => text().withLength(min: 1, max: 100)();
   IntColumn get kind => intEnum<WorkoutKind>().withDefault(const Constant(0))();
   IntColumn get sets => integer()();
+  IntColumn get restDurationSeconds => integer().nullable()(); // Per-workout rest override. Null inherits the global app setting.
   IntColumn get position => integer()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
   DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
@@ -155,7 +156,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -191,6 +192,9 @@ extension Migrations on GeneratedDatabase {
     from2To3: (m, s) async {
       await m.addColumn(s.workouts, s.workouts.kind);
       await m.createTable(s.challengeLogs);
+    },
+    from3To4: (m, s) async {
+      await m.addColumn(s.workouts, s.workouts.restDurationSeconds);
     },
   );
 }
