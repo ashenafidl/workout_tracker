@@ -6,3 +6,5 @@ class ProgramWithWorkoutCount {
   final Program program;
   final int workoutCount;
 }
+
+enum WorkoutKind { standard, challenge }

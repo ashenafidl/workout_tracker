@@ -2,7 +2,9 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
+import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
@@ -27,11 +29,29 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   }
 
   Future<void> _startProgram() async {
-    final nextWorkout = vm.nextWorkout;
-    if (!mounted || nextWorkout == null) return;
+    if (!mounted || vm.nextWorkout == null) return;
+
+    if (vm.isProgramCompleted) {
+      await vm.restartProgram();
+      if (!mounted) return;
+    }
 
     await vm.setActive(widget.programId);
     if (!mounted) return;
+
+    final nextWorkout = vm.nextWorkout;
+    if (nextWorkout == null) return;
+
+    if (nextWorkout.workout.kind == WorkoutKind.challenge) {
+      context.push(
+        "/session/challenge",
+        extra: ChallengeScreenArgs(
+          workoutWithExercises: nextWorkout,
+          programId: widget.programId,
+        ),
+      );
+      return;
+    }
 
     context.push(
       "/session",
@@ -176,6 +196,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => _openWorkoutScreen(
                   workoutId: workout.id,
+                  kind: workout.kind,
                   name: workout.name,
                   sets: workout.sets,
                   exercises: exercises,
@@ -199,15 +220,18 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
-                          Text(
-                            "${workout.sets} set${workout.sets == 1 ? "" : "s"}",
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
+                          if (workout.kind == WorkoutKind.standard)
+                            Text(
+                              "${workout.sets} set${workout.sets == 1 ? "" : "s"}",
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            )
+                          else
+                            const Icon(Icons.emoji_events_outlined, size: 18),
                           if (vm.isProgramActive && completed) ...[
                             const SizedBox(width: 8),
                             Icon(
@@ -343,6 +367,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     int? workoutId,
     String? name,
     int? sets,
+    WorkoutKind? kind,
     List<WorkoutExerciseDetail>? exercises,
   }) {
     Navigator.push<void>(
@@ -353,6 +378,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           workoutId: workoutId,
           initialName: name,
           initialSets: sets,
+          initialKind: kind,
           initialExercises: exercises,
         ),
       ),

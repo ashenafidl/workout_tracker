@@ -10,9 +10,12 @@ class WorkoutExerciseInput {
     required this.position,
     required this.isBilateral,
     this.side,
-    this.targetReps,
-    this.targetDurationSeconds,
-  });
+    int? targetReps,
+    int? targetDurationSeconds,
+  }) : targetReps = type == ExerciseType.reps ? targetReps : null,
+       targetDurationSeconds = type == ExerciseType.reps
+           ? null
+           : targetDurationSeconds;
 
   final int exerciseId;
   final String exerciseName;

@@ -21,6 +21,13 @@ class SoundService {
     await _play(_wav(frequency: 1318, durationMs: 220, amplitude: 0.7));
   }
 
+  // Rising two-note chime — a duration target has been reached.
+  Future<void> playExerciseComplete() async {
+    await _play(_wav(frequency: 784, durationMs: 120, amplitude: 0.65));
+    await Future<void>.delayed(const Duration(milliseconds: 130));
+    await _play(_wav(frequency: 1047, durationMs: 220, amplitude: 0.7));
+  }
+
   Future<void> _play(Uint8List bytes) async {
     await _player.stop();
     await _player.play(BytesSource(bytes));

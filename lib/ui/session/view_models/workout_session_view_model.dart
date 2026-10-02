@@ -389,12 +389,17 @@ class WorkoutSessionViewModel extends ChangeNotifier {
 
     if (workouts.isEmpty) return;
 
+    final runStart = sharedPreferenceService.programRunStartForProgram(
+      args.programId,
+    );
     final sessions =
-        await (database.select(database.workoutSessions)..where(
-              (session) =>
+        await (database.select(database.workoutSessions)..where((session) {
+              final base =
                   session.programId.equals(args.programId) &
-                  session.completedAt.isNotNull(),
-            ))
+                  session.completedAt.isNotNull();
+              if (runStart == null) return base;
+              return base & session.completedAt.isBiggerOrEqualValue(runStart);
+            }))
             .get();
     final completedIds = sessions.map((session) => session.workoutId).toSet();
 

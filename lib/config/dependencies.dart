@@ -1,6 +1,8 @@
 import "package:get_it/get_it.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/repositories/challenge_repo.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
@@ -15,6 +17,7 @@ import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_mode
 import "package:workout_tracker/ui/history/view_models/history_view_model.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
+import "package:workout_tracker/ui/programs/view_models/challenge_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
@@ -52,6 +55,9 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<StreakRepo>(
     () => StreakRepo(getIt<AppDatabase>()),
   );
+  getIt.registerLazySingleton<ChallengeRepo>(
+    () => ChallengeRepo(getIt<AppDatabase>()),
+  );
 
   // ViewModels
   getIt.registerFactory<MoreViewModel>(
@@ -77,11 +83,19 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<WorkoutViewModel>(
     () => WorkoutViewModel(getIt<WorkoutRepo>(), getIt<ExerciseRepo>()),
   );
+  getIt.registerFactoryParam<ChallengeViewModel, WorkoutWithExercises, int>(
+    (workout, programId) => ChallengeViewModel(
+      getIt<ChallengeRepo>(),
+      getIt<StreakService>(),
+      getIt<SharedPreferenceService>(),
+    )..init(workout, programId),
+  );
   getIt.registerLazySingleton<HomeViewModel>(
     () => HomeViewModel(
       getIt<ProgramRepo>(),
       getIt<WorkoutRepo>(),
       getIt<StreakRepo>(),
+      getIt<SharedPreferenceService>(),
     ),
   );
   getIt.registerLazySingleton<HistoryViewModel>(

@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/database/database.dart";
@@ -29,6 +30,13 @@ class WorkoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  WorkoutKind _kind = WorkoutKind.standard;
+  WorkoutKind get kind => _kind;
+  set kind(WorkoutKind value) {
+    _kind = value;
+    notifyListeners();
+  }
+
   List<WorkoutExerciseInput> _exercises = [];
   List<WorkoutExerciseInput> get exercises => _exercises;
 
@@ -43,10 +51,12 @@ class WorkoutViewModel extends ChangeNotifier {
     required String name,
     required int sets,
     required List<WorkoutExerciseDetail> exercises,
+    WorkoutKind kind = WorkoutKind.standard,
   }) {
     _workoutId = workoutId;
     _name = name;
     _sets = sets;
+    _kind = kind;
     _exercises = exercises
         .map(
           (e) => WorkoutExerciseInput(
@@ -187,19 +197,22 @@ class WorkoutViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
+      final effectiveSets = _kind == WorkoutKind.challenge ? 1 : _sets;
       if (isEditing) {
         await _workoutRepository.updateWorkout(
           workoutId: _workoutId!,
           name: trimmedName,
-          sets: _sets,
+          sets: effectiveSets,
           exercises: _exercises,
+          kind: _kind,
         );
       } else {
         await _workoutRepository.addWorkout(
           programId: programId,
           name: trimmedName,
-          sets: _sets,
+          sets: effectiveSets,
           exercises: _exercises,
+          kind: _kind,
         );
       }
       return true;

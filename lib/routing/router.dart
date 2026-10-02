@@ -1,11 +1,13 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/core/widgets/scaffold_with_navbar.dart";
+import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/ui/exercises/widgets/exercises_screen.dart";
 import "package:workout_tracker/ui/history/widgets/history_screen.dart";
 import "package:workout_tracker/ui/home/widgets/home_screen.dart";
 import "package:workout_tracker/ui/more/widgets/more_screen.dart";
+import "package:workout_tracker/ui/programs/widgets/challenge_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/program_detail_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/programs_screen.dart";
 import "package:workout_tracker/ui/session/widgets/workout_session_screen.dart";
@@ -100,6 +102,19 @@ final GoRouter appRouter = GoRouter(
         final args = state.extra as WorkoutSessionArgs;
         return WorkoutSessionScreen(args: args);
       },
+      routes: [
+        GoRoute(
+          path: "challenge",
+          builder: (context, state) {
+            final args = state.extra as ChallengeScreenArgs;
+
+            return ChallengeScreen(
+              workoutWithExercises: args.workoutWithExercises,
+              programId: args.programId,
+            );
+          },
+        ),
+      ],
     ),
   ],
 );

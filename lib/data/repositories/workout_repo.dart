@@ -1,5 +1,6 @@
 import "package:drift/drift.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/database/database.dart";
 
 class WorkoutRepo {
@@ -7,25 +8,32 @@ class WorkoutRepo {
 
   final AppDatabase _db;
 
-  Stream<List<WorkoutSession>> watchCompletedSessionsForProgram(int programId) {
-    return (_db.select(_db.workoutSessions)
-          ..where(
-            (session) =>
-                session.programId.equals(programId) &
-                session.completedAt.isNotNull(),
-          )
-          ..orderBy([
-            (session) => OrderingTerm(
-              expression: session.completedAt,
-              mode: OrderingMode.desc,
-            ),
-          ]))
-        .watch();
+  Stream<List<WorkoutSession>> watchCompletedSessionsForProgram(
+    int programId, {
+    DateTime? since,
+  }) {
+    final query = _db.select(_db.workoutSessions)
+      ..where((session) {
+        final base =
+            session.programId.equals(programId) &
+            session.completedAt.isNotNull();
+        if (since == null) return base;
+        return base & session.completedAt.isBiggerOrEqualValue(since);
+      })
+      ..orderBy([
+        (session) => OrderingTerm(
+          expression: session.completedAt,
+          mode: OrderingMode.desc,
+        ),
+      ]);
+
+    return query.watch();
   }
 
-  Stream<Set<int>> watchCompletedWorkoutIds(int programId) {
+  Stream<Set<int>> watchCompletedWorkoutIds(int programId, {DateTime? since}) {
     return watchCompletedSessionsForProgram(
       programId,
+      since: since,
     ).map((sessions) => sessions.map((session) => session.workoutId).toSet());
   }
 
@@ -59,13 +67,14 @@ class WorkoutRepo {
         final exercise = row.readTableOrNull(_db.exercises);
         final we = row.readTableOrNull(_db.workoutExercises);
         if (exercise != null && we != null) {
+          final isReps = exercise.type == ExerciseType.reps;
           grouping.exercises.add(
             WorkoutExerciseDetail(
               exercise: exercise,
               isBilateral: exercise.isBilateral,
               side: we.side,
-              targetReps: we.targetReps,
-              targetDurationSeconds: we.targetDurationSeconds,
+              targetReps: isReps ? we.targetReps : null,
+              targetDurationSeconds: isReps ? null : we.targetDurationSeconds,
               position: we.position,
             ),
           );
@@ -88,6 +97,7 @@ class WorkoutRepo {
     required String name,
     required int sets,
     required List<WorkoutExerciseInput> exercises,
+    WorkoutKind kind = WorkoutKind.standard,
   }) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -100,6 +110,7 @@ class WorkoutRepo {
       final workoutCompanion = WorkoutsCompanion.insert(
         programId: int.parse(programId),
         name: trimmedName,
+        kind: Value(kind),
         sets: sets,
         position: await _nextWorkoutPosition(programId),
         createdAt: Value(now),
@@ -126,6 +137,7 @@ class WorkoutRepo {
     required String name,
     required int sets,
     required List<WorkoutExerciseInput> exercises,
+    required WorkoutKind kind,
   }) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -138,6 +150,7 @@ class WorkoutRepo {
       )..where((w) => w.id.equals(workoutId))).write(
         WorkoutsCompanion(
           name: Value(trimmedName),
+          kind: Value(kind),
           sets: Value(sets),
           updatedAt: Value(DateTime.now()),
         ),

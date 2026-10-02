@@ -5,10 +5,16 @@ import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
+import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/database/database.dart";
 
 class HomeViewModel extends ChangeNotifier {
-  new(this._programRepo, this._workoutRepo, this._streakRepo) {
+  new(
+    this._programRepo,
+    this._workoutRepo,
+    this._streakRepo,
+    this._preferenceService,
+  ) {
     _activeProgramSub = _programRepo.watchActiveProgram().listen((program) {
       _activeProgram = program;
       _sessionsSub?.cancel();
@@ -19,8 +25,11 @@ class HomeViewModel extends ChangeNotifier {
       _isDoneToday = false;
 
       if (program != null) {
+        final runStart = _preferenceService.programRunStartForProgram(
+          program.id,
+        );
         _sessionsSub = _workoutRepo
-            .watchCompletedSessionsForProgram(program.id)
+            .watchCompletedSessionsForProgram(program.id, since: runStart)
             .listen((sessions) {
               _completedSessions = sessions;
               _recompute();
@@ -45,6 +54,7 @@ class HomeViewModel extends ChangeNotifier {
   final ProgramRepo _programRepo;
   final WorkoutRepo _workoutRepo;
   final StreakRepo _streakRepo;
+  final SharedPreferenceService _preferenceService;
   StreamSubscription<Program?>? _activeProgramSub;
   StreamSubscription<List<WorkoutSession>>? _sessionsSub;
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;

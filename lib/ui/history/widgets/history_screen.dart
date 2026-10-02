@@ -142,14 +142,27 @@ class _SessionCard extends StatelessWidget {
                   icon: Icons.timer_outlined,
                   text: formatDuration(entry.duration),
                 ),
-                _Stat(
-                  icon: Icons.repeat_rounded,
-                  text: "${entry.circuitCount} circuits",
-                ),
-                _Stat(
-                  icon: Icons.fitness_center,
-                  text: "${entry.exerciseCount} exercises",
-                ),
+                if (entry.isChallenge) ...[
+                  _Stat(
+                    icon: Icons.repeat_rounded,
+                    text: "${entry.totalReps} reps",
+                  ),
+                  _Stat(
+                    icon: Icons.hourglass_bottom,
+                    text: formatDuration(
+                      Duration(seconds: entry.totalDurationSeconds),
+                    ),
+                  ),
+                ] else ...[
+                  _Stat(
+                    icon: Icons.repeat_rounded,
+                    text: "${entry.circuitCount} circuits",
+                  ),
+                  _Stat(
+                    icon: Icons.fitness_center,
+                    text: "${entry.exerciseCount} exercises",
+                  ),
+                ],
               ],
             ),
           ],

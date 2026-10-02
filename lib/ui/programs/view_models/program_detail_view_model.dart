@@ -45,8 +45,9 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   void _subscribeToCompletedWorkoutIds() {
     _completedIdsSub?.cancel();
+    final runStart = _preferenceService.programRunStartForProgram(_programId!);
     _completedIdsSub = _workoutRepo
-        .watchCompletedWorkoutIds(_programId!)
+        .watchCompletedWorkoutIds(_programId!, since: runStart)
         .listen((ids) {
           _completedWorkoutIds = ids;
           notifyListeners();
@@ -118,6 +119,18 @@ class ProgramDetailViewModel extends ChangeNotifier {
 
   Future<void> setActive(int id) async {
     await _programRepo.setActiveProgram(id);
+  }
+
+  /// Starts a new run of the program. Sessions from the previous run are kept
+  /// in history but stop counting towards progress, so every workout (and
+  /// challenge) becomes doable again.
+  Future<void> restartProgram() async {
+    final now = DateTime.now();
+    await _preferenceService.setProgramRunStartForProgram(_programId!, now);
+    await _preferenceService.setWorkoutIndexForProgram(_programId!, 0);
+    _completedWorkoutIds = {};
+    _subscribeToCompletedWorkoutIds();
+    notifyListeners();
   }
 
   WorkoutWithExercises? get nextWorkoutIndex =>

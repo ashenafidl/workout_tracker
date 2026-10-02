@@ -2,6 +2,9 @@ import "package:drift/drift.dart";
 import "package:drift_flutter/drift_flutter.dart";
 import "package:path_provider/path_provider.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
+
+import "database.steps.dart";
 
 part "database.g.dart";
 
@@ -27,6 +30,7 @@ class Workouts extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get programId => integer().references(Programs, #id)();
   TextColumn get name => text().withLength(min: 1, max: 100)();
+  IntColumn get kind => intEnum<WorkoutKind>().withDefault(const Constant(0))();
   IntColumn get sets => integer()();
   IntColumn get position => integer()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
@@ -105,6 +109,20 @@ class SessionExerciseLogs extends Table {
   DateTimeColumn get completedAt => dateTime().nullable()();
 }
 
+class ChallengeLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionId =>
+      integer().references(WorkoutSessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get exerciseId =>
+      integer().references(Exercises, #id, onDelete: KeyAction.restrict)();
+  IntColumn get exerciseType =>
+      intEnum<ExerciseType>().withDefault(const Constant(0))();
+  IntColumn get side => intEnum<ExerciseSide>().nullable()();
+  IntColumn get reps => integer().nullable()();
+  IntColumn get durationSeconds => integer().nullable()();
+  DateTimeColumn get loggedAt => dateTime().clientDefault(DateTime.now)();
+}
+
 // Singleton table: always exactly one row (id = 1) holding the streak counters.
 // Updated incrementally on every completed session, never recomputed from scratch.
 class StreakStats extends Table {
@@ -129,6 +147,7 @@ class StreakStats extends Table {
     WorkoutSessions,
     SessionCircuits,
     SessionExerciseLogs,
+    ChallengeLogs,
     StreakStats,
   ],
 )
@@ -136,7 +155,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -144,13 +163,7 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
       await _seedStreakStats();
     },
-    onUpgrade: (Migrator m, int from, int to) async {
-      if (from < 2) {
-        await m.addColumn(exercises, exercises.isBilateral);
-        await m.addColumn(workoutExercises, workoutExercises.side);
-        await m.addColumn(sessionExerciseLogs, sessionExerciseLogs.side);
-      }
-    },
+    onUpgrade: _schemaUpgrade,
   );
 
   Future<void> _seedStreakStats() {
@@ -166,4 +179,18 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
+}
+
+extension Migrations on GeneratedDatabase {
+  OnUpgrade get _schemaUpgrade => stepByStep(
+    from1To2: (m, s) async {
+      await m.addColumn(s.exercises, s.exercises.isBilateral);
+      await m.addColumn(s.workoutExercises, s.workoutExercises.side);
+      await m.addColumn(s.sessionExerciseLogs, s.sessionExerciseLogs.side);
+    },
+    from2To3: (m, s) async {
+      await m.addColumn(s.workouts, s.workouts.kind);
+      await m.createTable(s.challengeLogs);
+    },
+  );
 }

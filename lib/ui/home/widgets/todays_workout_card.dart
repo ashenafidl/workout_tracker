@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
+import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 
 class TodaysWorkoutCard extends StatelessWidget {
@@ -95,7 +97,9 @@ class TodaysWorkoutCard extends StatelessWidget {
             ),
           ),
         Text(
-          "${workout.workout.sets} sets · circuit training",
+          workout.workout.kind == WorkoutKind.challenge
+              ? "Challenge · ${exercises.length} exercises"
+              : "${workout.workout.sets} sets · circuit training",
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -105,7 +109,11 @@ class TodaysWorkoutCard extends StatelessWidget {
           width: double.infinity,
           child: FilledButton(
             onPressed: () => _start(context),
-            child: const Text("Start workout"),
+            child: Text(
+              workout.workout.kind == WorkoutKind.challenge
+                  ? "Open challenge"
+                  : "Start workout",
+            ),
           ),
         ),
       ],
@@ -180,6 +188,17 @@ class TodaysWorkoutCard extends StatelessWidget {
   }
 
   void _start(BuildContext context) {
+    if (workout.workout.kind == WorkoutKind.challenge) {
+      context.push(
+        "/session/challenge",
+        extra: ChallengeScreenArgs(
+          workoutWithExercises: workout,
+          programId: workout.workout.programId,
+        ),
+      );
+      return;
+    }
+
     context.push(
       "/session",
       extra: WorkoutSessionArgs(

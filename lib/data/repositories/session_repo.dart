@@ -28,6 +28,10 @@ class SessionRepository {
                 _db.sessionCircuits.id,
               ),
             ),
+            leftOuterJoin(
+              _db.challengeLogs,
+              _db.challengeLogs.sessionId.equalsExp(_db.workoutSessions.id),
+            ),
           ])
           ..where(_db.workoutSessions.completedAt.isNotNull())
           ..orderBy([
@@ -49,6 +53,7 @@ class SessionRepository {
             session: session,
             workoutName: workout.name,
             programName: program.name,
+            workoutKind: workout.kind,
           ),
         );
         final circuit = row.readTableOrNull(_db.sessionCircuits);
@@ -59,6 +64,11 @@ class SessionRepository {
         if (log != null) {
           grouping.exerciseIds.add(log.exerciseId);
         }
+        final challengeLog = row.readTableOrNull(_db.challengeLogs);
+        if (challengeLog != null) {
+          grouping.totalReps += challengeLog.reps ?? 0;
+          grouping.totalDurationSeconds += challengeLog.durationSeconds ?? 0;
+        }
       }
 
       return grouped.values.map((group) {
@@ -67,9 +77,12 @@ class SessionRepository {
           session: group.session,
           workoutName: group.workoutName,
           programName: group.programName,
+          workoutKind: group.workoutKind,
           circuitCount: group.circuitIds.length,
           exerciseCount: group.exerciseIds.length,
           duration: completedAt.difference(group.session.startedAt),
+          totalReps: group.totalReps,
+          totalDurationSeconds: group.totalDurationSeconds,
         );
       }).toList();
     });

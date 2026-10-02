@@ -5,6 +5,7 @@ import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/exercise_picker_sheet.dart";
@@ -17,6 +18,7 @@ class WorkoutScreen extends StatefulWidget {
     this.workoutId,
     this.initialName,
     this.initialSets,
+    this.initialKind,
     this.initialExercises,
   });
 
@@ -24,6 +26,7 @@ class WorkoutScreen extends StatefulWidget {
   final int? workoutId;
   final String? initialName;
   final int? initialSets;
+  final WorkoutKind? initialKind;
   final List<WorkoutExerciseDetail>? initialExercises;
 
   @override
@@ -52,6 +55,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         workoutId: widget.workoutId!,
         name: widget.initialName!,
         sets: widget.initialSets ?? 1,
+        kind: widget.initialKind ?? WorkoutKind.standard,
         exercises: widget.initialExercises!,
       );
     }
@@ -108,20 +112,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(_viewModel.isEditing ? "Edit workout" : "Add workout"),
+            title: Text(
+              _viewModel.kind == WorkoutKind.challenge
+                  ? (_viewModel.isEditing ? "Edit challenge" : "Add challenge")
+                  : (_viewModel.isEditing ? "Edit workout" : "Add workout"),
+            ),
           ),
           body: GestureDetector(
             onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            behavior:
-                HitTestBehavior.opaque, // ← catches taps on empty space too
+            behavior: HitTestBehavior.opaque,
             child: Form(
               key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: TextFormField(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
                       controller: _nameController,
                       textCapitalization: TextCapitalization.words,
                       maxLength: 100,
@@ -136,73 +143,83 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                         return null;
                       },
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: TextFormField(
-                      controller: _setsController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Sets (circuit repeats)",
-                      ),
-                      validator: (value) {
-                        final parsed = int.tryParse(value ?? "");
-                        if (parsed == null || parsed < 1) {
-                          return "Must be at least 1";
-                        }
-                        return null;
-                      },
+
+                    SegmentedButton<WorkoutKind>(
+                      segments: const [
+                        ButtonSegment(
+                          value: WorkoutKind.standard,
+                          icon: Icon(Icons.repeat_rounded),
+                          label: Text("Standard"),
+                        ),
+                        ButtonSegment(
+                          value: WorkoutKind.challenge,
+                          icon: Icon(Icons.emoji_events_outlined),
+                          label: Text("Challenge"),
+                        ),
+                      ],
+                      selected: {_viewModel.kind},
+                      onSelectionChanged: (selection) =>
+                          _viewModel.kind = selection.first,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_viewModel.exercises.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
+                    if (_viewModel.kind == WorkoutKind.standard) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _setsController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: "Sets (circuit repeats)",
+                        ),
+                        validator: (value) {
+                          final parsed = int.tryParse(value ?? "");
+                          if (parsed == null || parsed < 1) {
+                            return "Must be at least 1";
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    if (_viewModel.exercises.isNotEmpty)
+                      Text(
                         "Exercises",
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                    ),
-                  if (_viewModel.exercises.isNotEmpty)
-                    const SizedBox(height: 8),
-                  Expanded(
-                    child: _viewModel.exercises.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No exercises added yet",
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                    if (_viewModel.exercises.isNotEmpty)
+                      const SizedBox(height: 8),
+                    Expanded(
+                      child: _viewModel.exercises.isEmpty
+                          ? Center(
+                              child: Text(
+                                "No exercises added yet",
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                            )
+                          : ReorderableListView.builder(
+                              itemCount: _viewModel.exercises.length,
+                              onReorderItem: _viewModel.reorderExercises,
+                              itemBuilder: (context, index) {
+                                final input = _viewModel.exercises[index];
+                                return _ExerciseRow(
+                                  key: ValueKey("exercise_$index"),
+                                  index: index,
+                                  input: input,
+                                  viewModel: _viewModel,
+                                );
+                              },
                             ),
-                          )
-                        : ReorderableListView.builder(
-                            itemCount: _viewModel.exercises.length,
-                            onReorderItem: _viewModel.reorderExercises,
-                            itemBuilder: (context, index) {
-                              final input = _viewModel.exercises[index];
-                              return _ExerciseRow(
-                                key: ValueKey("exercise_$index"),
-                                index: index,
-                                input: input,
-                                viewModel: _viewModel,
-                              );
-                            },
-                          ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                    child: OutlinedButton.icon(
+                    ),
+                    OutlinedButton.icon(
                       onPressed: _showExercisePicker,
                       icon: const Icon(Icons.add),
                       label: const Text("Add exercise"),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                    child: SizedBox(
+                    const SizedBox(height: 8),
+                    SizedBox(
                       height: 48,
                       child: _viewModel.isLoading
                           ? const Center(child: CircularProgressIndicator())
@@ -215,8 +232,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                               ),
                             ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
           ),
@@ -309,6 +327,7 @@ class _ExerciseRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       key: key,
+      contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.drag_handle),
       title: ExerciseTitleWithSide(name: input.exerciseName, side: input.side),
       subtitle: Text(
