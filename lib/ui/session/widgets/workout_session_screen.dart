@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:wakelock_plus/wakelock_plus.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
 import "package:workout_tracker/database/database.dart";
@@ -25,6 +26,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
 
     vm = getIt<WorkoutSessionViewModel>(
       param1: WorkoutSessionArgs(
@@ -41,6 +43,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     vm.dispose();
     super.dispose();
   }

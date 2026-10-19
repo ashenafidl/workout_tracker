@@ -39,7 +39,7 @@ class StreakRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                "Personal best",
+                "PB",
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,
