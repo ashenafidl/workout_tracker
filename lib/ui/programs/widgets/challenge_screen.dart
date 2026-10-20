@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:wakelock_plus/wakelock_plus.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/challenge.dart";
@@ -29,6 +30,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
     _viewModel = getIt<ChallengeViewModel>(
       param1: widget.workoutWithExercises,
       param2: widget.programId,
@@ -38,6 +40,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
   @override
   void dispose() {
     _viewModel.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
 
