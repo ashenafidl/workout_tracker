@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
+import "package:workout_tracker/core/widgets/exercise_tile.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
 import "package:workout_tracker/ui/exercises/widgets/exercise_form_sheet.dart";
 
@@ -45,7 +45,8 @@ Widget _buildBody(ExerciseListViewModel viewModel) {
   return ListView.builder(
     itemCount: viewModel.exercises.length,
     itemBuilder: (context, index) {
-      final exercise = viewModel.exercises[index];
+      final exerciseWithTypes = viewModel.exercises[index];
+      final exercise = exerciseWithTypes.exercise;
 
       return Dismissible(
         key: ValueKey(exercise.id),
@@ -68,17 +69,15 @@ Widget _buildBody(ExerciseListViewModel viewModel) {
           }
           return deleted;
         },
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-          leading: Icon(exercise.type.icon),
-          title: Text(exercise.name),
-          trailing: exercise.isBilateral ? const BilateralMarker() : null,
+        child: ExerciseTile(
+          exerciseWithTypes: exerciseWithTypes,
           onTap: () {
             showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
               useSafeArea: true,
-              builder: (sheetContext) => ExerciseFormSheet(exercise: exercise),
+              builder: (sheetContext) =>
+                  ExerciseFormSheet(exercise: exerciseWithTypes),
             );
           },
         ),

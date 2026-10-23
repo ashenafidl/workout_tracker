@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/database/database.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";
 import "package:workout_tracker/ui/exercises/widgets/exercise_type_selection_view.dart";
 
 class ExerciseFormSheet extends StatefulWidget {
   const new({super.key, this.exercise});
 
-  final Exercise? exercise;
+  final ExerciseWithTypes? exercise;
 
   @override
   State<ExerciseFormSheet> createState() => _ExerciseFormSheetState();
@@ -94,7 +94,7 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
                       key: const ValueKey("type-selection"),
                       name: _nameController.text.trim(),
                       description: _descriptionController.text.trim(),
-                      selectedType: _viewModel.type,
+                      selectedTypes: _viewModel.types,
                       isBilateral: _viewModel.isBilateral,
                       onBilateralChanged: (value) =>
                           _viewModel.isBilateral = value,
@@ -103,7 +103,7 @@ class _ExerciseFormSheetState extends State<ExerciseFormSheet> {
                       submitLabel: _viewModel.isEditing
                           ? "Save changes"
                           : "Add exercise",
-                      onTypeSelected: (type) => _viewModel.type = type,
+                      onTypeToggled: _viewModel.toggleType,
                       onSubmit: _submit,
                     )
                   : Form(

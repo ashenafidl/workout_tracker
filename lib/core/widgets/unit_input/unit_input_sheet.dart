@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/core/widgets/unit_input/scroll_wheel.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
+import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class UnitInputSheet extends StatefulWidget {
@@ -10,11 +11,15 @@ class UnitInputSheet extends StatefulWidget {
     required this.title,
     required this.config,
     this.subtitle,
+    this.availableTypes,
+    this.initialType,
   });
 
   final String title;
   final String? subtitle;
   final UnitInputConfig config;
+  final List<ExerciseType>? availableTypes;
+  final ExerciseType? initialType;
 
   @override
   State<UnitInputSheet> createState() => _UnitInputSheetState();
@@ -24,6 +29,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // Current raw values — only one is active depending on config type.
   late int _intValue;
   late Duration _duration;
+  late UnitInputConfig _config;
+  late ExerciseType _selectedType;
 
   bool _isEditing = false;
   late final TextEditingController _controller;
@@ -31,13 +38,61 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   @override
   void initState() {
     super.initState();
-    switch (widget.config) {
+    _selectedType =
+        widget.initialType ??
+        switch (widget.config) {
+          IntegerInputConfig() => ExerciseType.reps,
+          DurationInputConfig() => ExerciseType.duration,
+        };
+    final availableTypes = widget.availableTypes;
+    if (availableTypes != null && !availableTypes.contains(_selectedType)) {
+      _selectedType = availableTypes.first;
+    }
+    _config = widget.config;
+    if (_configType(_config) != _selectedType) {
+      _config = _defaultConfig(_selectedType);
+    }
+    switch (_config) {
       case final IntegerInputConfig c:
         _intValue = c.initialValue;
       case final DurationInputConfig c:
         _duration = c.initialDuration;
     }
     _controller = TextEditingController(text: _displayValue());
+  }
+
+  ExerciseType _configType(UnitInputConfig config) {
+    return switch (config) {
+      IntegerInputConfig() => ExerciseType.reps,
+      DurationInputConfig() => ExerciseType.duration,
+    };
+  }
+
+  UnitInputConfig _defaultConfig(ExerciseType type) {
+    return switch (type) {
+      ExerciseType.reps => const IntegerInputConfig(
+        initialValue: 10,
+        label: "reps",
+      ),
+      ExerciseType.duration => const DurationInputConfig(
+        initialDuration: Duration(seconds: 10),
+      ),
+    };
+  }
+
+  void _selectType(ExerciseType type) {
+    setState(() {
+      _selectedType = type;
+      _config = _defaultConfig(type);
+      switch (_config) {
+        case final IntegerInputConfig config:
+          _intValue = config.initialValue;
+        case final DurationInputConfig config:
+          _duration = config.initialDuration;
+      }
+      _isEditing = false;
+      _controller.text = _displayValue();
+    });
   }
 
   @override
@@ -49,14 +104,14 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Display ─────────────────────────────────────────────────────────────
 
   String _displayValue() {
-    return switch (widget.config) {
+    return switch (_config) {
       IntegerInputConfig() => "$_intValue",
       DurationInputConfig() => formatDuration(_duration),
     };
   }
 
   String _unitLabel() {
-    return switch (widget.config) {
+    return switch (_config) {
       final IntegerInputConfig c => c.label ?? "",
       DurationInputConfig() => "",
     };
@@ -65,7 +120,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Stepper logic ───────────────────────────────────────────────────────
   void _increment() {
     setState(() {
-      switch (widget.config) {
+      switch (_config) {
         case final IntegerInputConfig c:
           _intValue += c.step;
         case final DurationInputConfig c:
@@ -76,7 +131,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
 
   void _decrement() {
     setState(() {
-      switch (widget.config) {
+      switch (_config) {
         case final IntegerInputConfig c:
           if (_intValue - c.step >= c.min) _intValue -= c.step;
         case final DurationInputConfig c:
@@ -87,7 +142,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   }
 
   bool get _canDecrement {
-    return switch (widget.config) {
+    return switch (_config) {
       final IntegerInputConfig c => _intValue - c.step >= c.min,
       final DurationInputConfig c =>
         (_duration - Duration(seconds: c.stepSeconds)).inSeconds >= 0,
@@ -97,7 +152,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Inline keyboard edit ────────────────────────────────────────────────
 
   // Duration uses two separate fields (mm:ss) so keyboard edit is disabled for it.
-  bool get _supportsKeyboardEdit => widget.config is! DurationInputConfig;
+  bool get _supportsKeyboardEdit => _config is! DurationInputConfig;
 
   void _startEditing() {
     if (!_supportsKeyboardEdit) return;
@@ -111,7 +166,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   }
 
   void _commitEdit() {
-    switch (widget.config) {
+    switch (_config) {
       case final IntegerInputConfig c:
         final v = int.tryParse(_controller.text);
         if (v != null && v >= c.min) _intValue = v;
@@ -124,9 +179,15 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   // ─── Result ──────────────────────────────────────────────────────────────
 
   UnitInputResult _buildResult() {
-    return switch (widget.config) {
-      IntegerInputConfig() => IntegerInputResult(_intValue),
-      DurationInputConfig() => DurationInputResult(_duration),
+    return switch (_config) {
+      IntegerInputConfig() => IntegerInputResult(
+        _intValue,
+        type: _selectedType,
+      ),
+      DurationInputConfig() => DurationInputResult(
+        _duration,
+        type: _selectedType,
+      ),
     };
   }
 
@@ -204,7 +265,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   @override
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final isDuration = widget.config is DurationInputConfig;
+    final isDuration = _config is DurationInputConfig;
 
     return SafeArea(
       child: Padding(
@@ -225,6 +286,21 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
+              ),
+            ],
+            if ((widget.availableTypes?.length ?? 0) > 1) ...[
+              const SizedBox(height: 16),
+              SegmentedButton<ExerciseType>(
+                segments: [
+                  for (final type in widget.availableTypes!)
+                    ButtonSegment<ExerciseType>(
+                      value: type,
+                      icon: Icon(type.icon),
+                      label: Text(type.name),
+                    ),
+                ],
+                selected: {_selectedType},
+                onSelectionChanged: (selection) => _selectType(selection.first),
               ),
             ],
 

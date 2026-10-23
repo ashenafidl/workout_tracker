@@ -2,11 +2,22 @@ import "package:flutter/material.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/utils/exercise_label.dart";
 
+class ExerciseWithTypes {
+  const new({required this.exercise, required this.supportedTypes});
+
+  final Exercise exercise;
+  final List<ExerciseType> supportedTypes;
+
+  bool get isMultiType => supportedTypes.length > 1;
+  ExerciseType get defaultType => supportedTypes.first;
+}
+
 class WorkoutExerciseInput {
   const new({
     required this.exerciseId,
     required this.exerciseName,
     required this.type,
+    required this.supportedTypes,
     required this.position,
     required this.isBilateral,
     this.side,
@@ -20,6 +31,7 @@ class WorkoutExerciseInput {
   final int exerciseId;
   final String exerciseName;
   final ExerciseType type;
+  final List<ExerciseType> supportedTypes;
   final int position;
   final bool isBilateral;
   final ExerciseSide? side;
@@ -27,6 +39,7 @@ class WorkoutExerciseInput {
   final int? targetDurationSeconds;
 
   WorkoutExerciseInput copyWith({
+    ExerciseType? type,
     int? position,
     ExerciseSide? side,
     int? targetReps,
@@ -35,7 +48,8 @@ class WorkoutExerciseInput {
     return WorkoutExerciseInput(
       exerciseId: exerciseId,
       exerciseName: exerciseName,
-      type: type,
+      type: type ?? this.type,
+      supportedTypes: supportedTypes,
       position: position ?? this.position,
       isBilateral: isBilateral,
       side: side ?? this.side,
@@ -55,6 +69,8 @@ class WorkoutExerciseInput {
 class WorkoutExerciseDetail {
   const new({
     required this.exercise,
+    required this.type,
+    required this.supportedTypes,
     required this.position,
     this.isBilateral = false,
     this.side,
@@ -63,6 +79,8 @@ class WorkoutExerciseDetail {
   });
 
   final Exercise exercise;
+  final ExerciseType type;
+  final List<ExerciseType> supportedTypes;
   final int position;
   final bool isBilateral;
   final ExerciseSide? side;
@@ -70,7 +88,7 @@ class WorkoutExerciseDetail {
   final int? targetDurationSeconds;
 
   String get targetLabel => exerciseTargetLabel(
-    type: exercise.type,
+    type: type,
     targetReps: targetReps,
     targetDurationSeconds: targetDurationSeconds,
   );

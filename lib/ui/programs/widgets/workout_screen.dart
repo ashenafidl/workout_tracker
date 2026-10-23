@@ -6,7 +6,6 @@ import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
-import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/exercise_picker_sheet.dart";
 import "package:workout_tracker/ui/programs/widgets/exercise_side_sheet.dart";
@@ -289,7 +288,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   Future<void> _showExercisePicker() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    final exercise = await showModalBottomSheet<Exercise>(
+    final exerciseWithTypes = await showModalBottomSheet<ExerciseWithTypes>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -300,9 +299,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       ),
     );
 
-    if (exercise == null || !mounted) {
+    if (exerciseWithTypes == null || !mounted) {
       return;
     }
+    final exercise = exerciseWithTypes.exercise;
 
     FocusManager.instance.primaryFocus?.unfocus();
 
@@ -322,7 +322,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       side = null;
     }
 
-    final config = switch (exercise.type) {
+    final selectedType = exerciseWithTypes.defaultType;
+    final config = switch (selectedType) {
       ExerciseType.reps => const IntegerInputConfig(
         initialValue: 10,
         label: "reps",
@@ -338,16 +339,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       useSafeArea: true,
       builder: (sheetContext) => UnitInputSheet(
         title: exercise.name,
-        subtitle: exercise.type.name,
         config: config,
+        availableTypes: exerciseWithTypes.supportedTypes,
+        initialType: selectedType,
       ),
     );
 
-    if (result case IntegerInputResult(:final value)) {
-      _viewModel.addExercise(exercise, side: side, targetReps: value);
-    } else if (result case DurationInputResult(:final duration)) {
+    if (result case IntegerInputResult(:final value, :final type)) {
       _viewModel.addExercise(
-        exercise,
+        exerciseWithTypes,
+        type: type,
+        side: side,
+        targetReps: value,
+      );
+    } else if (result case DurationInputResult(:final duration, :final type)) {
+      _viewModel.addExercise(
+        exerciseWithTypes,
+        type: type,
         side: side,
         targetDurationSeconds: duration.inSeconds,
       );
@@ -429,8 +437,9 @@ class _ExerciseRow extends StatelessWidget {
       useSafeArea: true,
       builder: (sheetContext) => UnitInputSheet(
         title: input.exerciseName,
-        subtitle: input.targetLabel,
         config: config,
+        availableTypes: input.supportedTypes,
+        initialType: input.type,
       ),
     );
 
@@ -438,18 +447,19 @@ class _ExerciseRow extends StatelessWidget {
       return;
     }
 
-    switch (input.type) {
-      case ExerciseType.reps:
-        if (result case IntegerInputResult(:final value)) {
-          viewModel.updateExerciseTarget(index, targetReps: value);
-        }
-      case ExerciseType.duration:
-        if (result case DurationInputResult(:final duration)) {
-          viewModel.updateExerciseTarget(
-            index,
-            targetDurationSeconds: duration.inSeconds,
-          );
-        }
+    switch (result) {
+      case IntegerInputResult(:final value, :final type):
+        viewModel.updateExerciseTypeAndTarget(
+          index,
+          type: type,
+          targetReps: value,
+        );
+      case DurationInputResult(:final duration, :final type):
+        viewModel.updateExerciseTypeAndTarget(
+          index,
+          type: type,
+          targetDurationSeconds: duration.inSeconds,
+        );
     }
   }
 }

@@ -145,7 +145,7 @@ class _ChallengeExerciseCardState extends State<_ChallengeExerciseCard> {
   /// entry is still traveling through the database stream.
   int _localAccumulated = 0;
 
-  bool get _isDuration => widget.item.exercise.type == ExerciseType.duration;
+  bool get _isDuration => widget.item.type == ExerciseType.duration;
 
   int get _accumulatedSeconds =>
       widget.item.accumulatedDurationSeconds > _localAccumulated

@@ -48,11 +48,18 @@ class WorkoutRepo {
               _db.exercises,
               _db.exercises.id.equalsExp(_db.workoutExercises.exerciseId),
             ),
+            leftOuterJoin(
+              _db.exerciseSupportedTypes,
+              _db.exerciseSupportedTypes.exerciseId.equalsExp(
+                _db.workoutExercises.exerciseId,
+              ),
+            ),
           ])
           ..where(_db.workouts.programId.equals(programId))
           ..orderBy([
             OrderingTerm(expression: _db.workouts.position),
             OrderingTerm(expression: _db.workoutExercises.position),
+            OrderingTerm(expression: _db.exerciseSupportedTypes.type),
           ]);
 
     return query.watch().map((rows) {
@@ -61,23 +68,23 @@ class WorkoutRepo {
         final workout = row.readTable(_db.workouts);
         final grouping = grouped.putIfAbsent(
           workout.id,
-          () => _WorkoutGrouping(workout: workout, exercises: []),
+          () => _WorkoutGrouping(workout: workout, exercises: {}),
         );
 
         final exercise = row.readTableOrNull(_db.exercises);
         final we = row.readTableOrNull(_db.workoutExercises);
         if (exercise != null && we != null) {
-          final isReps = exercise.type == ExerciseType.reps;
-          grouping.exercises.add(
-            WorkoutExerciseDetail(
+          final exerciseGrouping = grouping.exercises.putIfAbsent(
+            we.id,
+            () => _WorkoutExerciseGrouping(
               exercise: exercise,
-              isBilateral: exercise.isBilateral,
-              side: we.side,
-              targetReps: isReps ? we.targetReps : null,
-              targetDurationSeconds: isReps ? null : we.targetDurationSeconds,
-              position: we.position,
+              workoutExercise: we,
             ),
           );
+          final supportedType = row.readTableOrNull(_db.exerciseSupportedTypes);
+          if (supportedType != null) {
+            exerciseGrouping.supportedTypes.add(supportedType.type);
+          }
         }
       }
 
@@ -85,7 +92,7 @@ class WorkoutRepo {
           .map(
             (g) => WorkoutWithExercises(
               workout: g.workout,
-              exercises: g.exercises,
+              exercises: g.exercises.values.map((e) => e.toDetail()).toList(),
             ),
           )
           .toList();
@@ -124,6 +131,7 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
+          type: Value(input.type),
           side: Value(input.isBilateral ? input.side : null),
           targetReps: Value(input.targetReps),
           targetDurationSeconds: Value(input.targetDurationSeconds),
@@ -168,6 +176,7 @@ class WorkoutRepo {
         final weCompanion = WorkoutExercisesCompanion.insert(
           workoutId: workoutId,
           exerciseId: input.exerciseId,
+          type: Value(input.type),
           side: Value(input.isBilateral ? input.side : null),
           targetReps: Value(input.targetReps),
           targetDurationSeconds: Value(input.targetDurationSeconds),
@@ -217,5 +226,29 @@ class _WorkoutGrouping {
   new({required this.workout, required this.exercises});
 
   final Workout workout;
-  final List<WorkoutExerciseDetail> exercises;
+  final Map<int, _WorkoutExerciseGrouping> exercises;
+}
+
+class _WorkoutExerciseGrouping {
+  new({required this.exercise, required this.workoutExercise});
+
+  final Exercise exercise;
+  final WorkoutExercise workoutExercise;
+  final Set<ExerciseType> supportedTypes = {};
+
+  WorkoutExerciseDetail toDetail() {
+    final isReps = workoutExercise.type == ExerciseType.reps;
+    return WorkoutExerciseDetail(
+      exercise: exercise,
+      type: workoutExercise.type,
+      supportedTypes: supportedTypes.toList(),
+      isBilateral: exercise.isBilateral,
+      side: workoutExercise.side,
+      targetReps: isReps ? workoutExercise.targetReps : null,
+      targetDurationSeconds: isReps
+          ? null
+          : workoutExercise.targetDurationSeconds,
+      position: workoutExercise.position,
+    );
+  }
 }

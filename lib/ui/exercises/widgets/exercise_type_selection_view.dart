@@ -6,25 +6,27 @@ class ExerciseTypeSelectionView extends StatelessWidget {
     super.key,
     required this.name,
     required this.description,
-    required this.selectedType,
+    required this.selectedTypes,
     required this.isBilateral,
     required this.onBilateralChanged,
     required this.isLoading,
     required this.submitLabel,
     required this.onBack,
-    required this.onTypeSelected,
+    required this.onTypeToggled,
+    this.errorMessage,
     required this.onSubmit,
   });
 
   final String name;
   final String description;
-  final ExerciseType selectedType;
+  final Set<ExerciseType> selectedTypes;
   final bool isBilateral;
   final ValueChanged<bool> onBilateralChanged;
   final bool isLoading;
   final String submitLabel;
   final VoidCallback onBack;
-  final ValueChanged<ExerciseType> onTypeSelected;
+  final ValueChanged<ExerciseType> onTypeToggled;
+  final String? errorMessage;
   final VoidCallback onSubmit;
 
   @override
@@ -59,27 +61,33 @@ class ExerciseTypeSelectionView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 4),
-        RadioGroup(
-          groupValue: selectedType,
-          onChanged: (value) {
-            if (value != null) {
-              onTypeSelected(value);
-            }
-          },
-          child: Column(
-            children: [
-              for (final option in ExerciseType.values)
-                RadioListTile<ExerciseType>(
-                  value: option,
-                  title: Text(option.name),
-                  subtitle: Text(option.description),
-                  secondary: Icon(option.icon),
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  contentPadding: EdgeInsets.zero,
-                ),
-            ],
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final option in ExerciseType.values)
+              FilterChip(
+                avatar: Icon(option.icon, size: 18),
+                label: Text(option.name),
+                selected: selectedTypes.contains(option),
+                onSelected: isLoading ? null : (_) => onTypeToggled(option),
+                showCheckmark: false,
+              ),
+          ],
         ),
+        if (errorMessage != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            errorMessage!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ] else if (selectedTypes.isEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            "Select at least one exercise type",
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ],
         const Divider(),
         const SizedBox(height: 8),
         SwitchListTile(
@@ -97,7 +105,10 @@ class ExerciseTypeSelectionView extends StatelessWidget {
           height: 48,
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : FilledButton(onPressed: onSubmit, child: Text(submitLabel)),
+              : FilledButton(
+                  onPressed: selectedTypes.isEmpty ? null : onSubmit,
+                  child: Text(submitLabel),
+                ),
         ),
       ],
     );

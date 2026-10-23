@@ -56,7 +56,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   bool get isCurrentExerciseDuration =>
       _phase == SessionPhase.exercising &&
       _currentStepIndex < _steps.length &&
-      currentExercise.exercise.type == ExerciseType.duration;
+      currentExercise.type == ExerciseType.duration;
   int get durationSecondsRemaining => _durationSecondsRemaining;
   double get durationProgress {
     if (_durationTargetSeconds == 0) {
@@ -232,7 +232,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   }
 
   Future<void> _startExercise() async {
-    if (currentExercise.exercise.type == ExerciseType.duration) {
+    if (currentExercise.type == ExerciseType.duration) {
       _startDurationPreparation();
       return;
     }
@@ -254,7 +254,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
             circuitId: _currentCircuitId!,
             exerciseId: exercise.exercise.id,
             position: _currentStepIndex,
-            exerciseType: Value(exercise.exercise.type),
+            exerciseType: Value(exercise.type),
             side: Value(currentSide),
             targetReps: Value(exercise.targetReps),
             targetDurationSeconds: Value(exercise.targetDurationSeconds),

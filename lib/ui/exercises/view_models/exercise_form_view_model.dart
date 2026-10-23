@@ -1,7 +1,6 @@
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
-import "package:workout_tracker/database/database.dart";
 
 class ExerciseFormViewModel extends ChangeNotifier {
   new(this._exerciseRepository);
@@ -25,10 +24,16 @@ class ExerciseFormViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  ExerciseType _type = ExerciseType.reps;
-  ExerciseType get type => _type;
-  set type(ExerciseType value) {
-    _type = value;
+  Set<ExerciseType> _types = {ExerciseType.reps};
+  Set<ExerciseType> get types => _types;
+
+  void toggleType(ExerciseType value) {
+    _types = Set.of(_types);
+    if (_types.contains(value)) {
+      _types.remove(value);
+    } else {
+      _types.add(value);
+    }
     notifyListeners();
   }
 
@@ -45,11 +50,12 @@ class ExerciseFormViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  void loadExercise(Exercise exercise) {
+  void loadExercise(ExerciseWithTypes exerciseWithTypes) {
+    final exercise = exerciseWithTypes.exercise;
     _exerciseId = exercise.id;
     _name = exercise.name;
     _description = exercise.description ?? "";
-    _type = exercise.type;
+    _types = exerciseWithTypes.supportedTypes.toSet();
     _isBilateral = exercise.isBilateral;
     notifyListeners();
   }
@@ -69,6 +75,11 @@ class ExerciseFormViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+    if (_types.isEmpty) {
+      _errorMessage = "Select at least one exercise type";
+      notifyListeners();
+      return false;
+    }
 
     _isLoading = true;
     _errorMessage = null;
@@ -80,14 +91,14 @@ class ExerciseFormViewModel extends ChangeNotifier {
           id: _exerciseId!,
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
-          type: type,
+          types: types.toList(),
           isBilateral: isBilateral,
         );
       } else {
         await _exerciseRepository.addExercise(
           name: trimmedName,
           description: trimmedDescription.isEmpty ? null : trimmedDescription,
-          type: type,
+          types: types.toList(),
           isBilateral: isBilateral,
         );
       }

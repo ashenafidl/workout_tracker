@@ -194,7 +194,7 @@ class _ChallengeGrouping {
         ? <ExerciseSide?>[null]
         : side.performedSides;
 
-    final isReps = exercise.type == ExerciseType.reps;
+    final isReps = workoutExercise.type == ExerciseType.reps;
     final repTargets = _splitTarget(
       isReps ? workoutExercise.targetReps : null,
       performed.length,
@@ -209,6 +209,7 @@ class _ChallengeGrouping {
         ChallengeExerciseProgress(
           workoutExerciseId: workoutExercise.id,
           exercise: exercise,
+          type: workoutExercise.type,
           side: performed[i],
           targetReps: repTargets?[i],
           targetDurationSeconds: durationTargets?[i],

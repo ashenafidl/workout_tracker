@@ -1,12 +1,9 @@
-import "dart:async";
-
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
-import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class WorkoutViewModel extends ChangeNotifier {
@@ -85,7 +82,8 @@ class WorkoutViewModel extends ChangeNotifier {
           (e) => WorkoutExerciseInput(
             exerciseId: e.exercise.id,
             exerciseName: e.exercise.name,
-            type: e.exercise.type,
+            type: e.type,
+            supportedTypes: e.supportedTypes,
             position: e.position,
             isBilateral: e.isBilateral,
             side: e.side,
@@ -98,7 +96,8 @@ class WorkoutViewModel extends ChangeNotifier {
   }
 
   void addExercise(
-    Exercise exercise, {
+    ExerciseWithTypes exercise, {
+    required ExerciseType type,
     ExerciseSide? side,
     int targetReps = 10,
     int targetDurationSeconds = 60,
@@ -106,11 +105,12 @@ class WorkoutViewModel extends ChangeNotifier {
     _exercises = List.from(_exercises)
       ..add(
         WorkoutExerciseInput(
-          exerciseId: exercise.id,
-          exerciseName: exercise.name,
-          type: exercise.type,
+          exerciseId: exercise.exercise.id,
+          exerciseName: exercise.exercise.name,
+          type: type,
+          supportedTypes: exercise.supportedTypes,
           position: _exercises.length,
-          isBilateral: exercise.isBilateral,
+          isBilateral: exercise.exercise.isBilateral,
           side: side,
           targetReps: targetReps,
           targetDurationSeconds: targetDurationSeconds,
@@ -146,6 +146,22 @@ class WorkoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateExerciseTypeAndTarget(
+    int index, {
+    required ExerciseType type,
+    int? targetReps,
+    int? targetDurationSeconds,
+  }) {
+    final old = _exercises[index];
+    _exercises = List.from(_exercises)
+      ..[index] = old.copyWith(
+        type: type,
+        targetReps: targetReps,
+        targetDurationSeconds: targetDurationSeconds,
+      );
+    notifyListeners();
+  }
+
   void reorderExercises(int oldIndex, int newIndex) {
     final item = _exercises[oldIndex];
     _exercises = List.from(_exercises)
@@ -161,46 +177,25 @@ class WorkoutViewModel extends ChangeNotifier {
     }).toList();
   }
 
-  Future<Exercise?> createAndAddExercise(
+  Future<ExerciseWithTypes?> createAndAddExercise(
     String name,
-    ExerciseType type, {
+    List<ExerciseType> types, {
     bool isBilateral = false,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
 
-    try {
-      await _exerciseRepository.addExercise(
-        name: trimmed,
-        type: type,
-        isBilateral: isBilateral,
-      );
-      final completer = Completer<Exercise?>();
-      late final StreamSubscription<List<Exercise>> sub;
-      sub = _exerciseRepository.watchAllExercises().listen((exercises) {
-        final match = exercises
-            .where(
-              (e) =>
-                  e.name == trimmed &&
-                  e.type == type &&
-                  e.isBilateral == isBilateral,
-            )
-            .toList();
-        if (match.isNotEmpty && !completer.isCompleted) {
-          completer.complete(match.first);
-          sub.cancel();
-        }
-      });
-      Future.delayed(const Duration(seconds: 5), () {
-        if (!completer.isCompleted) {
-          sub.cancel();
-          completer.complete(null);
-        }
-      });
-      return await completer.future;
-    } catch (_) {
-      return null;
-    }
+    final exerciseId = await _exerciseRepository.addExercise(
+      name: trimmed,
+      types: types,
+      isBilateral: isBilateral,
+    );
+    final exercises = await _exerciseRepository
+        .watchAllExercisesWithTypes()
+        .first;
+    return exercises.firstWhere(
+      (exercise) => exercise.exercise.id == exerciseId,
+    );
   }
 
   Future<bool> submit(String programId) async {

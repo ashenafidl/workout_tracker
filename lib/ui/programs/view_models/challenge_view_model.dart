@@ -60,11 +60,11 @@ class ChallengeViewModel extends ChangeNotifier {
     final sessionId = _sessionId;
     if (sessionId == null) return;
 
-    if (item.exercise.type == ExerciseType.reps) {
+    if (item.type == ExerciseType.reps) {
       await _challengeRepo.logReps(
         sessionId: sessionId,
         exerciseId: item.exercise.id,
-        exerciseType: item.exercise.type,
+        exerciseType: item.type,
         side: item.side,
         reps: value,
       );
@@ -74,7 +74,7 @@ class ChallengeViewModel extends ChangeNotifier {
     await _challengeRepo.logDuration(
       sessionId: sessionId,
       exerciseId: item.exercise.id,
-      exerciseType: item.exercise.type,
+      exerciseType: item.type,
       side: item.side,
       durationSeconds: value,
     );

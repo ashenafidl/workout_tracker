@@ -12,11 +12,18 @@ class Exercises extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get description => text().nullable()();
-  IntColumn get type =>
-      intEnum<ExerciseType>().withDefault(const Constant(0))();
   BoolColumn get isBilateral => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
   DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
+}
+
+class ExerciseSupportedTypes extends Table {
+  IntColumn get exerciseId =>
+      integer().references(Exercises, #id, onDelete: KeyAction.cascade)();
+  IntColumn get type => intEnum<ExerciseType>()();
+
+  @override
+  Set<Column> get primaryKey => {exerciseId, type};
 }
 
 class Programs extends Table {
@@ -47,6 +54,8 @@ class WorkoutExercises extends Table {
   IntColumn get exerciseId =>
       integer().references(Exercises, #id, onDelete: KeyAction.restrict)();
   IntColumn get position => integer()();
+  IntColumn get type =>
+      intEnum<ExerciseType>().withDefault(const Constant(0))();
 
   // Only set when this exercise is bilateral.
   IntColumn get side => intEnum<ExerciseSide>().nullable()();
@@ -142,6 +151,7 @@ class StreakStats extends Table {
 @DriftDatabase(
   tables: [
     Exercises,
+    ExerciseSupportedTypes,
     Programs,
     Workouts,
     WorkoutExercises,
@@ -156,7 +166,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -195,6 +205,24 @@ extension Migrations on GeneratedDatabase {
     },
     from3To4: (m, s) async {
       await m.addColumn(s.workouts, s.workouts.restDurationSeconds);
+    },
+    from4To5: (m, s) async {
+      await m.createTable(s.exerciseSupportedTypes);
+      await m.database.customStatement("""
+    INSERT INTO exercise_supported_types (exercise_id, type)
+    SELECT id, type FROM exercises
+  """);
+      await m.addColumn(s.workoutExercises, s.workoutExercises.type);
+      await m.database.customStatement("""
+    UPDATE workout_exercises
+    SET type = CASE
+      WHEN target_duration_seconds IS NOT NULL THEN 1
+      ELSE 0
+    END
+  """);
+      await m.alterTable(
+        TableMigration(s.exercises, newColumns: [], columnTransformer: {}),
+      );
     },
   );
 }

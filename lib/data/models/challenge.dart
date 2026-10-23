@@ -5,6 +5,7 @@ class ChallengeExerciseProgress {
   const new({
     required this.workoutExerciseId,
     required this.exercise,
+    required this.type,
     required this.side,
     required this.targetReps,
     required this.targetDurationSeconds,
@@ -14,6 +15,7 @@ class ChallengeExerciseProgress {
 
   final int workoutExerciseId;
   final Exercise exercise;
+  final ExerciseType type;
   final ExerciseSide? side;
   final int? targetReps;
   final int? targetDurationSeconds;
