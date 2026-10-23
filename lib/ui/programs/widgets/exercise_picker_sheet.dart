@@ -163,6 +163,7 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                     TextField(
                       controller: _searchController,
                       autofocus: true,
+                      textCapitalization: .words,
                       decoration: const InputDecoration(
                         labelText: "Search exercises",
                         prefixIcon: Icon(Icons.search),
