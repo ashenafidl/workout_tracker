@@ -11,6 +11,7 @@ import "package:workout_tracker/ui/programs/widgets/challenge_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/program_detail_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/programs_screen.dart";
 import "package:workout_tracker/ui/session/widgets/workout_session_screen.dart";
+import "package:workout_tracker/ui/stats/widgers/stats_screen.dart";
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>(
@@ -18,6 +19,9 @@ final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>(
 );
 final GlobalKey<NavigatorState> _programsNavKey = GlobalKey<NavigatorState>(
   debugLabel: "programs",
+);
+final GlobalKey<NavigatorState> _statsNavKey = GlobalKey<NavigatorState>(
+  debugLabel: "stats",
 );
 final GlobalKey<NavigatorState> _historyNavKey = GlobalKey<NavigatorState>(
   debugLabel: "history",
@@ -65,7 +69,18 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
 
-        // Branch 2: History
+        // Branch 2: Stats
+        StatefulShellBranch(
+          navigatorKey: _statsNavKey,
+          routes: [
+            GoRoute(
+              path: "/stats",
+              builder: (context, state) => const StatsScreen(),
+            ),
+          ],
+        ),
+
+        // Branch 3: History
         StatefulShellBranch(
           navigatorKey: _historyNavKey,
           routes: [
@@ -76,7 +91,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
 
-        // Branch 3: More
+        // Branch 4: More
         StatefulShellBranch(
           navigatorKey: _moreNavKey,
           routes: [

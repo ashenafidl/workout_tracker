@@ -6,6 +6,7 @@ import "package:workout_tracker/data/repositories/challenge_repo.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
+import "package:workout_tracker/data/repositories/stats_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
@@ -22,6 +23,7 @@ import "package:workout_tracker/ui/programs/view_models/program_detail_view_mode
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
+import "package:workout_tracker/ui/stats/view_models/stats_view_model.dart";
 
 final getIt = GetIt.instance;
 
@@ -49,12 +51,13 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<WorkoutRepo>(
     () => WorkoutRepo(getIt<AppDatabase>()),
   );
-  getIt.registerLazySingleton<SessionRepository>(
-    () => SessionRepository(getIt<AppDatabase>()),
+  getIt.registerLazySingleton<SessionRepo>(
+    () => SessionRepo(getIt<AppDatabase>()),
   );
   getIt.registerLazySingleton<StreakRepo>(
     () => StreakRepo(getIt<AppDatabase>()),
   );
+  getIt.registerLazySingleton<StatsRepo>(() => StatsRepo(getIt<AppDatabase>()));
   getIt.registerLazySingleton<ChallengeRepo>(
     () => ChallengeRepo(getIt<AppDatabase>()),
   );
@@ -103,7 +106,10 @@ Future<void> setupDependencies() async {
     ),
   );
   getIt.registerLazySingleton<HistoryViewModel>(
-    () => HistoryViewModel(getIt<SessionRepository>()),
+    () => HistoryViewModel(getIt<SessionRepo>()),
+  );
+  getIt.registerFactory<StatsViewModel>(
+    () => StatsViewModel(getIt<StatsRepo>(), getIt<SessionRepo>()),
   );
   getIt.registerFactoryParam<
     WorkoutSessionViewModel,

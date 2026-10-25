@@ -2,7 +2,7 @@ import "package:drift/drift.dart";
 import "package:workout_tracker/data/models/session_history.dart";
 import "package:workout_tracker/database/database.dart";
 
-class SessionRepository {
+class SessionRepo {
   new(this._db);
 
   final AppDatabase _db;
@@ -86,5 +86,17 @@ class SessionRepository {
         );
       }).toList();
     });
+  }
+
+  Stream<List<WorkoutSession>> watchCompletedSessions() {
+    return (_db.select(_db.workoutSessions)
+          ..where((session) => session.completedAt.isNotNull())
+          ..orderBy([
+            (session) => OrderingTerm(
+              expression: session.completedAt,
+              mode: OrderingMode.desc,
+            ),
+          ]))
+        .watch();
   }
 }

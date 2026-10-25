@@ -14,7 +14,7 @@ class HistoryViewModel extends ChangeNotifier {
     });
   }
 
-  final SessionRepository _sessionRepository;
+  final SessionRepo _sessionRepository;
   StreamSubscription<List<SessionHistoryEntry>>? _subscription;
 
   List<SessionHistoryEntry> _sessions = [];

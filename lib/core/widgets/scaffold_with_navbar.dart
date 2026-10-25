@@ -46,6 +46,11 @@ class ScaffoldWithNavbar extends StatelessWidget {
             label: "Programs",
           ),
           const BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_outlined),
+            activeIcon: Icon(Icons.bar_chart_rounded),
+            label: "Stats",
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.history_outlined),
             activeIcon: Icon(Icons.history_rounded),
             label: "History",
