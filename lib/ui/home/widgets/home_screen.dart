@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
+import "package:workout_tracker/ui/home/widgets/streak_calendar_sheet.dart";
 import "package:workout_tracker/ui/home/widgets/streak_row.dart";
 import "package:workout_tracker/ui/home/widgets/todays_workout_card.dart";
 
@@ -25,6 +27,16 @@ class HomeScreen extends StatelessWidget {
               StreakRow(
                 currentStreak: streak?.currentStreak ?? 0,
                 longestStreak: streak?.longestStreak ?? 0,
+                onTap: () => showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  useRootNavigator: true,
+                  builder: (context) => StreakCalendarSheet(
+                    currentStreak: streak?.currentStreak ?? 0,
+                    dailyActivityStream: getIt<StreakRepo>()
+                        .watchDailyActivity(),
+                  ),
+                ),
               ),
               Expanded(child: _buildBody(context, vm)),
             ],
