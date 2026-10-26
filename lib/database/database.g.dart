@@ -4581,6 +4581,255 @@ class StreakStatsCompanion extends UpdateCompanion<StreakStat> {
   }
 }
 
+class $BodyWeightLogsTable extends BodyWeightLogs
+    with TableInfo<$BodyWeightLogsTable, BodyWeightLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BodyWeightLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _loggedAtMeta = const VerificationMeta(
+    'loggedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> loggedAt = GeneratedColumn<DateTime>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, weightKg, loggedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'body_weight_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BodyWeightLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weightKgMeta);
+    }
+    if (data.containsKey('logged_at')) {
+      context.handle(
+        _loggedAtMeta,
+        loggedAt.isAcceptableOrUnknown(data['logged_at']!, _loggedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BodyWeightLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BodyWeightLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      )!,
+      loggedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}logged_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BodyWeightLogsTable createAlias(String alias) {
+    return $BodyWeightLogsTable(attachedDatabase, alias);
+  }
+}
+
+class BodyWeightLog extends DataClass implements Insertable<BodyWeightLog> {
+  final int id;
+  final double weightKg;
+  final DateTime loggedAt;
+  const BodyWeightLog({
+    required this.id,
+    required this.weightKg,
+    required this.loggedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['weight_kg'] = Variable<double>(weightKg);
+    map['logged_at'] = Variable<DateTime>(loggedAt);
+    return map;
+  }
+
+  BodyWeightLogsCompanion toCompanion(bool nullToAbsent) {
+    return BodyWeightLogsCompanion(
+      id: Value(id),
+      weightKg: Value(weightKg),
+      loggedAt: Value(loggedAt),
+    );
+  }
+
+  factory BodyWeightLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BodyWeightLog(
+      id: serializer.fromJson<int>(json['id']),
+      weightKg: serializer.fromJson<double>(json['weightKg']),
+      loggedAt: serializer.fromJson<DateTime>(json['loggedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'weightKg': serializer.toJson<double>(weightKg),
+      'loggedAt': serializer.toJson<DateTime>(loggedAt),
+    };
+  }
+
+  BodyWeightLog copyWith({int? id, double? weightKg, DateTime? loggedAt}) =>
+      BodyWeightLog(
+        id: id ?? this.id,
+        weightKg: weightKg ?? this.weightKg,
+        loggedAt: loggedAt ?? this.loggedAt,
+      );
+  BodyWeightLog copyWithCompanion(BodyWeightLogsCompanion data) {
+    return BodyWeightLog(
+      id: data.id.present ? data.id.value : this.id,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      loggedAt: data.loggedAt.present ? data.loggedAt.value : this.loggedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BodyWeightLog(')
+          ..write('id: $id, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('loggedAt: $loggedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, weightKg, loggedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BodyWeightLog &&
+          other.id == this.id &&
+          other.weightKg == this.weightKg &&
+          other.loggedAt == this.loggedAt);
+}
+
+class BodyWeightLogsCompanion extends UpdateCompanion<BodyWeightLog> {
+  final Value<int> id;
+  final Value<double> weightKg;
+  final Value<DateTime> loggedAt;
+  const BodyWeightLogsCompanion({
+    this.id = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.loggedAt = const Value.absent(),
+  });
+  BodyWeightLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required double weightKg,
+    this.loggedAt = const Value.absent(),
+  }) : weightKg = Value(weightKg);
+  static Insertable<BodyWeightLog> custom({
+    Expression<int>? id,
+    Expression<double>? weightKg,
+    Expression<DateTime>? loggedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (loggedAt != null) 'logged_at': loggedAt,
+    });
+  }
+
+  BodyWeightLogsCompanion copyWith({
+    Value<int>? id,
+    Value<double>? weightKg,
+    Value<DateTime>? loggedAt,
+  }) {
+    return BodyWeightLogsCompanion(
+      id: id ?? this.id,
+      weightKg: weightKg ?? this.weightKg,
+      loggedAt: loggedAt ?? this.loggedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (loggedAt.present) {
+      map['logged_at'] = Variable<DateTime>(loggedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BodyWeightLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('loggedAt: $loggedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4602,6 +4851,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SessionExerciseLogsTable(this);
   late final $ChallengeLogsTable challengeLogs = $ChallengeLogsTable(this);
   late final $StreakStatsTable streakStats = $StreakStatsTable(this);
+  late final $BodyWeightLogsTable bodyWeightLogs = $BodyWeightLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4617,6 +4867,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sessionExerciseLogs,
     challengeLogs,
     streakStats,
+    bodyWeightLogs,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9286,6 +9537,173 @@ typedef $$StreakStatsTableProcessedTableManager =
       StreakStat,
       PrefetchHooks Function()
     >;
+typedef $$BodyWeightLogsTableCreateCompanionBuilder =
+    BodyWeightLogsCompanion Function({
+      Value<int> id,
+      required double weightKg,
+      Value<DateTime> loggedAt,
+    });
+typedef $$BodyWeightLogsTableUpdateCompanionBuilder =
+    BodyWeightLogsCompanion Function({
+      Value<int> id,
+      Value<double> weightKg,
+      Value<DateTime> loggedAt,
+    });
+
+class $$BodyWeightLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $BodyWeightLogsTable> {
+  $$BodyWeightLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BodyWeightLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BodyWeightLogsTable> {
+  $$BodyWeightLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get loggedAt => $composableBuilder(
+    column: $table.loggedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BodyWeightLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BodyWeightLogsTable> {
+  $$BodyWeightLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get loggedAt =>
+      $composableBuilder(column: $table.loggedAt, builder: (column) => column);
+}
+
+class $$BodyWeightLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BodyWeightLogsTable,
+          BodyWeightLog,
+          $$BodyWeightLogsTableFilterComposer,
+          $$BodyWeightLogsTableOrderingComposer,
+          $$BodyWeightLogsTableAnnotationComposer,
+          $$BodyWeightLogsTableCreateCompanionBuilder,
+          $$BodyWeightLogsTableUpdateCompanionBuilder,
+          (
+            BodyWeightLog,
+            BaseReferences<_$AppDatabase, $BodyWeightLogsTable, BodyWeightLog>,
+          ),
+          BodyWeightLog,
+          PrefetchHooks Function()
+        > {
+  $$BodyWeightLogsTableTableManager(
+    _$AppDatabase db,
+    $BodyWeightLogsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BodyWeightLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BodyWeightLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BodyWeightLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<double> weightKg = const Value.absent(),
+                Value<DateTime> loggedAt = const Value.absent(),
+              }) => BodyWeightLogsCompanion(
+                id: id,
+                weightKg: weightKg,
+                loggedAt: loggedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required double weightKg,
+                Value<DateTime> loggedAt = const Value.absent(),
+              }) => BodyWeightLogsCompanion.insert(
+                id: id,
+                weightKg: weightKg,
+                loggedAt: loggedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BodyWeightLogsTable, BodyWeightLog>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $BodyWeightLogsTable,
+                    BodyWeightLog
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BodyWeightLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BodyWeightLogsTable,
+      BodyWeightLog,
+      $$BodyWeightLogsTableFilterComposer,
+      $$BodyWeightLogsTableOrderingComposer,
+      $$BodyWeightLogsTableAnnotationComposer,
+      $$BodyWeightLogsTableCreateCompanionBuilder,
+      $$BodyWeightLogsTableUpdateCompanionBuilder,
+      (
+        BodyWeightLog,
+        BaseReferences<_$AppDatabase, $BodyWeightLogsTable, BodyWeightLog>,
+      ),
+      BodyWeightLog,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9313,4 +9731,6 @@ class $AppDatabaseManager {
       $$ChallengeLogsTableTableManager(_db, _db.challengeLogs);
   $$StreakStatsTableTableManager get streakStats =>
       $$StreakStatsTableTableManager(_db, _db.streakStats);
+  $$BodyWeightLogsTableTableManager get bodyWeightLogs =>
+      $$BodyWeightLogsTableTableManager(_db, _db.bodyWeightLogs);
 }

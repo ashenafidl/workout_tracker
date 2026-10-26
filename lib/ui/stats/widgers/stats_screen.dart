@@ -1,7 +1,13 @@
+import "package:fl_chart/fl_chart.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
+import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
+import "package:workout_tracker/data/models/body_weight_entry.dart";
 import "package:workout_tracker/data/models/stats.dart";
+import "package:workout_tracker/ui/stats/view_models/body_weight_view_model.dart";
 import "package:workout_tracker/ui/stats/view_models/stats_view_model.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
@@ -14,6 +20,8 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   late final StatsViewModel _viewModel = getIt<StatsViewModel>();
+  late final BodyWeightViewModel _bodyWeightViewModel =
+      getIt<BodyWeightViewModel>();
 
   @override
   void dispose() {
@@ -53,6 +61,8 @@ class _StatsScreenState extends State<StatsScreen> {
               ],
               _MetricGrid(stats: stats),
               const SizedBox(height: 16),
+              _BodyWeightSection(viewModel: _bodyWeightViewModel),
+              const SizedBox(height: 16),
               _WeekdayDistribution(stats: stats),
             ],
           );
@@ -82,22 +92,6 @@ class _MetricGrid extends StatelessWidget {
                 label: "Workouts",
                 value: "${stats.totalWorkouts}",
                 icon: Icons.check_circle_outline,
-              ),
-            ),
-            SizedBox(
-              width: width,
-              child: _MetricCard(
-                label: "Circuits",
-                value: "${stats.totalCircuits}",
-                icon: Icons.loop,
-              ),
-            ),
-            SizedBox(
-              width: width,
-              child: _MetricCard(
-                label: "Reps",
-                value: _numberLabel(stats.totalReps),
-                icon: Icons.repeat,
               ),
             ),
             SizedBox(
@@ -250,6 +244,280 @@ class _WeekdayDistribution extends StatelessWidget {
   }
 }
 
+class _BodyWeightSection extends StatelessWidget {
+  const new({required this.viewModel});
+
+  final BodyWeightViewModel viewModel;
+
+  Future<void> _inputWeight(
+    BuildContext context, {
+    BodyWeightEntry? entry,
+  }) async {
+    double? initialWeight = entry?.weightKg;
+    if (entry == null) {
+      try {
+        initialWeight = (await viewModel.getLatest())?.weightKg;
+      } catch (error) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Could not load the latest weight: $error")),
+        );
+        return;
+      }
+    }
+    if (!context.mounted) return;
+    final result = await showModalBottomSheet<UnitInputResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => UnitInputSheet(
+        title: entry == null ? "Log body weight" : "Edit body weight",
+        config: DoubleInputConfig(
+          initialValue: initialWeight ?? 0,
+          label: "kg",
+          min: 0.1,
+        ),
+      ),
+    );
+    if (result case DoubleInputResult(:final value)) {
+      if (entry == null) {
+        await viewModel.add(value);
+      } else {
+        await viewModel.update(entry.id, value);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: viewModel,
+      builder: (context, _) {
+        final theme = Theme.of(context);
+        final entries = viewModel.filteredEntries;
+        return _SectionCard(
+          title: "Body weight",
+          icon: Icons.monitor_weight_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (viewModel.isLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (viewModel.errorMessage != null &&
+                  viewModel.entries.isEmpty)
+                Text(
+                  "Weight entries could not be loaded: ${viewModel.errorMessage}",
+                )
+              else if (viewModel.entries.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text("Log your weight to start tracking progress."),
+                )
+              else ...[
+                _BodyWeightSummary(viewModel: viewModel),
+                const SizedBox(height: 16),
+                SegmentedButton<WeightTimeRange>(
+                  style: const ButtonStyle(
+                    visualDensity: .compact,
+                    tapTargetSize: .shrinkWrap,
+                  ),
+                  segments: [
+                    for (final range in WeightTimeRange.values)
+                      ButtonSegment<WeightTimeRange>(
+                        value: range,
+                        label: Text(_rangeLabel(range)),
+                      ),
+                  ],
+                  selected: {viewModel.selectedRange},
+                  onSelectionChanged: (selection) =>
+                      viewModel.setRange(selection.first),
+                  showSelectedIcon: false,
+                ),
+                const SizedBox(height: 16),
+                if (entries.isEmpty)
+                  const SizedBox(
+                    height: 160,
+                    child: Center(child: Text("No entries in this period.")),
+                  )
+                else
+                  _BodyWeightChart(entries: entries),
+                if (viewModel.errorMessage != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    "Could not save the weight: ${viewModel.errorMessage}",
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                for (final entry in entries.reversed.take(3))
+                  ListTile(
+                    visualDensity: .compact,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text("${entry.weightKg.toStringAsFixed(1)} kg"),
+                    subtitle: Text(DateFormat.yMMMd().format(entry.loggedAt)),
+                    trailing: IconButton(
+                      tooltip: "Edit weight",
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      onPressed: () => _inputWeight(context, entry: entry),
+                    ),
+                  ),
+              ],
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () => _inputWeight(context),
+                icon: const Icon(Icons.add),
+                label: const Text("Log weight"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _BodyWeightSummary extends StatelessWidget {
+  const new({required this.viewModel});
+
+  final BodyWeightViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    final latest = viewModel.latest!;
+    final change = viewModel.changeFromFirst!;
+    return Wrap(
+      spacing: 20,
+      runSpacing: 8,
+      children: [
+        _WeightMetric(
+          label: "Latest",
+          value: "${latest.weightKg.toStringAsFixed(1)} kg",
+        ),
+        _WeightMetric(
+          label: "Change",
+          value: "${change > 0 ? "+" : ""}${change.toStringAsFixed(1)} kg",
+        ),
+        _WeightMetric(
+          label: "Range",
+          value:
+              "${viewModel.lowest!.weightKg.toStringAsFixed(1)}–${viewModel.highest!.weightKg.toStringAsFixed(1)} kg",
+        ),
+      ],
+    );
+  }
+}
+
+class _WeightMetric extends StatelessWidget {
+  const new({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.titleMedium),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
+class _BodyWeightChart extends StatelessWidget {
+  const new({required this.entries});
+
+  final List<BodyWeightEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final weights = entries.map((entry) => entry.weightKg);
+    final minWeight = weights.reduce((a, b) => a < b ? a : b);
+    final maxWeight = weights.reduce((a, b) => a > b ? a : b);
+    final padding = maxWeight == minWeight
+        ? 0.5
+        : (maxWeight - minWeight) * 0.15;
+    final chartEntries = entries.length == 1
+        ? [...entries, entries.single]
+        : entries;
+    final spots = [
+      for (var index = 0; index < chartEntries.length; index++)
+        FlSpot(index.toDouble(), chartEntries[index].weightKg),
+    ];
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 180,
+          child: LineChart(
+            LineChartData(
+              minX: 0,
+              maxX: (spots.length - 1).toDouble(),
+              minY: minWeight - padding,
+              maxY: maxWeight + padding,
+              gridData: FlGridData(
+                drawVerticalLine: false,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: theme.colorScheme.outlineVariant,
+                  strokeWidth: 1,
+                ),
+              ),
+              titlesData: const FlTitlesData(show: false),
+              borderData: FlBorderData(show: false),
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (spots) => [
+                    for (final spot in spots)
+                      LineTooltipItem(
+                        "${DateFormat.MMMd().format(chartEntries[spot.x.round()].loggedAt)}\n${spot.y.toStringAsFixed(1)} kg",
+                        TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: spots,
+                  isCurved: true,
+                  color: theme.colorScheme.primary,
+                  barWidth: 3,
+                  dotData: const FlDotData(show: true),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(DateFormat.MMMd().format(entries.first.loggedAt)),
+            Text(DateFormat.MMMd().format(entries.last.loggedAt)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+String _rangeLabel(WeightTimeRange range) {
+  return switch (range) {
+    WeightTimeRange.month1 => "1M",
+    WeightTimeRange.month3 => "3M",
+    WeightTimeRange.month6 => "6M",
+    WeightTimeRange.yearAll => "All",
+  };
+}
+
 class _StatsError extends StatelessWidget {
   const new({required this.message, required this.onRetry});
 
@@ -274,10 +542,6 @@ class _StatsError extends StatelessWidget {
       ),
     );
   }
-}
-
-String _numberLabel(int value) {
-  return NumberFormat.compact().format(value);
 }
 
 String _durationLabel(Duration duration) {

@@ -148,6 +148,12 @@ class StreakStats extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class BodyWeightLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  RealColumn get weightKg => real()();
+  DateTimeColumn get loggedAt => dateTime().clientDefault(DateTime.now)();
+}
+
 @DriftDatabase(
   tables: [
     Exercises,
@@ -160,13 +166,14 @@ class StreakStats extends Table {
     SessionExerciseLogs,
     ChallengeLogs,
     StreakStats,
+    BodyWeightLogs,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -223,6 +230,9 @@ extension Migrations on GeneratedDatabase {
       await m.alterTable(
         TableMigration(s.exercises, newColumns: [], columnTransformer: {}),
       );
+    },
+    from5To6: (m, s) async {
+      await m.createTable(s.bodyWeightLogs);
     },
   );
 }

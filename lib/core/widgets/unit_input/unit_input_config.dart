@@ -18,6 +18,23 @@ class IntegerInputConfig extends UnitInputConfig {
   final int step;
 }
 
+class DoubleInputConfig extends UnitInputConfig {
+  const new({
+    required this.initialValue,
+    this.label,
+    this.min = 0,
+    this.step = 0.1,
+    this.decimalPlaces = 1,
+  }) : assert(step > 0),
+       assert(decimalPlaces >= 0 && decimalPlaces <= 20);
+
+  final double initialValue;
+  final String? label;
+  final double min;
+  final double step;
+  final int decimalPlaces;
+}
+
 class DurationInputConfig extends UnitInputConfig {
   const new({required this.initialDuration, this.stepSeconds = 15});
 

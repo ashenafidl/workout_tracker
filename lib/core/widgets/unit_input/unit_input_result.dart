@@ -2,8 +2,6 @@ import "package:workout_tracker/data/models/exercises.dart";
 
 sealed class UnitInputResult {
   const new();
-
-  ExerciseType get type;
 }
 
 class IntegerInputResult extends UnitInputResult {
@@ -11,8 +9,13 @@ class IntegerInputResult extends UnitInputResult {
 
   final int value;
 
-  @override
   final ExerciseType type;
+}
+
+class DoubleInputResult extends UnitInputResult {
+  const new(this.value);
+
+  final double value;
 }
 
 class DurationInputResult extends UnitInputResult {
@@ -20,6 +23,5 @@ class DurationInputResult extends UnitInputResult {
 
   final Duration duration;
 
-  @override
   final ExerciseType type;
 }

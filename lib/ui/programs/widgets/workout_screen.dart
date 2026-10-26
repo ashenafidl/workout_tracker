@@ -460,6 +460,8 @@ class _ExerciseRow extends StatelessWidget {
           type: type,
           targetDurationSeconds: duration.inSeconds,
         );
+      case DoubleInputResult():
+        break;
     }
   }
 }

@@ -2,6 +2,7 @@ import "package:get_it/get_it.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/repositories/body_weight_repo.dart";
 import "package:workout_tracker/data/repositories/challenge_repo.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
@@ -23,6 +24,7 @@ import "package:workout_tracker/ui/programs/view_models/program_detail_view_mode
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/workout_view_model.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
+import "package:workout_tracker/ui/stats/view_models/body_weight_view_model.dart";
 import "package:workout_tracker/ui/stats/view_models/stats_view_model.dart";
 
 final getIt = GetIt.instance;
@@ -57,7 +59,10 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<StreakRepo>(
     () => StreakRepo(getIt<AppDatabase>()),
   );
-  getIt.registerLazySingleton<StatsRepo>(() => StatsRepo(getIt<AppDatabase>()));
+  getIt.registerLazySingleton<StatsRepo>(StatsRepo.new);
+  getIt.registerLazySingleton<BodyWeightRepo>(
+    () => BodyWeightRepo(getIt<AppDatabase>()),
+  );
   getIt.registerLazySingleton<ChallengeRepo>(
     () => ChallengeRepo(getIt<AppDatabase>()),
   );
@@ -110,6 +115,9 @@ Future<void> setupDependencies() async {
   );
   getIt.registerFactory<StatsViewModel>(
     () => StatsViewModel(getIt<StatsRepo>(), getIt<SessionRepo>()),
+  );
+  getIt.registerLazySingleton<BodyWeightViewModel>(
+    () => BodyWeightViewModel(getIt<BodyWeightRepo>()),
   );
   getIt.registerFactoryParam<
     WorkoutSessionViewModel,

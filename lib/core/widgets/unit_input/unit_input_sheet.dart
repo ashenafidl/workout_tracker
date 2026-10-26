@@ -28,6 +28,7 @@ class UnitInputSheet extends StatefulWidget {
 class _UnitInputSheetState extends State<UnitInputSheet> {
   // Current raw values — only one is active depending on config type.
   late int _intValue;
+  late double _doubleValue;
   late Duration _duration;
   late UnitInputConfig _config;
   late ExerciseType _selectedType;
@@ -42,6 +43,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
         widget.initialType ??
         switch (widget.config) {
           IntegerInputConfig() => ExerciseType.reps,
+          DoubleInputConfig() => ExerciseType.reps,
           DurationInputConfig() => ExerciseType.duration,
         };
     final availableTypes = widget.availableTypes;
@@ -55,6 +57,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
     switch (_config) {
       case final IntegerInputConfig c:
         _intValue = c.initialValue;
+      case final DoubleInputConfig c:
+        _doubleValue = _roundDecimal(c.initialValue, c.decimalPlaces);
       case final DurationInputConfig c:
         _duration = c.initialDuration;
     }
@@ -64,6 +68,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   ExerciseType _configType(UnitInputConfig config) {
     return switch (config) {
       IntegerInputConfig() => ExerciseType.reps,
+      DoubleInputConfig() => ExerciseType.reps,
       DurationInputConfig() => ExerciseType.duration,
     };
   }
@@ -87,6 +92,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
       switch (_config) {
         case final IntegerInputConfig config:
           _intValue = config.initialValue;
+        case final DoubleInputConfig config:
+          _doubleValue = config.initialValue;
         case final DurationInputConfig config:
           _duration = config.initialDuration;
       }
@@ -106,6 +113,9 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   String _displayValue() {
     return switch (_config) {
       IntegerInputConfig() => "$_intValue",
+      final DoubleInputConfig c => _doubleValue.toStringAsFixed(
+        c.decimalPlaces,
+      ),
       DurationInputConfig() => formatDuration(_duration),
     };
   }
@@ -113,6 +123,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   String _unitLabel() {
     return switch (_config) {
       final IntegerInputConfig c => c.label ?? "",
+      final DoubleInputConfig c => c.label ?? "",
       DurationInputConfig() => "",
     };
   }
@@ -123,6 +134,11 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
       switch (_config) {
         case final IntegerInputConfig c:
           _intValue += c.step;
+        case final DoubleInputConfig c:
+          _doubleValue = _roundDecimal(
+            _doubleValue + c.step,
+            c.decimalPlaces,
+          );
         case final DurationInputConfig c:
           _duration += Duration(seconds: c.stepSeconds);
       }
@@ -134,6 +150,9 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
       switch (_config) {
         case final IntegerInputConfig c:
           if (_intValue - c.step >= c.min) _intValue -= c.step;
+        case final DoubleInputConfig c:
+          final next = _roundDecimal(_doubleValue - c.step, c.decimalPlaces);
+          if (next >= c.min) _doubleValue = next;
         case final DurationInputConfig c:
           final next = _duration - Duration(seconds: c.stepSeconds);
           if (next.inSeconds >= 0) _duration = next;
@@ -144,6 +163,8 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
   bool get _canDecrement {
     return switch (_config) {
       final IntegerInputConfig c => _intValue - c.step >= c.min,
+      final DoubleInputConfig c =>
+        _roundDecimal(_doubleValue - c.step, c.decimalPlaces) >= c.min,
       final DurationInputConfig c =>
         (_duration - Duration(seconds: c.stepSeconds)).inSeconds >= 0,
     };
@@ -153,6 +174,14 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
 
   // Duration uses two separate fields (mm:ss) so keyboard edit is disabled for it.
   bool get _supportsKeyboardEdit => _config is! DurationInputConfig;
+
+  bool get _canSubmit {
+    return switch (_config) {
+      final DoubleInputConfig c =>
+        _doubleValue.isFinite && _doubleValue >= c.min,
+      _ => true,
+    };
+  }
 
   void _startEditing() {
     if (!_supportsKeyboardEdit) return;
@@ -165,15 +194,33 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
     setState(() => _isEditing = true);
   }
 
-  void _commitEdit() {
+  bool _commitEdit() {
+    var isValid = true;
     switch (_config) {
       case final IntegerInputConfig c:
         final v = int.tryParse(_controller.text);
-        if (v != null && v >= c.min) _intValue = v;
+        if (v != null && v >= c.min) {
+          _intValue = v;
+        } else {
+          isValid = false;
+        }
+      case final DoubleInputConfig c:
+        final value = double.tryParse(_controller.text);
+        if (value != null && value.isFinite && value >= c.min) {
+          _doubleValue = _roundDecimal(value, c.decimalPlaces);
+        } else {
+          isValid = false;
+        }
       case DurationInputConfig():
         break;
     }
-    setState(() => _isEditing = false);
+    if (isValid) {
+      setState(() {
+        _isEditing = false;
+        _controller.text = _displayValue();
+      });
+    }
+    return isValid;
   }
 
   // ─── Result ──────────────────────────────────────────────────────────────
@@ -184,6 +231,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
         _intValue,
         type: _selectedType,
       ),
+      DoubleInputConfig() => DoubleInputResult(_doubleValue),
       DurationInputConfig() => DurationInputResult(
         _duration,
         type: _selectedType,
@@ -339,8 +387,12 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
                               ),
-                              onSubmitted: (_) => _commitEdit(),
-                              onTapOutside: (_) => _commitEdit(),
+                              onSubmitted: (_) {
+                                _commitEdit();
+                              },
+                              onTapOutside: (_) {
+                                _commitEdit();
+                              },
                             )
                           : Column(
                               mainAxisSize: .min,
@@ -385,15 +437,19 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () {
-                  if (_isEditing) _commitEdit();
-                  Navigator.pop(context, _buildResult());
+                  if (_isEditing && !_commitEdit()) return;
+                  if (_canSubmit) Navigator.pop(context, _buildResult());
                 },
-                child: const Text("Done"),
+                child: Text(_canSubmit ? "Done" : "Enter a valid value"),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  double _roundDecimal(double value, int decimalPlaces) {
+    return double.parse(value.toStringAsFixed(decimalPlaces));
   }
 }
