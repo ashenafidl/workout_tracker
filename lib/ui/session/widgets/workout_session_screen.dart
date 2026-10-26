@@ -11,6 +11,8 @@ import "package:workout_tracker/ui/session/widgets/rest_view.dart";
 import "package:workout_tracker/ui/session/widgets/session_bottom_panel.dart";
 import "package:workout_tracker/ui/session/widgets/session_progress_bar.dart";
 
+enum _SessionExitAction { keepGoing, quit, recordProgress }
+
 class WorkoutSessionScreen extends StatefulWidget {
   const new({super.key, required this.args});
 
@@ -48,31 +50,139 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
-    if (vm.phase == SessionPhase.completed) return true;
+  Future<_SessionExitAction?> _onWillPop() async {
+    if (vm.phase == SessionPhase.completed) return _SessionExitAction.quit;
 
-    final confirm = await showDialog<bool>(
+    var keepProgress = false;
+    return showDialog<_SessionExitAction>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Quite workout?"),
-        content: const Text("Your progress for this session will be lost."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              "Quit",
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
+
+          return Dialog(
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Keep going"),
-          ),
-        ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: colorScheme.primary,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Quit workout?",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    vm.hasCompletedProgress
+                        ? "You can keep your completed work and view your session summary."
+                        : "You haven't completed any exercises to save yet.",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (vm.hasCompletedProgress) ...[
+                    const SizedBox(height: 8),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: Text(
+                        "Keep my progress",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      value: keepProgress,
+                      onChanged: (value) {
+                        setDialogState(() {
+                          keepProgress = value ?? false;
+                        });
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(
+                            dialogContext,
+                            keepProgress
+                                ? _SessionExitAction.recordProgress
+                                : _SessionExitAction.quit,
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: BorderSide(
+                              color: colorScheme.outline.withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            "Quit",
+                            style: TextStyle(
+                              color: colorScheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () => Navigator.pop(
+                            dialogContext,
+                            _SessionExitAction.keepGoing,
+                          ),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text(
+                            "Keep going",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
-
-    return confirm ?? false;
   }
 
   @override
@@ -81,8 +191,19 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final can = await _onWillPop();
-        if (can && context.mounted) context.pop();
+        final action = await _onWillPop();
+        if (!context.mounted) return;
+        switch (action) {
+          case _SessionExitAction.quit:
+            context.pop();
+            break;
+          case _SessionExitAction.recordProgress:
+            await vm.recordPartialProgress();
+            break;
+          case _SessionExitAction.keepGoing:
+          case null:
+            break;
+        }
       },
       child: Scaffold(
         body: SafeArea(

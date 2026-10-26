@@ -46,6 +46,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   int? _sessionId;
   int? _currentCircuitId;
   int? _currentExerciseLogId;
+  bool _hasCompletedProgress = false;
   WorkoutSessionSummary? _summary;
 
   SessionPhase get phase => _phase;
@@ -66,6 +67,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   }
 
   WorkoutSessionSummary? get summary => _summary;
+  bool get hasCompletedProgress => _hasCompletedProgress;
 
   Timer? _timer;
   Timer? _exerciseTimer;
@@ -355,6 +357,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
       ),
     );
 
+    _hasCompletedProgress = true;
     _currentExerciseLogId = null;
   }
 
@@ -380,6 +383,31 @@ class WorkoutSessionViewModel extends ChangeNotifier {
 
       await _deactivateProgramIfFinished();
     });
+  }
+
+  Future<void> recordPartialProgress() async {
+    if (_sessionId == null || !_hasCompletedProgress) {
+      throw StateError(
+        "Completed session progress is required to finish early.",
+      );
+    }
+
+    _timer?.cancel();
+    _exerciseTimer?.cancel();
+    _timer = null;
+    _exerciseTimer = null;
+
+    if (_currentExerciseLogId != null) {
+      await (database.delete(
+        database.sessionExerciseLogs,
+      )..where((log) => log.id.equals(_currentExerciseLogId!))).go();
+      _currentExerciseLogId = null;
+    }
+
+    await _completeSession();
+    _phase = SessionPhase.completed;
+    await _loadSessionSummary();
+    notifyListeners();
   }
 
   /// Completing the last workout finishes the program, so it loses its
@@ -476,7 +504,8 @@ class WorkoutSessionViewModel extends ChangeNotifier {
         CircuitSummary(
           circuitNumber: circuit.circuitNumber,
           startedAt: circuit.startedAt,
-          completedAt: circuit.completedAt ?? circuit.startedAt,
+          completedAt:
+              circuit.completedAt ?? session.completedAt ?? circuit.startedAt,
           restDuration: restDuration,
           exercises: exercises,
         ),
