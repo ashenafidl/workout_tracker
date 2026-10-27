@@ -198,7 +198,7 @@ class WorkoutViewModel extends ChangeNotifier {
     );
   }
 
-  Future<bool> submit(String programId) async {
+  Future<bool> submit(int programId) async {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
       _errorMessage = "Workout name is required";

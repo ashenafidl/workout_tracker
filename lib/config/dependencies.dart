@@ -1,7 +1,7 @@
 import "package:get_it/get_it.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workout_tracker/data/models/exercises.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 import "package:workout_tracker/data/repositories/body_weight_repo.dart";
 import "package:workout_tracker/data/repositories/challenge_repo.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";

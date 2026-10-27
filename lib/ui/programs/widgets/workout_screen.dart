@@ -22,7 +22,7 @@ class WorkoutScreen extends StatefulWidget {
     this.initialExercises,
   });
 
-  final String programId;
+  final int programId;
   final int? workoutId;
   final String? initialName;
   final int? initialSets;

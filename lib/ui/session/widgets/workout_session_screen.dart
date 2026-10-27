@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:wakelock_plus/wakelock_plus.dart";
 import "package:workout_tracker/config/dependencies.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 import "package:workout_tracker/ui/session/widgets/completed_view.dart";

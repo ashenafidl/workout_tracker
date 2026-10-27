@@ -4,7 +4,7 @@ import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 
 class TodaysWorkoutCard extends StatelessWidget {
   const new({

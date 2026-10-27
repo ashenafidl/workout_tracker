@@ -4,7 +4,7 @@ import "package:drift/drift.dart";
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/data/services/sound_service.dart";
 import "package:workout_tracker/data/services/streak_service.dart";

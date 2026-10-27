@@ -5,9 +5,8 @@ import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
-import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
 
 class ProgramDetailScreen extends StatefulWidget {
   const new({super.key, required this.programId});
@@ -372,18 +371,16 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     WorkoutKind? kind,
     List<WorkoutExerciseDetail>? exercises,
   }) {
-    Navigator.push<void>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WorkoutScreen(
-          programId: widget.programId.toString(),
-          workoutId: workoutId,
-          initialName: name,
-          initialSets: sets,
-          initialKind: kind,
-          initialRestDurationSeconds: restDurationSeconds,
-          initialExercises: exercises,
-        ),
+    context.push(
+      "/programs/workout",
+      extra: WorkoutScreenArgs(
+        programId: widget.programId,
+        workoutId: workoutId,
+        initialName: name,
+        initialSets: sets,
+        initialKind: kind,
+        initialRestDurationSeconds: restDurationSeconds,
+        initialExercises: exercises,
       ),
     );
   }

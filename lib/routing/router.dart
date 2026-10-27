@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:workout_tracker/core/widgets/scaffold_with_navbar.dart";
 import "package:workout_tracker/data/models/challenge.dart";
-import "package:workout_tracker/data/models/workout_session_args.dart";
+import "package:workout_tracker/data/models/workout.dart";
 import "package:workout_tracker/ui/exercises/widgets/exercises_screen.dart";
 import "package:workout_tracker/ui/history/widgets/history_screen.dart";
 import "package:workout_tracker/ui/home/widgets/home_screen.dart";
@@ -10,8 +10,9 @@ import "package:workout_tracker/ui/more/widgets/more_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/challenge_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/program_detail_screen.dart";
 import "package:workout_tracker/ui/programs/widgets/programs_screen.dart";
+import "package:workout_tracker/ui/programs/widgets/workout_screen.dart";
 import "package:workout_tracker/ui/session/widgets/workout_session_screen.dart";
-import "package:workout_tracker/ui/stats/widgers/stats_screen.dart";
+import "package:workout_tracker/ui/stats/widgets/stats_screen.dart";
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _homeNavKey = GlobalKey<NavigatorState>(
@@ -55,13 +56,36 @@ final GoRouter appRouter = GoRouter(
               builder: (context, state) => const ProgramsScreen(),
               routes: [
                 GoRoute(
-                  path: ":programId",
+                  path: ":programId(\\d+)",
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) {
-                    final programId = int.parse(
-                      state.pathParameters["programId"]!,
-                    );
+                    final raw = state.pathParameters["programId"]!;
+                    final programId = int.tryParse(raw);
+
+                    if (programId == null) {
+                      return const Scaffold(
+                        body: Center(child: Text("Invalid program")),
+                      );
+                    }
+
                     return ProgramDetailScreen(programId: programId);
+                  },
+                ),
+                GoRoute(
+                  path: "workout",
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) {
+                    final args = state.extra as WorkoutScreenArgs;
+                    return WorkoutScreen(
+                      programId: args.programId,
+                      workoutId: args.workoutId,
+                      initialName: args.initialName,
+                      initialSets: args.initialSets,
+                      initialKind: args.initialKind,
+                      initialRestDurationSeconds:
+                          args.initialRestDurationSeconds,
+                      initialExercises: args.initialExercises,
+                    );
                   },
                 ),
               ],

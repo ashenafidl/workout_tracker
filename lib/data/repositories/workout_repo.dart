@@ -100,7 +100,7 @@ class WorkoutRepo {
   }
 
   Future<void> addWorkout({
-    required String programId,
+    required int programId,
     required String name,
     required int sets,
     required List<WorkoutExerciseInput> exercises,
@@ -116,7 +116,7 @@ class WorkoutRepo {
 
     await _db.transaction(() async {
       final workoutCompanion = WorkoutsCompanion.insert(
-        programId: int.parse(programId),
+        programId: programId,
         name: trimmedName,
         kind: Value(kind),
         sets: sets,
@@ -206,9 +206,9 @@ class WorkoutRepo {
     });
   }
 
-  Future<int> _nextWorkoutPosition(String programId) async {
+  Future<int> _nextWorkoutPosition(int programId) async {
     final query = _db.select(_db.workouts)
-      ..where((w) => w.programId.equals(int.parse(programId)))
+      ..where((w) => w.programId.equals(programId))
       ..orderBy([
         (w) => OrderingTerm(expression: w.position, mode: OrderingMode.desc),
       ])
