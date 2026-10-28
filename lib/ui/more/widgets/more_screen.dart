@@ -38,35 +38,127 @@ class _MoreScreenState extends State<MoreScreen> {
     }
   }
 
+  Future<void> _exportBackup() async {
+    try {
+      final saved = await vm.exportBackup();
+      if (!mounted || !saved) return;
+      _showMessage("Backup exported successfully.");
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString(), isError: true);
+    }
+  }
+
+  Future<void> _importBackup() async {
+    try {
+      final backup = await vm.selectBackup();
+      if (!mounted || backup == null) return;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Replace all app data?"),
+          content: Text(
+            "This will replace your existing workouts, history, settings, "
+            "and other backed-up data with ${backup.summary}. This cannot "
+            "be undone.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Replace data"),
+            ),
+          ],
+        ),
+      );
+      if (!mounted || confirmed != true) return;
+
+      await vm.restoreBackup(backup);
+      if (!mounted) return;
+      _showMessage("Backup restored successfully.");
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString(), isError: true);
+    }
+  }
+
+  void _showMessage(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("More")),
       body: ListenableBuilder(
         listenable: vm,
-        builder: (context, _) => ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        builder: (context, _) => Column(
           children: [
-            MoreTileGroup(
-              title: "Workouts",
-              children: [
-                MoreTile(
-                  icon: Icons.fitness_center_outlined,
-                  title: "Exercises",
-                  trailingText: vm.exerciseCount > 0
-                      ? "${vm.exerciseCount}"
-                      : null,
-                  onTap: () => context.push("/more/exercises"),
+            SizedBox(
+              height: 2,
+              child: vm.isBackupBusy ? const LinearProgressIndicator() : null,
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
-                MoreTile(
-                  icon: Icons.timer_outlined,
-                  title: "Rest Time",
-                  trailingText: formatDuration(
-                    Duration(seconds: vm.restDuration),
+                children: [
+                  MoreTileGroup(
+                    title: "Workouts",
+                    children: [
+                      MoreTile(
+                        icon: Icons.fitness_center_outlined,
+                        title: "Exercises",
+                        trailingText: vm.exerciseCount > 0
+                            ? "${vm.exerciseCount}"
+                            : null,
+                        onTap: vm.isBackupBusy
+                            ? null
+                            : () => context.push("/more/exercises"),
+                      ),
+                      MoreTile(
+                        icon: Icons.timer_outlined,
+                        title: "Rest Time",
+                        trailingText: formatDuration(
+                          Duration(seconds: vm.restDuration),
+                        ),
+                        onTap: vm.isBackupBusy
+                            ? null
+                            : _showRestDurationSettingDialog,
+                      ),
+                    ],
                   ),
-                  onTap: _showRestDurationSettingDialog,
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  MoreTileGroup(
+                    title: "Backup & Restore",
+                    children: [
+                      MoreTile(
+                        icon: Icons.upload_file_outlined,
+                        title: "Export Backup",
+                        onTap: vm.isBackupBusy ? null : _exportBackup,
+                      ),
+                      MoreTile(
+                        icon: Icons.download_outlined,
+                        title: "Import Backup",
+                        onTap: vm.isBackupBusy ? null : _importBackup,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

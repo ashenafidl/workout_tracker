@@ -10,6 +10,7 @@ import "package:workout_tracker/data/repositories/session_repo.dart";
 import "package:workout_tracker/data/repositories/stats_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
+import "package:workout_tracker/data/services/backup_service.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/data/services/sound_service.dart";
 import "package:workout_tracker/data/services/streak_service.dart";
@@ -40,6 +41,9 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<SharedPreferenceService>(
     SharedPreferenceService(prefs),
   );
+  getIt.registerLazySingleton<BackupService>(
+    () => BackupService(getIt<AppDatabase>(), getIt<SharedPreferenceService>()),
+  );
   getIt.registerSingleton<SoundService>(SoundService());
   getIt.registerSingleton<StreakService>(StreakService(getIt<AppDatabase>()));
 
@@ -69,8 +73,11 @@ Future<void> setupDependencies() async {
 
   // ViewModels
   getIt.registerFactory<MoreViewModel>(
-    () =>
-        MoreViewModel(getIt<ExerciseRepo>(), getIt<SharedPreferenceService>()),
+    () => MoreViewModel(
+      getIt<ExerciseRepo>(),
+      getIt<SharedPreferenceService>(),
+      getIt<BackupService>(),
+    ),
   );
   getIt.registerFactory<ExerciseListViewModel>(
     () => ExerciseListViewModel(getIt<ExerciseRepo>()),
