@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_form_view_model.dart";

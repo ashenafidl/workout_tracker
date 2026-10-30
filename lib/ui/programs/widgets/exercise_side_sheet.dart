@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 
 /// Asks which side a bilateral exercise is performed on when it is added to a

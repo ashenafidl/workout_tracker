@@ -1,7 +1,7 @@
 import "dart:math" as math;
 
-import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/data/models/daily_activity.dart";
 import "package:workout_tracker/utils/format_time.dart";
 

@@ -1,7 +1,7 @@
 import "package:drift/drift.dart";
 import "package:flutter/foundation.dart";
-import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/database/database.dart";
 

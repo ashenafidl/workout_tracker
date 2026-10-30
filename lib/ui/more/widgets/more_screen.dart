@@ -1,5 +1,5 @@
-import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";

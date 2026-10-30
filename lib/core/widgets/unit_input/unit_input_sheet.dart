@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/core/widgets/unit_input/scroll_wheel.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
@@ -135,10 +135,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
         case final IntegerInputConfig c:
           _intValue += c.step;
         case final DoubleInputConfig c:
-          _doubleValue = _roundDecimal(
-            _doubleValue + c.step,
-            c.decimalPlaces,
-          );
+          _doubleValue = _roundDecimal(_doubleValue + c.step, c.decimalPlaces);
         case final DurationInputConfig c:
           _duration += Duration(seconds: c.stepSeconds);
       }

@@ -1,5 +1,5 @@
-import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/core/widgets/scaffold_with_navbar.dart";
 import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/workout.dart";

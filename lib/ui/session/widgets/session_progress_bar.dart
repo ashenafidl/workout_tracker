@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 
 class SessionProgressBar extends StatelessWidget {

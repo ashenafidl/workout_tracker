@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/theme/app_theme.dart";
 import "package:workout_tracker/routing/router.dart";

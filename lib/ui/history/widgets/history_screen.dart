@@ -1,5 +1,5 @@
-import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/session_history.dart";
 import "package:workout_tracker/ui/history/view_models/history_view_model.dart";
