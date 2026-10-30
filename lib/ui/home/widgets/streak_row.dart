@@ -5,18 +5,23 @@ class StreakRow extends StatelessWidget {
     super.key,
     required this.currentStreak,
     required this.longestStreak,
+    required this.isStreakCountedToday,
     required this.onTap,
   });
 
   final int currentStreak;
   final int longestStreak;
+  final bool isStreakCountedToday;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isPersonalBest = currentStreak >= longestStreak;
+    final isPersonalBest = currentStreak > 0 && currentStreak >= longestStreak;
+    final streakColor = isStreakCountedToday
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -29,10 +34,7 @@ class StreakRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Icon(
-                  Icons.local_fire_department_rounded,
-                  color: colorScheme.primary,
-                ),
+                Icon(Icons.local_fire_department_rounded, color: streakColor),
                 const SizedBox(width: 8),
                 Text(
                   "$currentStreak day streak",
@@ -40,6 +42,9 @@ class StreakRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: isStreakCountedToday
+                        ? null
+                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
                 if (isPersonalBest) ...[

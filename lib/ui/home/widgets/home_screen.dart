@@ -20,19 +20,22 @@ class HomeScreen extends StatelessWidget {
         listenable: vm,
         builder: (context, _) {
           final streak = vm.streakStats;
+          final currentStreak = vm.currentStreak;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StreakRow(
-                currentStreak: streak?.currentStreak ?? 0,
+                currentStreak: currentStreak,
                 longestStreak: streak?.longestStreak ?? 0,
+                isStreakCountedToday: vm.isStreakCountedToday,
                 onTap: () => showModalBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
                   useRootNavigator: true,
                   builder: (context) => StreakCalendarSheet(
-                    currentStreak: streak?.currentStreak ?? 0,
+                    currentStreak: vm.currentStreak,
+                    isStreakCountedToday: vm.isStreakCountedToday,
                     dailyActivityStream: getIt<StreakRepo>()
                         .watchDailyActivity(),
                   ),

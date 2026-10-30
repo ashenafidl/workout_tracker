@@ -9,10 +9,12 @@ class StreakCalendarSheet extends StatefulWidget {
   const new({
     super.key,
     required this.currentStreak,
+    required this.isStreakCountedToday,
     required this.dailyActivityStream,
   });
 
   final int currentStreak;
+  final bool isStreakCountedToday;
   final Stream<List<DailyActivity>> dailyActivityStream;
 
   @override
@@ -56,6 +58,9 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final streakColor = widget.isStreakCountedToday
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
 
     return SafeArea(
       top: false,
@@ -75,7 +80,7 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
             const SizedBox(height: 20),
             Icon(
               Icons.local_fire_department_rounded,
-              color: colorScheme.primary,
+              color: streakColor,
               size: 36,
             ),
             const SizedBox(height: 4),
@@ -83,6 +88,9 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
               "${widget.currentStreak} day streak",
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: widget.isStreakCountedToday
+                    ? null
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
             Text(

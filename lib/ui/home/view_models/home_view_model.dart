@@ -62,6 +62,30 @@ class HomeViewModel extends ChangeNotifier {
 
   StreakStat? _streakStats;
   StreakStat? get streakStats => _streakStats;
+  int get currentStreak {
+    final stats = _streakStats;
+    final endDate = stats?.currentStreakEndDate;
+    if (stats == null || endDate == null || stats.currentStreak == 0) return 0;
+
+    final today = _dateOnly(DateTime.now());
+    final lastCountedDay = _dateOnly(endDate);
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (lastCountedDay.isBefore(yesterday) || lastCountedDay.isAfter(today)) {
+      return 0;
+    }
+
+    return stats.currentStreak;
+  }
+
+  bool get isStreakCountedToday {
+    final endDate = _streakStats?.currentStreakEndDate;
+    return currentStreak > 0 &&
+        endDate != null &&
+        _dateOnly(endDate) == _dateOnly(DateTime.now());
+  }
+
+  DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
