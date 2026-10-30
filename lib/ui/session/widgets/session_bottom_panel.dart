@@ -1,6 +1,5 @@
 import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
-import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
@@ -50,7 +49,7 @@ class SessionBottomPanel extends StatelessWidget {
               Expanded(
                 child: ExerciseTitleWithSide(
                   name: isRest ? "Rest" : vm.currentExercise.exercise.name,
-                  side: isRest ? ExerciseSide.both : vm.currentSide,
+                  side: isRest ? null : vm.currentSide,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
