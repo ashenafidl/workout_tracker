@@ -4581,6 +4581,242 @@ class StreakStatsCompanion extends UpdateCompanion<StreakStat> {
   }
 }
 
+class $WorkoutScheduleChangesTable extends WorkoutScheduleChanges
+    with TableInfo<$WorkoutScheduleChangesTable, WorkoutScheduleChange> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WorkoutScheduleChangesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _effectiveFromMeta = const VerificationMeta(
+    'effectiveFrom',
+  );
+  @override
+  late final GeneratedColumn<DateTime> effectiveFrom =
+      GeneratedColumn<DateTime>(
+        'effective_from',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _weekdayMaskMeta = const VerificationMeta(
+    'weekdayMask',
+  );
+  @override
+  late final GeneratedColumn<int> weekdayMask = GeneratedColumn<int>(
+    'weekday_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [effectiveFrom, weekdayMask];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'workout_schedule_changes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<WorkoutScheduleChange> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('effective_from')) {
+      context.handle(
+        _effectiveFromMeta,
+        effectiveFrom.isAcceptableOrUnknown(
+          data['effective_from']!,
+          _effectiveFromMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveFromMeta);
+    }
+    if (data.containsKey('weekday_mask')) {
+      context.handle(
+        _weekdayMaskMeta,
+        weekdayMask.isAcceptableOrUnknown(
+          data['weekday_mask']!,
+          _weekdayMaskMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_weekdayMaskMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {effectiveFrom};
+  @override
+  WorkoutScheduleChange map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WorkoutScheduleChange(
+      effectiveFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}effective_from'],
+      )!,
+      weekdayMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}weekday_mask'],
+      )!,
+    );
+  }
+
+  @override
+  $WorkoutScheduleChangesTable createAlias(String alias) {
+    return $WorkoutScheduleChangesTable(attachedDatabase, alias);
+  }
+}
+
+class WorkoutScheduleChange extends DataClass
+    implements Insertable<WorkoutScheduleChange> {
+  final DateTime effectiveFrom;
+  final int weekdayMask;
+  const WorkoutScheduleChange({
+    required this.effectiveFrom,
+    required this.weekdayMask,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['effective_from'] = Variable<DateTime>(effectiveFrom);
+    map['weekday_mask'] = Variable<int>(weekdayMask);
+    return map;
+  }
+
+  WorkoutScheduleChangesCompanion toCompanion(bool nullToAbsent) {
+    return WorkoutScheduleChangesCompanion(
+      effectiveFrom: Value(effectiveFrom),
+      weekdayMask: Value(weekdayMask),
+    );
+  }
+
+  factory WorkoutScheduleChange.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WorkoutScheduleChange(
+      effectiveFrom: serializer.fromJson<DateTime>(json['effectiveFrom']),
+      weekdayMask: serializer.fromJson<int>(json['weekdayMask']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'effectiveFrom': serializer.toJson<DateTime>(effectiveFrom),
+      'weekdayMask': serializer.toJson<int>(weekdayMask),
+    };
+  }
+
+  WorkoutScheduleChange copyWith({DateTime? effectiveFrom, int? weekdayMask}) =>
+      WorkoutScheduleChange(
+        effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+        weekdayMask: weekdayMask ?? this.weekdayMask,
+      );
+  WorkoutScheduleChange copyWithCompanion(
+    WorkoutScheduleChangesCompanion data,
+  ) {
+    return WorkoutScheduleChange(
+      effectiveFrom: data.effectiveFrom.present
+          ? data.effectiveFrom.value
+          : this.effectiveFrom,
+      weekdayMask: data.weekdayMask.present
+          ? data.weekdayMask.value
+          : this.weekdayMask,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkoutScheduleChange(')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('weekdayMask: $weekdayMask')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(effectiveFrom, weekdayMask);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WorkoutScheduleChange &&
+          other.effectiveFrom == this.effectiveFrom &&
+          other.weekdayMask == this.weekdayMask);
+}
+
+class WorkoutScheduleChangesCompanion
+    extends UpdateCompanion<WorkoutScheduleChange> {
+  final Value<DateTime> effectiveFrom;
+  final Value<int> weekdayMask;
+  final Value<int> rowid;
+  const WorkoutScheduleChangesCompanion({
+    this.effectiveFrom = const Value.absent(),
+    this.weekdayMask = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WorkoutScheduleChangesCompanion.insert({
+    required DateTime effectiveFrom,
+    required int weekdayMask,
+    this.rowid = const Value.absent(),
+  }) : effectiveFrom = Value(effectiveFrom),
+       weekdayMask = Value(weekdayMask);
+  static Insertable<WorkoutScheduleChange> custom({
+    Expression<DateTime>? effectiveFrom,
+    Expression<int>? weekdayMask,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (effectiveFrom != null) 'effective_from': effectiveFrom,
+      if (weekdayMask != null) 'weekday_mask': weekdayMask,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WorkoutScheduleChangesCompanion copyWith({
+    Value<DateTime>? effectiveFrom,
+    Value<int>? weekdayMask,
+    Value<int>? rowid,
+  }) {
+    return WorkoutScheduleChangesCompanion(
+      effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+      weekdayMask: weekdayMask ?? this.weekdayMask,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (effectiveFrom.present) {
+      map['effective_from'] = Variable<DateTime>(effectiveFrom.value);
+    }
+    if (weekdayMask.present) {
+      map['weekday_mask'] = Variable<int>(weekdayMask.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkoutScheduleChangesCompanion(')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('weekdayMask: $weekdayMask, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $BodyWeightLogsTable extends BodyWeightLogs
     with TableInfo<$BodyWeightLogsTable, BodyWeightLog> {
   @override
@@ -4851,6 +5087,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $SessionExerciseLogsTable(this);
   late final $ChallengeLogsTable challengeLogs = $ChallengeLogsTable(this);
   late final $StreakStatsTable streakStats = $StreakStatsTable(this);
+  late final $WorkoutScheduleChangesTable workoutScheduleChanges =
+      $WorkoutScheduleChangesTable(this);
   late final $BodyWeightLogsTable bodyWeightLogs = $BodyWeightLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -4867,6 +5105,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sessionExerciseLogs,
     challengeLogs,
     streakStats,
+    workoutScheduleChanges,
     bodyWeightLogs,
   ];
   @override
@@ -5425,10 +5664,11 @@ class $$ExercisesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (exerciseSupportedTypesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Exercise,
                           $ExercisesTable,
-                          ExerciseSupportedType
+                          ExerciseSupportedType,
+                          $ExerciseSupportedTypesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ExercisesTableReferences
@@ -5439,17 +5679,16 @@ class $$ExercisesTableTableManager
                                 table,
                                 p0,
                               ).exerciseSupportedTypesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.exerciseId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'exercise_id',
                           typedResults: items,
                         ),
                       if (workoutExercisesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Exercise,
                           $ExercisesTable,
-                          WorkoutExercise
+                          WorkoutExercise,
+                          $WorkoutExercisesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ExercisesTableReferences
@@ -5460,17 +5699,16 @@ class $$ExercisesTableTableManager
                                 table,
                                 p0,
                               ).workoutExercisesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.exerciseId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'exercise_id',
                           typedResults: items,
                         ),
                       if (sessionExerciseLogsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Exercise,
                           $ExercisesTable,
-                          SessionExerciseLog
+                          SessionExerciseLog,
+                          $SessionExerciseLogsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ExercisesTableReferences
@@ -5481,17 +5719,16 @@ class $$ExercisesTableTableManager
                                 table,
                                 p0,
                               ).sessionExerciseLogsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.exerciseId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'exercise_id',
                           typedResults: items,
                         ),
                       if (challengeLogsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Exercise,
                           $ExercisesTable,
-                          ChallengeLog
+                          ChallengeLog,
+                          $ChallengeLogsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ExercisesTableReferences
@@ -5502,10 +5739,8 @@ class $$ExercisesTableTableManager
                                 table,
                                 p0,
                               ).challengeLogsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.exerciseId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'exercise_id',
                           typedResults: items,
                         ),
                     ];
@@ -6127,10 +6362,11 @@ class $$ProgramsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (workoutsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Program,
                           $ProgramsTable,
-                          Workout
+                          Workout,
+                          $WorkoutsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ProgramsTableReferences
@@ -6141,17 +6377,16 @@ class $$ProgramsTableTableManager
                                 table,
                                 p0,
                               ).workoutsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.programId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'program_id',
                           typedResults: items,
                         ),
                       if (workoutSessionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Program,
                           $ProgramsTable,
-                          WorkoutSession
+                          WorkoutSession,
+                          $WorkoutSessionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ProgramsTableReferences
@@ -6162,10 +6397,8 @@ class $$ProgramsTableTableManager
                                 table,
                                 p0,
                               ).workoutSessionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.programId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'program_id',
                           typedResults: items,
                         ),
                     ];
@@ -6708,10 +6941,11 @@ class $$WorkoutsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (workoutExercisesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Workout,
                           $WorkoutsTable,
-                          WorkoutExercise
+                          WorkoutExercise,
+                          $WorkoutExercisesTable
                         >(
                           currentTable: table,
                           referencedTable: $$WorkoutsTableReferences
@@ -6722,17 +6956,16 @@ class $$WorkoutsTableTableManager
                                 table,
                                 p0,
                               ).workoutExercisesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.workoutId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'workout_id',
                           typedResults: items,
                         ),
                       if (workoutSessionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           Workout,
                           $WorkoutsTable,
-                          WorkoutSession
+                          WorkoutSession,
+                          $WorkoutSessionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$WorkoutsTableReferences
@@ -6743,10 +6976,8 @@ class $$WorkoutsTableTableManager
                                 table,
                                 p0,
                               ).workoutSessionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.workoutId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'workout_id',
                           typedResults: items,
                         ),
                     ];
@@ -7772,10 +8003,11 @@ class $$WorkoutSessionsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (sessionCircuitsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           WorkoutSession,
                           $WorkoutSessionsTable,
-                          SessionCircuit
+                          SessionCircuit,
+                          $SessionCircuitsTable
                         >(
                           currentTable: table,
                           referencedTable: $$WorkoutSessionsTableReferences
@@ -7786,17 +8018,16 @@ class $$WorkoutSessionsTableTableManager
                                 table,
                                 p0,
                               ).sessionCircuitsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.sessionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'session_id',
                           typedResults: items,
                         ),
                       if (challengeLogsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           WorkoutSession,
                           $WorkoutSessionsTable,
-                          ChallengeLog
+                          ChallengeLog,
+                          $ChallengeLogsTable
                         >(
                           currentTable: table,
                           referencedTable: $$WorkoutSessionsTableReferences
@@ -7807,10 +8038,8 @@ class $$WorkoutSessionsTableTableManager
                                 table,
                                 p0,
                               ).challengeLogsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.sessionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'session_id',
                           typedResults: items,
                         ),
                     ];
@@ -8219,10 +8448,11 @@ class $$SessionCircuitsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (sessionExerciseLogsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           SessionCircuit,
                           $SessionCircuitsTable,
-                          SessionExerciseLog
+                          SessionExerciseLog,
+                          $SessionExerciseLogsTable
                         >(
                           currentTable: table,
                           referencedTable: $$SessionCircuitsTableReferences
@@ -8233,10 +8463,8 @@ class $$SessionCircuitsTableTableManager
                                 table,
                                 p0,
                               ).sessionExerciseLogsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.circuitId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'circuit_id',
                           typedResults: items,
                         ),
                     ];
@@ -9537,6 +9765,184 @@ typedef $$StreakStatsTableProcessedTableManager =
       StreakStat,
       PrefetchHooks Function()
     >;
+typedef $$WorkoutScheduleChangesTableCreateCompanionBuilder =
+    WorkoutScheduleChangesCompanion Function({
+      required DateTime effectiveFrom,
+      required int weekdayMask,
+      Value<int> rowid,
+    });
+typedef $$WorkoutScheduleChangesTableUpdateCompanionBuilder =
+    WorkoutScheduleChangesCompanion Function({
+      Value<DateTime> effectiveFrom,
+      Value<int> weekdayMask,
+      Value<int> rowid,
+    });
+
+class $$WorkoutScheduleChangesTableFilterComposer
+    extends Composer<_$AppDatabase, $WorkoutScheduleChangesTable> {
+  $$WorkoutScheduleChangesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get weekdayMask => $composableBuilder(
+    column: $table.weekdayMask,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WorkoutScheduleChangesTableOrderingComposer
+    extends Composer<_$AppDatabase, $WorkoutScheduleChangesTable> {
+  $$WorkoutScheduleChangesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekdayMask => $composableBuilder(
+    column: $table.weekdayMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WorkoutScheduleChangesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WorkoutScheduleChangesTable> {
+  $$WorkoutScheduleChangesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get effectiveFrom => $composableBuilder(
+    column: $table.effectiveFrom,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get weekdayMask => $composableBuilder(
+    column: $table.weekdayMask,
+    builder: (column) => column,
+  );
+}
+
+class $$WorkoutScheduleChangesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WorkoutScheduleChangesTable,
+          WorkoutScheduleChange,
+          $$WorkoutScheduleChangesTableFilterComposer,
+          $$WorkoutScheduleChangesTableOrderingComposer,
+          $$WorkoutScheduleChangesTableAnnotationComposer,
+          $$WorkoutScheduleChangesTableCreateCompanionBuilder,
+          $$WorkoutScheduleChangesTableUpdateCompanionBuilder,
+          (
+            WorkoutScheduleChange,
+            BaseReferences<
+              _$AppDatabase,
+              $WorkoutScheduleChangesTable,
+              WorkoutScheduleChange
+            >,
+          ),
+          WorkoutScheduleChange,
+          PrefetchHooks Function()
+        > {
+  $$WorkoutScheduleChangesTableTableManager(
+    _$AppDatabase db,
+    $WorkoutScheduleChangesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WorkoutScheduleChangesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$WorkoutScheduleChangesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$WorkoutScheduleChangesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> effectiveFrom = const Value.absent(),
+                Value<int> weekdayMask = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkoutScheduleChangesCompanion(
+                effectiveFrom: effectiveFrom,
+                weekdayMask: weekdayMask,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required DateTime effectiveFrom,
+                required int weekdayMask,
+                Value<int> rowid = const Value.absent(),
+              }) => WorkoutScheduleChangesCompanion.insert(
+                effectiveFrom: effectiveFrom,
+                weekdayMask: weekdayMask,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $WorkoutScheduleChangesTable,
+                    WorkoutScheduleChange
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $WorkoutScheduleChangesTable,
+                    WorkoutScheduleChange
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WorkoutScheduleChangesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WorkoutScheduleChangesTable,
+      WorkoutScheduleChange,
+      $$WorkoutScheduleChangesTableFilterComposer,
+      $$WorkoutScheduleChangesTableOrderingComposer,
+      $$WorkoutScheduleChangesTableAnnotationComposer,
+      $$WorkoutScheduleChangesTableCreateCompanionBuilder,
+      $$WorkoutScheduleChangesTableUpdateCompanionBuilder,
+      (
+        WorkoutScheduleChange,
+        BaseReferences<
+          _$AppDatabase,
+          $WorkoutScheduleChangesTable,
+          WorkoutScheduleChange
+        >,
+      ),
+      WorkoutScheduleChange,
+      PrefetchHooks Function()
+    >;
 typedef $$BodyWeightLogsTableCreateCompanionBuilder =
     BodyWeightLogsCompanion Function({
       Value<int> id,
@@ -9731,6 +10137,11 @@ class $AppDatabaseManager {
       $$ChallengeLogsTableTableManager(_db, _db.challengeLogs);
   $$StreakStatsTableTableManager get streakStats =>
       $$StreakStatsTableTableManager(_db, _db.streakStats);
+  $$WorkoutScheduleChangesTableTableManager get workoutScheduleChanges =>
+      $$WorkoutScheduleChangesTableTableManager(
+        _db,
+        _db.workoutScheduleChanges,
+      );
   $$BodyWeightLogsTableTableManager get bodyWeightLogs =>
       $$BodyWeightLogsTableTableManager(_db, _db.bodyWeightLogs);
 }

@@ -2,7 +2,9 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/models/workout_schedule.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/schedule_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/data/repositories/workout_repo.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
@@ -13,6 +15,7 @@ class HomeViewModel extends ChangeNotifier {
     this._programRepo,
     this._workoutRepo,
     this._streakRepo,
+    this._scheduleRepo,
     this._preferenceService,
   ) {
     _activeProgramSub = _programRepo.watchActiveProgram().listen((program) {
@@ -49,16 +52,30 @@ class HomeViewModel extends ChangeNotifier {
       _streakStats = stats;
       notifyListeners();
     });
+    _scheduleSub = _scheduleRepo.watchSchedule().listen((schedule) {
+      _schedule = schedule;
+      notifyListeners();
+    });
   }
 
   final ProgramRepo _programRepo;
   final WorkoutRepo _workoutRepo;
   final StreakRepo _streakRepo;
+  final ScheduleRepo _scheduleRepo;
   final SharedPreferenceService _preferenceService;
   StreamSubscription<Program?>? _activeProgramSub;
   StreamSubscription<List<WorkoutSession>>? _sessionsSub;
   StreamSubscription<List<WorkoutWithExercises>>? _workoutsSub;
   StreamSubscription<StreakStat?>? _streakSub;
+  StreamSubscription<WorkoutSchedule>? _scheduleSub;
+
+  WorkoutSchedule _schedule = WorkoutSchedule([
+    ScheduleChange(
+      effectiveFrom: DateTime(2000, 1, 1),
+      weekdays: {1, 2, 3, 4, 5, 6, 7},
+    ),
+  ]);
+  WorkoutSchedule get schedule => _schedule;
 
   StreakStat? _streakStats;
   StreakStat? get streakStats => _streakStats;
@@ -69,11 +86,23 @@ class HomeViewModel extends ChangeNotifier {
 
     final today = _dateOnly(DateTime.now());
     final lastCountedDay = _dateOnly(endDate);
-    final yesterday = today.subtract(const Duration(days: 1));
-    if (lastCountedDay.isBefore(yesterday) || lastCountedDay.isAfter(today)) {
+    if (lastCountedDay.isAfter(today)) {
       return 0;
     }
 
+    return stats.currentStreak;
+  }
+
+  int get displayStreak {
+    final stats = _streakStats;
+    final endDate = stats?.currentStreakEndDate;
+    if (stats == null || endDate == null || stats.currentStreak == 0) return 0;
+
+    final today = _dateOnly(DateTime.now());
+    final lastCountedDay = _dateOnly(endDate);
+    if (schedule.hasScheduledDayBetween(lastCountedDay, today)) {
+      return 0;
+    }
     return stats.currentStreak;
   }
 
@@ -158,6 +187,7 @@ class HomeViewModel extends ChangeNotifier {
     _sessionsSub?.cancel();
     _workoutsSub?.cancel();
     _streakSub?.cancel();
+    _scheduleSub?.cancel();
     super.dispose();
   }
 }

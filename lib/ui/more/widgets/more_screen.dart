@@ -5,8 +5,10 @@ import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_sheet.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
+import "package:workout_tracker/ui/more/view_models/schedule_view_model.dart";
 import "package:workout_tracker/ui/more/widgets/more_tile.dart";
 import "package:workout_tracker/ui/more/widgets/more_tile_group.dart";
+import "package:workout_tracker/ui/more/widgets/schedule_sheet.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
 class MoreScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class MoreScreen extends StatefulWidget {
 
 class _MoreScreenState extends State<MoreScreen> {
   late final MoreViewModel vm = getIt<MoreViewModel>();
+  final scheduleVm = getIt<ScheduleViewModel>();
 
   Future<void> _showRestDurationSettingDialog() async {
     final result = await showModalBottomSheet<UnitInputResult>(
@@ -29,12 +32,33 @@ class _MoreScreenState extends State<MoreScreen> {
         config: DurationInputConfig(
           initialDuration: Duration(seconds: vm.restDuration),
         ),
-        // initialValue: "${vm.restDuration}",
       ),
     );
 
     if (result case DurationInputResult(:final duration)) {
       vm.setRestDuration(duration.inSeconds);
+    }
+  }
+
+  Future<void> _showScheduleSheet() async {
+    try {
+      await scheduleVm.beginEditing();
+      if (!mounted) {
+        scheduleVm.cancelEditing();
+        return;
+      }
+      await showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        useSafeArea: true,
+        builder: (context) => const ScheduleSheet(),
+      );
+      scheduleVm.cancelEditing();
+    } catch (error) {
+      scheduleVm.cancelEditing();
+      if (!mounted) return;
+      _showMessage(error.toString(), isError: true);
     }
   }
 
@@ -102,7 +126,7 @@ class _MoreScreenState extends State<MoreScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("More")),
       body: ListenableBuilder(
-        listenable: vm,
+        listenable: Listenable.merge([vm, scheduleVm]),
         builder: (context, _) => Column(
           children: [
             SizedBox(
@@ -117,13 +141,21 @@ class _MoreScreenState extends State<MoreScreen> {
                 ),
                 children: [
                   MoreTileGroup(
-                    title: "Workouts",
+                    title: "Workout",
                     children: [
                       MoreTile(
                         icon: Icons.fitness_center_outlined,
                         title: "Exercises",
-                        trailingText: vm.exerciseCount > 0
-                            ? "${vm.exerciseCount}"
+                        trailing: vm.exerciseCount > 0
+                            ? Text(
+                                "${vm.exerciseCount}",
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline,
+                                    ),
+                              )
                             : null,
                         onTap: vm.isBackupBusy
                             ? null
@@ -132,12 +164,24 @@ class _MoreScreenState extends State<MoreScreen> {
                       MoreTile(
                         icon: Icons.timer_outlined,
                         title: "Rest Time",
-                        trailingText: formatDuration(
-                          Duration(seconds: vm.restDuration),
+                        trailing: Text(
+                          formatDuration(Duration(seconds: vm.restDuration)),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         onTap: vm.isBackupBusy
                             ? null
                             : _showRestDurationSettingDialog,
+                      ),
+                      MoreTile(
+                        icon: Icons.event_repeat_outlined,
+                        title: "Schedule",
+                        trailing: _WorkoutDaysIndicator(
+                          weekdays: scheduleVm.weekdays,
+                        ),
+                        onTap: vm.isBackupBusy ? null : _showScheduleSheet,
                       ),
                     ],
                   ),
@@ -163,6 +207,53 @@ class _MoreScreenState extends State<MoreScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WorkoutDaysIndicator extends StatelessWidget {
+  const new({required this.weekdays});
+
+  final Set<int> weekdays;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    const labels = ["M", "T", "W", "T", "F", "S", "S"];
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var index = 0; index < labels.length; index++)
+          SizedBox(
+            width: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (weekdays.contains(index + 1))
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const SizedBox(width: 5, height: 5),
+                  )
+                else
+                  const SizedBox(width: 5, height: 5),
+                const SizedBox(height: 3),
+                Text(
+                  labels[index],
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: weekdays.contains(index + 1)
+                        ? colors.primary
+                        : colors.outline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

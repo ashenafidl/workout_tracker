@@ -148,6 +148,15 @@ class StreakStats extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class WorkoutScheduleChanges extends Table {
+  DateTimeColumn get effectiveFrom =>
+      dateTime().withDefault(Constant(DateTime(2000, 1, 1)))();
+  IntColumn get weekdayMask => integer().withDefault(const Constant(127))();
+
+  @override
+  Set<Column> get primaryKey => {effectiveFrom};
+}
+
 class BodyWeightLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   RealColumn get weightKg => real()();
@@ -166,6 +175,7 @@ class BodyWeightLogs extends Table {
     SessionExerciseLogs,
     ChallengeLogs,
     StreakStats,
+    WorkoutScheduleChanges,
     BodyWeightLogs,
   ],
 )
@@ -173,7 +183,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -233,6 +243,9 @@ extension Migrations on GeneratedDatabase {
     },
     from5To6: (m, s) async {
       await m.createTable(s.bodyWeightLogs);
+    },
+    from6To7: (m, s) async {
+      await m.createTable(s.workoutScheduleChanges);
     },
   );
 }

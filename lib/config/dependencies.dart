@@ -6,6 +6,7 @@ import "package:workout_tracker/data/repositories/body_weight_repo.dart";
 import "package:workout_tracker/data/repositories/challenge_repo.dart";
 import "package:workout_tracker/data/repositories/exercise_repo.dart";
 import "package:workout_tracker/data/repositories/program_repo.dart";
+import "package:workout_tracker/data/repositories/schedule_repo.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
 import "package:workout_tracker/data/repositories/stats_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
@@ -20,6 +21,7 @@ import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_mode
 import "package:workout_tracker/ui/history/view_models/history_view_model.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/more/view_models/more_view_model.dart";
+import "package:workout_tracker/ui/more/view_models/schedule_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/challenge_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/program_detail_view_model.dart";
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
@@ -45,7 +47,12 @@ Future<void> setupDependencies() async {
     () => BackupService(getIt<AppDatabase>(), getIt<SharedPreferenceService>()),
   );
   getIt.registerSingleton<SoundService>(SoundService());
-  getIt.registerSingleton<StreakService>(StreakService(getIt<AppDatabase>()));
+  getIt.registerLazySingleton<ScheduleRepo>(
+    () => ScheduleRepo(getIt<AppDatabase>()),
+  );
+  getIt.registerSingleton<StreakService>(
+    StreakService(getIt<AppDatabase>(), getIt<ScheduleRepo>()),
+  );
 
   // Repositories
   getIt.registerLazySingleton<ExerciseRepo>(
@@ -78,6 +85,9 @@ Future<void> setupDependencies() async {
       getIt<SharedPreferenceService>(),
       getIt<BackupService>(),
     ),
+  );
+  getIt.registerLazySingleton<ScheduleViewModel>(
+    () => ScheduleViewModel(getIt<ScheduleRepo>()),
   );
   getIt.registerFactory<ExerciseListViewModel>(
     () => ExerciseListViewModel(getIt<ExerciseRepo>()),
@@ -114,6 +124,7 @@ Future<void> setupDependencies() async {
       getIt<ProgramRepo>(),
       getIt<WorkoutRepo>(),
       getIt<StreakRepo>(),
+      getIt<ScheduleRepo>(),
       getIt<SharedPreferenceService>(),
     ),
   );

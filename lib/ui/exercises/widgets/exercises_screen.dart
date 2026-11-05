@@ -92,7 +92,6 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
           slivers: [
             SliverAppBar(
               pinned: true,
-              automaticallyImplyLeading: false,
               title: _isSearching
                   ? TextField(
                       key: const ValueKey("search_text_field"),

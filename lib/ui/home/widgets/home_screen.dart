@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
         listenable: vm,
         builder: (context, _) {
           final streak = vm.streakStats;
-          final currentStreak = vm.currentStreak;
+          final currentStreak = vm.displayStreak;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                   isScrollControlled: true,
                   useRootNavigator: true,
                   builder: (context) => StreakCalendarSheet(
-                    currentStreak: vm.currentStreak,
+                    currentStreak: vm.displayStreak,
                     isStreakCountedToday: vm.isStreakCountedToday,
                     dailyActivityStream: getIt<StreakRepo>()
                         .watchDailyActivity(),

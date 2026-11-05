@@ -6,14 +6,14 @@ class MoreTile extends StatelessWidget {
     required this.icon,
     required this.title,
     this.subtitle,
-    this.trailingText,
+    this.trailing,
     this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
-  final String? trailingText;
+  final Widget? trailing;
   final VoidCallback? onTap;
 
   @override
@@ -26,14 +26,7 @@ class MoreTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (trailingText != null) ...[
-            Text(
-              trailingText!,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.outline),
-            ),
-            const SizedBox(width: 8),
-          ],
+          if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
           const Icon(Icons.chevron_right),
         ],
       ),

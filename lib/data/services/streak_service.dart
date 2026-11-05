@@ -1,31 +1,27 @@
 import "package:drift/drift.dart";
+import "package:workout_tracker/data/repositories/schedule_repo.dart";
 import "package:workout_tracker/database/database.dart";
 
 class StreakService {
-  new(this._db);
+  new(this._db, this._scheduleRepo);
 
   final AppDatabase _db;
+  final ScheduleRepo _scheduleRepo;
 
   static const int _singletonId = 1;
 
   Future<void> recordCompletedSession({int? excludeSessionId}) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final tomorrow = today.add(const Duration(days: 1));
+    final today = _dateOnly(DateTime.now());
 
     await _db.transaction(() async {
       final stats = await _load();
+      final currentEndDate = stats.currentStreakEndDate;
+      if (currentEndDate != null && _dateOnly(currentEndDate) == today) {
+        return;
+      }
 
-      // Another session already landed on this calendar day, so this day is
-      // already counted towards the streak.
-      final alreadyCountedToday = await _hasCompletedSession(
-        today,
-        tomorrow,
-        excludeSessionId: excludeSessionId,
-      );
-      if (alreadyCountedToday) return;
-
+      final schedule = await _scheduleRepo.load();
+      final previousScheduledDay = schedule.previousScheduledDay(today);
       var currentStreak = stats.currentStreak;
       var currentStreakStartDate = stats.currentStreakStartDate;
       var currentStreakEndDate = stats.currentStreakEndDate;
@@ -33,14 +29,21 @@ class StreakService {
       var longestStreakStartDate = stats.longestStreakStartDate;
       var longestStreakEndDate = stats.longestStreakEndDate;
 
-      final continued = await _hasCompletedSession(yesterday, today);
+      final lastCountedDay = currentStreakEndDate == null
+          ? null
+          : _dateOnly(currentStreakEndDate);
+      final continued =
+          lastCountedDay != null &&
+          previousScheduledDay != null &&
+          (lastCountedDay == previousScheduledDay ||
+              (lastCountedDay.isAfter(previousScheduledDay) &&
+                  !schedule.hasScheduledDayBetween(lastCountedDay, today)));
+
       if (continued) {
-        currentStreak = currentStreak + 1;
+        currentStreak += 1;
         currentStreakStartDate ??= today;
         currentStreakEndDate = today;
       } else {
-        // A day was missed: the streak that just ended is banked as the
-        // previous streak before being compared against the longest one.
         if (currentStreak > longestStreak) {
           longestStreak = currentStreak;
           longestStreakStartDate = currentStreakStartDate;
@@ -89,22 +92,6 @@ class StreakService {
     return query.getSingle();
   }
 
-  /// Whether a session was completed in the `[start, end)` window.
-  Future<bool> _hasCompletedSession(
-    DateTime start,
-    DateTime end, {
-    int? excludeSessionId,
-  }) async {
-    final query = _db.selectOnly(_db.workoutSessions)
-      ..addColumns([_db.workoutSessions.id])
-      ..where(
-        _db.workoutSessions.completedAt.isBiggerOrEqualValue(start) &
-            _db.workoutSessions.completedAt.isSmallerThanValue(end),
-      );
-    if (excludeSessionId != null) {
-      query.where(_db.workoutSessions.id.equals(excludeSessionId).not());
-    }
-
-    return (await query.get()).isNotEmpty;
-  }
+  DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 }
