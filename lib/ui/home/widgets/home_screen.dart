@@ -1,6 +1,7 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
 import "package:workout_tracker/config/dependencies.dart";
+import "package:workout_tracker/data/repositories/schedule_repo.dart";
 import "package:workout_tracker/data/repositories/streak_repo.dart";
 import "package:workout_tracker/ui/home/view_models/home_view_model.dart";
 import "package:workout_tracker/ui/home/widgets/streak_calendar_sheet.dart";
@@ -38,6 +39,7 @@ class HomeScreen extends StatelessWidget {
                     isStreakCountedToday: vm.isStreakCountedToday,
                     dailyActivityStream: getIt<StreakRepo>()
                         .watchDailyActivity(),
+                    scheduleStream: getIt<ScheduleRepo>().watchSchedule(),
                   ),
                 ),
               ),
