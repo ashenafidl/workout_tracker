@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/database/database.dart";
 import "package:workout_tracker/utils/exercise_label.dart";
 
@@ -105,12 +106,12 @@ enum ExerciseType {
   reps(
     name: "Reps",
     description: "Track repetitions without weight.",
-    icon: Icons.repeat,
+    icon: PhosphorIconsDuotone.repeat,
   ),
   duration(
     name: "Duration",
     description: "Track how long you hold or perform the exercise.",
-    icon: Icons.timer_outlined,
+    icon: PhosphorIconsDuotone.timer,
   );
 
   new({required this.name, required this.description, required this.icon});
@@ -125,19 +126,19 @@ enum ExerciseSide {
     name: "Left",
     shortLabel: "L",
     description: "Only the left side.",
-    icon: Icons.arrow_back,
+    icon: PhosphorIconsDuotone.arrowLeft,
   ),
   right(
     name: "Right",
     shortLabel: "R",
     description: "Only the right side.",
-    icon: Icons.arrow_forward,
+    icon: PhosphorIconsDuotone.arrowRight,
   ),
   both(
     name: "Both",
     shortLabel: "L/R",
     description: "Left then right, once each per circuit.",
-    icon: Icons.swap_horiz,
+    icon: PhosphorIconsDuotone.arrowsLeftRight,
   );
 
   new({

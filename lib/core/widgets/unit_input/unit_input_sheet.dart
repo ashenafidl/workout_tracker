@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/core/widgets/unit_input/scroll_wheel.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
@@ -340,7 +341,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                   for (final type in widget.availableTypes!)
                     ButtonSegment<ExerciseType>(
                       value: type,
-                      icon: Icon(type.icon),
+                      icon: PhosphorIcon(type.icon),
                       label: Text(type.name),
                     ),
                 ],
@@ -359,7 +360,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                 children: [
                   IconButton(
                     onPressed: _canDecrement ? _decrement : null,
-                    icon: const Icon(Icons.remove_rounded),
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.minus),
                     iconSize: 36,
                     style: IconButton.styleFrom(
                       minimumSize: const Size(64, 64),
@@ -418,7 +419,7 @@ class _UnitInputSheetState extends State<UnitInputSheet> {
                   ),
                   IconButton(
                     onPressed: _increment,
-                    icon: const Icon(Icons.add_rounded),
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.plus),
                     iconSize: 36,
                     style: IconButton.styleFrom(
                       minimumSize: const Size(64, 64),

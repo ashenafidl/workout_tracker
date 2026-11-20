@@ -1,5 +1,6 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/challenge.dart";
@@ -83,7 +84,13 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       backgroundColor: Theme.of(context)
                           .colorScheme
                           .primaryContainer,
-                      labelStyle: Theme.of(context).textTheme.labelSmall,
+                      labelStyle: Theme.of(context).textTheme.labelSmall
+                          ?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                      side: BorderSide.none,
                       labelPadding: .zero,
                       materialTapTargetSize: .shrinkWrap,
                       visualDensity: .compact,
@@ -104,8 +111,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     value: "delete",
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.delete_rounded,
+                        PhosphorIcon(
+                          PhosphorIconsDuotone.trash,
                           color: Theme.of(context).colorScheme.error,
                         ),
                         const SizedBox(width: 8),
@@ -128,7 +135,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   child: FloatingActionButton.extended(
                     heroTag: "start",
                     onPressed: _startProgram,
-                    icon: const Icon(Icons.play_arrow_rounded),
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.play),
                     label: Text(
                       vm.isProgramCompleted
                           ? "Restart program"
@@ -141,7 +148,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               FloatingActionButton(
                 heroTag: "add",
                 onPressed: _openWorkoutScreen,
-                child: const Icon(Icons.add_rounded),
+                child: const PhosphorIcon(PhosphorIconsDuotone.plus),
               ),
             ],
           ),
@@ -231,11 +238,14 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                   ),
                             )
                           else
-                            const Icon(Icons.emoji_events_outlined, size: 18),
+                            const PhosphorIcon(
+                              PhosphorIconsDuotone.trophy,
+                              size: 18,
+                            ),
                           if (vm.isProgramActive && completed) ...[
                             const SizedBox(width: 8),
-                            Icon(
-                              Icons.check_circle_rounded,
+                            PhosphorIcon(
+                              PhosphorIconsDuotone.checkCircle,
                               color: colorScheme.primary,
                             ),
                           ],
@@ -259,8 +269,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.fitness_center,
+                              PhosphorIcon(
+                                PhosphorIconsDuotone.barbell,
                                 size: 16,
                                 color: Theme.of(context)
                                     .colorScheme

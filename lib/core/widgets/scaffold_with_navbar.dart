@@ -2,6 +2,7 @@ import "package:drift/drift.dart";
 import "package:flutter/foundation.dart";
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/database/database.dart";
 
@@ -36,28 +37,23 @@ class ScaffoldWithNavbar extends StatelessWidget {
         onTap: _onTap,
         items: [
           const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_filled),
+            icon: PhosphorIcon(PhosphorIconsDuotone.house),
             label: "Home",
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            activeIcon: Icon(Icons.calendar_month_rounded),
+            icon: PhosphorIcon(PhosphorIconsDuotone.calendarBlank),
             label: "Programs",
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart_rounded),
+            icon: PhosphorIcon(PhosphorIconsDuotone.chartBar),
             label: "Stats",
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history_rounded),
+            icon: PhosphorIcon(PhosphorIconsDuotone.clockCounterClockwise),
             label: "History",
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.menu_outlined),
-            activeIcon: Icon(Icons.menu_rounded),
+            icon: PhosphorIcon(PhosphorIconsDuotone.list),
             label: "More",
           ),
         ],
@@ -69,7 +65,7 @@ class ScaffoldWithNavbar extends StatelessWidget {
               backgroundColor: cs.errorContainer,
               foregroundColor: cs.onErrorContainer,
               mini: true,
-              child: const Icon(Icons.delete),
+              child: const PhosphorIcon(PhosphorIconsDuotone.trash),
               onPressed: () async {
                 final m = Migrator(db);
                 for (final table in db.allTables) {

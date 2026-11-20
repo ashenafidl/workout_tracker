@@ -21,6 +21,7 @@ class MainApp extends StatelessWidget {
       theme: AppTheme().light,
       darkTheme: AppTheme().dark,
       themeMode: .system,
+      scrollBehavior: const AppScrollBehavior(),
     );
   }
 }

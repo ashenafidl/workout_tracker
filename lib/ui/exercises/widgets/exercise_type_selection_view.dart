@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 
 class ExerciseTypeSelectionView extends StatelessWidget {
@@ -39,7 +40,7 @@ class ExerciseTypeSelectionView extends StatelessWidget {
           children: [
             IconButton(
               onPressed: isLoading ? null : onBack,
-              icon: const Icon(Icons.arrow_back),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.arrowLeft),
               tooltip: "Back",
             ),
             const SizedBox(width: 8),
@@ -67,7 +68,7 @@ class ExerciseTypeSelectionView extends StatelessWidget {
           children: [
             for (final option in ExerciseType.values)
               FilterChip(
-                avatar: Icon(option.icon, size: 18),
+                avatar: PhosphorIcon(option.icon, size: 18),
                 label: Text(option.name),
                 selected: selectedTypes.contains(option),
                 onSelected: isLoading ? null : (_) => onTypeToggled(option),
@@ -97,7 +98,7 @@ class ExerciseTypeSelectionView extends StatelessWidget {
           subtitle: const Text(
             "Performed on both sides, e.g. curls or lunges. Lets you pick a side when adding it to a workout.",
           ),
-          secondary: const Icon(Icons.swap_horiz),
+          secondary: const PhosphorIcon(PhosphorIconsDuotone.arrowsLeftRight),
           contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),

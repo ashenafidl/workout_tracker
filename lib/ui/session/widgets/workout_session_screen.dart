@@ -1,5 +1,6 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:wakelock_plus/wakelock_plus.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/workout.dart";
@@ -79,8 +80,8 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                       color: colorScheme.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.help_outline_rounded,
+                    child: PhosphorIcon(
+                      PhosphorIconsDuotone.question,
                       color: colorScheme.primary,
                       size: 28,
                     ),

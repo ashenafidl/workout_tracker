@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:wakelock_plus/wakelock_plus.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
@@ -241,8 +242,8 @@ class _ChallengeExerciseCardState extends State<_ChallengeExerciseCard> {
                   ),
                 ),
                 if (widget.item.isComplete)
-                  Icon(
-                    Icons.check_circle_rounded,
+                  PhosphorIcon(
+                    PhosphorIconsDuotone.checkCircle,
                     size: 20,
                     color: colorScheme.primary,
                   ),
@@ -286,7 +287,9 @@ class _ChallengeExerciseCardState extends State<_ChallengeExerciseCard> {
     return IconButton.filledTonal(
       onPressed: canRun ? _toggle : null,
       tooltip: _isRunning ? "Pause and log" : "Start",
-      icon: Icon(_isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded),
+      icon: PhosphorIcon(
+        _isRunning ? PhosphorIconsDuotone.pause : PhosphorIconsDuotone.play,
+      ),
     );
   }
 

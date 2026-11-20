@@ -1,6 +1,7 @@
 import "package:fl_chart/fl_chart.dart";
 import "package:intl/intl.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
@@ -91,7 +92,7 @@ class _MetricGrid extends StatelessWidget {
               child: _MetricCard(
                 label: "Workouts",
                 value: "${stats.totalWorkouts}",
-                icon: Icons.check_circle_outline,
+                icon: PhosphorIconsDuotone.checkCircle,
               ),
             ),
             SizedBox(
@@ -99,7 +100,7 @@ class _MetricGrid extends StatelessWidget {
               child: _MetricCard(
                 label: "Total duration",
                 value: _durationLabel(stats.totalDuration),
-                icon: Icons.timer_outlined,
+                icon: PhosphorIconsDuotone.timer,
               ),
             ),
           ],
@@ -126,7 +127,7 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: theme.colorScheme.primary),
+            PhosphorIcon(icon, color: theme.colorScheme.primary),
             const SizedBox(height: 12),
             Text(
               value,
@@ -166,7 +167,7 @@ class _SectionCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: theme.colorScheme.primary),
+                PhosphorIcon(icon, size: 20, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -200,42 +201,106 @@ class _WeekdayDistribution extends StatelessWidget {
       0,
       (maximum, value) => value > maximum ? value : maximum,
     );
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final headerStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: cs.onSurfaceVariant,
+      fontSize: 10,
+    );
+    final rowStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+
     return _SectionCard(
       title: "Workouts by day",
-      icon: Icons.calendar_month_outlined,
+      icon: PhosphorIconsDuotone.calendarBlank,
       child: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Row(
+              children: [
+                Text("Day", style: headerStyle),
+                const Spacer(),
+                Text("Workouts", style: headerStyle),
+              ],
+            ),
+          ),
           for (var index = 0; index < _days.length; index++)
             Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  SizedBox(width: 34, child: Text(_days[index])),
-                  Expanded(
-                    child: LinearProgressIndicator(
-                      value: maxCount == 0
-                          ? 0
-                          : stats.workoutsByWeekday[index] / maxCount,
-                      minHeight: 10,
-                      borderRadius: .circular(5),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 32,
-                    child: Text(
-                      "${stats.workoutsByWeekday[index]}",
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.only(bottom: 6),
+              child: _WeekdayBar(
+                label: _days[index],
+                count: stats.workoutsByWeekday[index],
+                fraction: maxCount == 0
+                    ? 0
+                    : stats.workoutsByWeekday[index] / maxCount,
+                isTop:
+                    maxCount > 0 && stats.workoutsByWeekday[index] == maxCount,
+                style: rowStyle,
               ),
             ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "Weekdays ${stats.weekdayWorkouts}  ·  Weekends ${stats.weekendWorkouts}",
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One row of the weekday chart: a rounded bar sized to [fraction] sits behind
+/// the day label, with the count right-aligned across the full row width.
+class _WeekdayBar extends StatelessWidget {
+  const new({
+    required this.label,
+    required this.count,
+    required this.fraction,
+    required this.isTop,
+    required this.style,
+  });
+
+  final String label;
+  final int count;
+  final double fraction;
+  final bool isTop;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final barColor = cs.primary.withValues(alpha: isTop ? 0.32 : 0.14);
+
+    return SizedBox(
+      height: 30,
+      child: Stack(
+        alignment: .centerLeft,
+        children: [
+          if (fraction > 0)
+            FractionallySizedBox(
+              widthFactor: fraction,
+              heightFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: barColor,
+                  borderRadius: .circular(10),
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Text(label, style: style),
+                const Spacer(),
+                Text("$count", style: style),
+              ],
             ),
           ),
         ],
@@ -297,7 +362,7 @@ class _BodyWeightSection extends StatelessWidget {
         final entries = viewModel.filteredEntries;
         return _SectionCard(
           title: "Body weight",
-          icon: Icons.monitor_weight_outlined,
+          icon: PhosphorIconsDuotone.scales,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -358,7 +423,10 @@ class _BodyWeightSection extends StatelessWidget {
                     subtitle: Text(DateFormat.yMMMd().format(entry.loggedAt)),
                     trailing: IconButton(
                       tooltip: "Edit weight",
-                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      icon: const PhosphorIcon(
+                        PhosphorIconsDuotone.pencilSimple,
+                        size: 20,
+                      ),
                       onPressed: () => _inputWeight(context, entry: entry),
                     ),
                   ),
@@ -366,7 +434,7 @@ class _BodyWeightSection extends StatelessWidget {
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: () => _inputWeight(context),
-                icon: const Icon(Icons.add),
+                icon: const PhosphorIcon(PhosphorIconsDuotone.plus),
                 label: const Text("Log weight"),
               ),
             ],
@@ -485,12 +553,28 @@ class _BodyWeightChart extends StatelessWidget {
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
+                  preventCurveOverShooting: true,
                   color: theme.colorScheme.primary,
                   barWidth: 3,
-                  dotData: const FlDotData(show: true),
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(
+                    getDotPainter: (spot, percent, bar, index) =>
+                        FlDotCirclePainter(
+                          radius: 2.5,
+                          color: theme.colorScheme.primary,
+                          strokeWidth: 0,
+                        ),
+                  ),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        theme.colorScheme.primary.withValues(alpha: 0.35),
+                        theme.colorScheme.primary.withValues(alpha: 0),
+                      ],
+                    ),
                   ),
                 ),
               ],

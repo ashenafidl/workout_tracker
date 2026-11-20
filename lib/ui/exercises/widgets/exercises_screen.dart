@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_tile.dart";
 import "package:workout_tracker/ui/exercises/view_models/exercise_list_view_model.dart";
@@ -64,7 +65,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
               builder: (sheetContext) => const ExerciseFormSheet(),
             );
           },
-          child: const Icon(Icons.add),
+          child: const PhosphorIcon(PhosphorIconsDuotone.plus),
         ),
       ),
     );
@@ -108,13 +109,15 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                 if (_isSearching)
                   IconButton(
                     tooltip: "Close search",
-                    icon: const Icon(Icons.close),
+                    icon: const PhosphorIcon(PhosphorIconsDuotone.x),
                     onPressed: _closeSearch,
                   )
                 else
                   IconButton(
                     tooltip: "Search exercises",
-                    icon: const Icon(Icons.search),
+                    icon: const PhosphorIcon(
+                      PhosphorIconsDuotone.magnifyingGlass,
+                    ),
                     onPressed: _openSearch,
                   ),
               ],
@@ -140,8 +143,8 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                       color: Theme.of(context).colorScheme.errorContainer,
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 16),
-                      child: Icon(
-                        Icons.delete,
+                      child: PhosphorIcon(
+                        PhosphorIconsDuotone.trash,
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
                     ),

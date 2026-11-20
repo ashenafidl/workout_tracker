@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
@@ -152,12 +153,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       segments: const [
                         ButtonSegment(
                           value: WorkoutKind.standard,
-                          icon: Icon(Icons.repeat_rounded),
+                          icon: PhosphorIcon(PhosphorIconsDuotone.repeat),
                           label: Text("Standard"),
                         ),
                         ButtonSegment(
                           value: WorkoutKind.challenge,
-                          icon: Icon(Icons.emoji_events_outlined),
+                          icon: PhosphorIcon(PhosphorIconsDuotone.trophy),
                           label: Text("Challenge"),
                         ),
                       ],
@@ -183,12 +184,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       ),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.timer_outlined),
+                        leading: const PhosphorIcon(PhosphorIconsDuotone.timer),
                         title: const Text("Rest between sets"),
                         subtitle: Text(_viewModel.restLabel),
                         trailing: _viewModel.restDurationSeconds != null
                             ? IconButton(
-                                icon: const Icon(Icons.restart_alt),
+                                icon: const PhosphorIcon(
+                                  PhosphorIconsDuotone.arrowCounterClockwise,
+                                ),
                                 tooltip: "Use app default",
                                 onPressed: () =>
                                     _viewModel.restDurationSeconds = null,
@@ -225,7 +228,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   children: [
                     OutlinedButton.icon(
                       onPressed: _showExercisePicker,
-                      icon: const Icon(Icons.add),
+                      icon: const PhosphorIcon(PhosphorIconsDuotone.plus),
                       label: const Text("Add exercise"),
                     ),
                     const SizedBox(height: 8),
@@ -380,7 +383,7 @@ class _ExerciseRow extends StatelessWidget {
     return ListTile(
       key: key,
       contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.drag_handle),
+      leading: const PhosphorIcon(PhosphorIconsDuotone.dotsSixVertical),
       title: ExerciseTitleWithSide(name: input.exerciseName, side: input.side),
       subtitle: Text(
         input.side == ExerciseSide.both
@@ -391,11 +394,11 @@ class _ExerciseRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const PhosphorIcon(PhosphorIconsDuotone.pencilSimple),
             onPressed: () => _showTargetSheet(context),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: const PhosphorIcon(PhosphorIconsDuotone.trash),
             onPressed: () => viewModel.removeExercise(index),
           ),
         ],

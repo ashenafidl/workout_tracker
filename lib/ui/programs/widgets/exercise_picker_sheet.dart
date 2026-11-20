@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/exercise_tile.dart";
 import "package:workout_tracker/data/models/exercises.dart";
@@ -166,7 +167,9 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                       textCapitalization: .words,
                       decoration: const InputDecoration(
                         labelText: "Search exercises",
-                        prefixIcon: Icon(Icons.search),
+                        prefixIcon: PhosphorIcon(
+                          PhosphorIconsDuotone.magnifyingGlass,
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() => _filterExercises(value));
@@ -208,7 +211,9 @@ class _ExercisePickerSheetState extends State<ExercisePickerSheet> {
                       const Divider(),
                       if (_searchController.text.trim().isNotEmpty)
                         ListTile(
-                          leading: const Icon(Icons.add),
+                          leading: const PhosphorIcon(
+                            PhosphorIconsDuotone.plus,
+                          ),
                           title: Text(
                             "Create '${_searchController.text.trim()}'",
                           ),

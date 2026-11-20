@@ -1,5 +1,6 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_config.dart";
 import "package:workout_tracker/core/widgets/unit_input/unit_input_result.dart";
@@ -115,8 +116,17 @@ class _MoreScreenState extends State<MoreScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message),
-          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+          content: Text(
+            message,
+            style: isError
+                ? TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  )
+                : null,
+          ),
+          backgroundColor: isError
+              ? Theme.of(context).colorScheme.errorContainer
+              : null,
         ),
       );
   }
@@ -144,7 +154,7 @@ class _MoreScreenState extends State<MoreScreen> {
                     title: "Workout",
                     children: [
                       MoreTile(
-                        icon: Icons.fitness_center_outlined,
+                        icon: PhosphorIconsDuotone.barbell,
                         title: "Exercises",
                         trailing: vm.exerciseCount > 0
                             ? Text(
@@ -162,7 +172,7 @@ class _MoreScreenState extends State<MoreScreen> {
                             : () => context.push("/more/exercises"),
                       ),
                       MoreTile(
-                        icon: Icons.timer_outlined,
+                        icon: PhosphorIconsDuotone.timer,
                         title: "Rest Time",
                         trailing: Text(
                           formatDuration(Duration(seconds: vm.restDuration)),
@@ -176,7 +186,7 @@ class _MoreScreenState extends State<MoreScreen> {
                             : _showRestDurationSettingDialog,
                       ),
                       MoreTile(
-                        icon: Icons.event_repeat_outlined,
+                        icon: PhosphorIconsDuotone.calendarDots,
                         title: "Schedule",
                         trailing: _WorkoutDaysIndicator(
                           weekdays: scheduleVm.weekdays,
@@ -190,12 +200,12 @@ class _MoreScreenState extends State<MoreScreen> {
                     title: "Backup & Restore",
                     children: [
                       MoreTile(
-                        icon: Icons.upload_file_outlined,
+                        icon: PhosphorIconsDuotone.fileArrowUp,
                         title: "Export Backup",
                         onTap: vm.isBackupBusy ? null : _exportBackup,
                       ),
                       MoreTile(
-                        icon: Icons.download_outlined,
+                        icon: PhosphorIconsDuotone.fileArrowDown,
                         title: "Import Backup",
                         onTap: vm.isBackupBusy ? null : _importBackup,
                       ),

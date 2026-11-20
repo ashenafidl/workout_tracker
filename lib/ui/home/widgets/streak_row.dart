@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 
 class StreakRow extends StatelessWidget {
   const new({
@@ -34,7 +35,7 @@ class StreakRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Icon(Icons.local_fire_department_rounded, color: streakColor),
+                PhosphorIcon(PhosphorIconsDuotone.fire, color: streakColor),
                 const SizedBox(width: 8),
                 Text(
                   "$currentStreak day streak",

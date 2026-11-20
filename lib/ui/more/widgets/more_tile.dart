@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 
 class MoreTile extends StatelessWidget {
   const new({
@@ -19,7 +20,7 @@ class MoreTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
+      leading: PhosphorIcon(icon),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -27,7 +28,7 @@ class MoreTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
-          const Icon(Icons.chevron_right),
+          const PhosphorIcon(PhosphorIconsDuotone.caretRight),
         ],
       ),
       onTap: onTap,

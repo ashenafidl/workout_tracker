@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/utils/format_time.dart";
@@ -23,7 +24,11 @@ class CompletedView extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Icon(Icons.check_circle_rounded, size: 72, color: cs.primary),
+            PhosphorIcon(
+              PhosphorIconsDuotone.checkCircle,
+              size: 72,
+              color: cs.primary,
+            ),
             const SizedBox(height: 16),
             Text(
               "Workout complete",

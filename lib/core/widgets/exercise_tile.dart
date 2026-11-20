@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 
@@ -25,7 +26,7 @@ class ExerciseTile extends StatelessWidget {
             spacing: 6,
             children: [
               for (final type in exerciseWithTypes.supportedTypes)
-                Icon(
+                PhosphorIcon(
                   type.icon,
                   size: 12,
                   color: Theme.of(context).disabledColor,

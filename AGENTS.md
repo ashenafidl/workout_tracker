@@ -3,117 +3,72 @@
 ## Commands
 
 ```bash
-# Run the app (Android only - no iOS/web/desktop targets exist)
-flutter run
+flutter pub get
+flutter run                     # Android only; no iOS/web/desktop targets
 
-# Codegen. Required after ANY edit to lib/database/database.dart.
-# Regenerates lib/database/database.g.dart.
-dart run build_runner build
+# After ANY edit to lib/database/database.dart:
+dart run build_runner build --delete-conflicting-outputs
+# emits lib/database/database.g.dart AND lib/database/database.steps.dart
 
-# Schema snapshot. NOT produced by build_runner - this is the only way to
-# refresh drift_schemas/**. `<input>` is the file holding the @DriftDatabase.
+# For a new schema version (snapshots are NOT produced by build_runner):
 dart run drift_dev schema dump \
   lib/database/database.dart \
-  drift_schemas/workout_tracker/drift_schema_v1.json
+  drift_schemas/workout_tracker/drift_schema_vN.json
+dart run drift_dev schema generate \
+  drift_schemas/workout_tracker test/drift/workout_tracker/generated
 
-# Lint + typecheck. This is the verification gate - it must stay at 0 issues.
-flutter analyze
-
-# Test. Currently FAILS: test/drift/ exists but is empty, so flutter test
-# reports "does not appear to contain any test files".
+flutter analyze                 # verification gate: keep at 0 issues
+flutter test                    # currently RED, see below
+flutter test test/backup/backup_service_test.dart --plain-name "..."
 ```
 
-Verification order after a change: `dart run build_runner build` -> `flutter analyze` -> `flutter test`.
+Verification order: build_runner -> `flutter analyze` -> `flutter test`.
 
-## Code style (repo-specific, NOT analyzer-enforced)
+`flutter analyze` is clean. `flutter test` currently fails ~10 tests:
+- Migration tests: `drift_schema_v1.json` already contains `is_bilateral`, which the v1->v2 migration adds, so it fails with `duplicate column name: is_bilateral`. Snapshots must be immutable historical records - do not regenerate old ones.
+- Backup tests: fixture declares `databaseSchemaVersion: 6`, app is 7; `BackupService` requires an exact match.
+- `migration_test.dart` still has an unfilled TODO-templated data-integrity test.
 
-- **Constructors are declared as `new(...)` / `const new(...)`** instead of a plain unnamed
-  constructor, in every class in `lib/` (deliberate, see commit `0c60fed`). The Dart parser treats a
-  constructor named `new` as the unnamed one, so **call sites stay normal** (`AppTheme()`,
-  `AppDatabase.new`). Do not "fix" these to ordinary unnamed constructors.
-- **Dot shorthands** everywhere: `themeMode: .system`, `BorderRadius.circular(8)` written as
-  `.circular(8)`, `Icons.repeat`, tear-offs like `AppDatabase.new`.
-- Formatting artifacts caused by `require_trailing_commas`: closing parens often sit on their own
-  line with args indented flat. Not a bug - do not reformat.
-- Drift style: `(query..where(...)).method()` cascades written inline, `OrderingTerm(expression:)`
-  named args, `watch()` for anything the UI reacts to.
+## Code style (repo-specific)
 
-## Analyzer rules that will fail you
+- Constructors are declared `new(...)` / `const new(...)` in every class in `lib/` (deliberate, commit `0c60fed`). Dart treats a constructor named `new` as the unnamed one, so call sites stay `AppTheme()` / `AppDatabase.new`. Do not "fix" these.
+- Import Flutter widgets from `package:material_ui/material_ui.dart`, not `package:flutter/material.dart` - it re-exports the widget API and is used throughout.
+- Dot shorthands everywhere (`.system`, `.circular(8)`, `Icons.repeat`, tear-offs like `AppDatabase.new`); double-quoted strings.
+- `require_trailing_commas` puts closing parens on their own line with flat args. Formatting artifact, not a bug.
+- Drift style: inline `(query..where(...)).method()` cascades, named `OrderingTerm(expression:)`, `watch()` for anything reactive.
 
-`flutter analyze` is strict; `analysis_options.yaml` enables beyond `flutter_lints`:
-`strict-casts` / `strict-inference` / `strict-raw-types`, `require_trailing_commas`,
-`type_annotate_public_apis` (every public member needs an explicit return type),
-`always_declare_return_types`, `prefer_const_constructors`, `prefer_final_locals` / `prefer_final_fields`,
-`directives_ordering` (`dart:` imports, then `package:`, alphabetical), `avoid_dynamic_calls`,
-`avoid_print`, `exhaustive_cases`, `no_default_cases`, `unnecessary_lambdas`,
-`unnecessary_primary_constructor_body`, `use_declaring_parameters`, `initialize_in_field_declaration`,
-`depend_on_referenced_packages`.
-Excluded from analysis: `build/`, platform dirs, and `test/drift`.
+`analysis_options.yaml` is stricter than `flutter_lints`: `strict-casts`/`strict-inference`/`strict-raw-types`, `type_annotate_public_apis`, `always_declare_return_types`, `prefer_final_locals`/`prefer_final_fields`, `require_trailing_commas`, `prefer_double_quotes`, `directives_ordering` (`dart:` then `package:`, alphabetical), `avoid_dynamic_calls`, `avoid_print`, `exhaustive_cases`/`no_default_cases`, `depend_on_referenced_packages`. Excluded from analysis: `build/`, platform dirs, and `test/drift`.
 
 ## Architecture
 
-Entry: `lib/main.dart` -> `setupDependencies()` (`lib/config/dependencies.dart`) -> `MaterialApp.router`
-with `appRouter`.
+`lib/main.dart` -> `setupDependencies()` (`lib/config/dependencies.dart`) -> `MaterialApp.router` with `appRouter` (`lib/routing/router.dart`).
 
-- **Database:** Drift + SQLite. Tables and `MigrationStrategy` in `lib/database/database.dart`;
-  `database.g.dart` (~7k lines) is build_runner output - never hand-edit. Builder is wired in
-  `build.yaml`.
-- **DI:** get_it. Services/repos as lazy singletons, most ViewModels as factories. A few ViewModels
-  are lazy singletons on purpose (`HomeViewModel`, `HistoryViewModel`, `ProgramDetailViewModel`) so
-  their streams survive tab switches in the shell. `WorkoutSessionViewModel` uses
-  `registerFactoryParam<..., WorkoutSessionArgs, AppDatabase?>` because it takes per-navigation args.
-- **Routing:** go_router `StatefulShellRoute.indexedStack` with 4 branches (Home `/`, Programs
-  `/programs`, History `/history`, More `/more`). Detail routes set
-  `parentNavigatorKey: _rootNavigatorKey` to cover the bottom-nav bar. `/session` lives at root and
-  receives `WorkoutSessionArgs` via `state.extra` (cast without null check).
-- **State:** `ChangeNotifier` ViewModels in `lib/ui/<feature>/view_models/`; screens/widgets in
-  `widgets/`. Every screen is `widgets/<name>_screen.dart`.
-- **Reactive reads:** repos return Drift `watch()`/`watchSingle()` streams; screens consume them with
-  `StreamBuilder`. Prefer extending a repo stream over adding manual refresh.
-- **Input hygiene:** all user text is `.trim()`ed in the repo before insert/update, and empty optional
-  strings are stored as `null` (see `exercise_repo.dart`, `program_repo.dart`).
+- **DI (get_it):** services/repos are lazy singletons, most ViewModels are factories. Deliberate lazy-singleton VMs: `HomeViewModel`, `HistoryViewModel`, `ProgramDetailViewModel`, `ScheduleViewModel`, `BodyWeightViewModel` (their streams survive tab switches). `WorkoutSessionViewModel` uses `registerFactoryParam<..., WorkoutSessionArgs, AppDatabase?>` so tests can inject a DB; `ChallengeViewModel` takes `(WorkoutWithExercises, int programId)`.
+- **Routing:** `StatefulShellRoute.indexedStack` with 5 branches (`/`, `/programs`, `/stats`, `/history`, `/more`). Detail routes set `parentNavigatorKey: _rootNavigatorKey` to cover the bottom nav. `/session` is root-level, reads `WorkoutSessionArgs` from `state.extra` with an unchecked cast; `/session/challenge` nests under it.
+- **UI/state:** `ChangeNotifier` ViewModels in `lib/ui/<feature>/view_models/`; screens are always `widgets/<name>_screen.dart`. Repos return Drift `watch()`/`watchSingle()` streams consumed by `StreamBuilder` - extend a repo stream rather than adding manual refresh.
+- **Input hygiene:** the repo layer trims all user text and stores empty optional strings as `null` (`exercise_repo.dart`, `workout_repo.dart`, `program_repo.dart`).
+- **Features:** program/workout/exercise planning, circuit-based session logging, challenges, stats + body-weight logs, schedule + streak calendar, JSON backup/restore under More.
 
 ## Database / schema
 
-- `schemaVersion` is **1** and `MigrationStrategy` has **only `onCreate`** - there is no `onUpgrade`.
-  Git history repeatedly bumped the version and then reset it to 1 while deleting `onUpgrade`
-  (commits `5c0a6c4`, `976e536`), because the app is pre-release. The `976e536` commit message
-  claims it added migration logic; it did not. Don't go looking for it.
-- **Consequence of never bumping the version:** a schema change ships without a migration, so any
-  existing install has an on-disk DB that is missing the new columns and crashes on the next query.
-  After a schema change, the app must be uninstalled / have its data cleared before it will run.
-- **`drift_schemas/workout_tracker/drift_schema_v1.json` is generated by `drift_dev schema dump` and
-  is tracked in git** (not gitignored). Commit it with schema changes. It was deleted in `976e536`
-  and is currently staged for re-add as uncommitted work.
-- If you add a column/table, decide deliberately: either keep the reset-to-1 pre-release pattern, or
-  bump the version *and* write `onUpgrade` *and* run build_runner to emit a `drift_schema_v2.json`.
-- `StreakStats` is a **singleton table** (always exactly one row, `id == 1`) holding current/longest
-  streak counters, incremented incrementally by `StreakService.recordCompletedSession()`. The row is
-  seeded in `onCreate` only - a new `onUpgrade` path must seed it too or `getSingle()` will throw.
-- FK delete behaviour is mixed and deliberate:
-  - cascade: `WorkoutExercises.workoutId`, `SessionCircuits.sessionId`, `SessionExerciseLogs.circuitId`
-  - restrict: `WorkoutExercises.exerciseId`, `WorkoutSessions.workoutId` / `programId`, `SessionExerciseLogs.exerciseId`
-  - `Workouts.programId` declares **no** `onDelete`, so it is NO ACTION - `deleteProgram` throws if
-    the program still has workouts.
-- Exactly one program is active at a time; `ProgramRepo.setActiveProgram` clears the others inside a
-  transaction.
-- `WorkoutExercises` (template) and `SessionExerciseLogs` (log) are different on purpose: log rows
-  snapshot `target*`, `exerciseType`, and `side` at session start so history survives later template
-  edits.
-- `ExerciseSide` is persisted with `intEnum`, so its **ordinal 0 must stay `none`** to match the
-  column default. `side` lives on `WorkoutExercises` (per-workout choice), `isBilateral` lives on
-  `Exercises` (library trait); the two are independent - a bilateral exercise added to a workout
-  with `side == none` is treated as unilateral there.
-- Timestamps use client-side defaults (`DateTime.now()`), never DB-side. `updatedAt` must be set
-  manually on updates.
+- `schemaVersion` is **7**. `MigrationStrategy` has `onCreate` plus `onUpgrade` via `stepByStep()` from generated `lib/database/database.steps.dart`; the `from1To2` ... `from6To7` bodies live in `extension Migrations on GeneratedDatabase` at the bottom of `database.dart`. Never hand-edit `database.g.dart`, `database.steps.dart`, or `test/drift/**/generated/*`.
+- Tracked snapshots: `drift_schemas/workout_tracker/drift_schema_v*.json`. Bump the version, dump a new snapshot, regenerate the test schemas, and add the matching `fromNToN+1` step together.
+- `StreakStats` is a singleton table (one row, `id == 1`) seeded in `onCreate`; `getSingle()` throws without it. Any upgrade that recreates it must reseed. Streak logic uses the schedule (`StreakService` depends on `ScheduleRepo` / `WorkoutScheduleChanges.weekdayMask`), not only session history.
+- FK delete behaviour is mixed and deliberate: cascade on `ExerciseSupportedTypes.exerciseId`, `WorkoutExercises.workoutId`, `SessionCircuits.sessionId`, `SessionExerciseLogs.circuitId`, `ChallengeLogs.sessionId`; restrict on `WorkoutExercises.exerciseId`, `WorkoutSessions.workoutId`/`programId`, `SessionExerciseLogs.exerciseId`, `ChallengeLogs.exerciseId`. `Workouts.programId` has no `onDelete` (NO ACTION), so `deleteProgram` throws while workouts remain.
+- Exactly one active program; `ProgramRepo.setActiveProgram` clears the others in a transaction.
+- `WorkoutExercises` is the template; `SessionExerciseLogs` snapshots `target*`, `exerciseType`, and `side` at session start so history survives template edits.
+- `ExerciseSide` is `left`/`right`/`both`, persisted with `intEnum`; `side` columns are nullable and `null` means no side. Never reorder intEnum values - ordinals are stored in the DB. `isBilateral` is an `Exercises` trait, independent of the per-workout `side`.
+- Timestamps use client-side `DateTime.now()` defaults, never DB-side; set `updatedAt` manually on updates.
+
+## Backup / restore
+
+- JSON uses `format: workout_tracker_backup`, `backupVersion: 1`, and `databaseSchemaVersion` must exactly equal `AppDatabase.schemaVersion`. A schema bump invalidates existing backups unless `BackupService._parseBackup` gains version handling.
+- Only these SharedPreferences keys are backed up/restored: `rest_duration_seconds`, `workout_index_<programId>`, `program_run_start_<programId>` (see `SharedPreferenceService`). Restore is transactional across DB + prefs and removes obsolete scoped keys.
+- Backups include private workout/body-weight history.
 
 ## Gotchas
 
-- Only Android is configured (`.metadata`, `android/` only). No iOS/web/desktop targets.
-- `android/app/build.gradle.kts`: `debug` has `applicationIdSuffix = ".debug"` and `release` is signed
-  with debug keys, so debug and release builds can be installed side by side.
-- **Sounds have no asset files.** `SoundService` synthesizes raw PCM WAV bytes in Dart and plays them
-  via `BytesSource`; `pubspec.yaml` declares no assets. Don't add audio files for new cues.
-- Puro manages the SDK (`.puro.json`: env `stable`); `.vscode/settings.json` hardcodes
-  `/home/ashenafi/.puro/envs/stable/flutter`. Plain `flutter` assumes that env is active.
-- No CI config, no `opencode.json`, no other agent instruction files. No `Makefile`/task runner.
+- `flutter`/`dart` resolve to `~/.flutter/flutter` (Flutter 3.50 / Dart 3.14). `.vscode/settings.json` points at a stale Puro path and there is no `.puro.json` - use the commands on PATH.
+- No audio assets: `SoundService` synthesizes PCM WAV bytes in Dart and plays them via `BytesSource`.
+- `android/app/build.gradle.kts`: debug adds `applicationIdSuffix = ".debug"` and release is signed with debug keys, so both install side by side.
+- No CI config, `opencode.json`, other agent instruction files, or task runner in this repo.

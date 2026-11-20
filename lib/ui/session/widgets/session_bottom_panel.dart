@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/ui/session/view_models/workout_session_view_model.dart";
 import "package:workout_tracker/utils/format_time.dart";
@@ -124,7 +125,9 @@ class SessionBottomPanel extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: isActive ? vm.advance : null,
               label: Text(isLast ? "Finish workout" : "Done, next"),
-              icon: !isLast ? const Icon(Icons.arrow_forward_rounded) : null,
+              icon: !isLast
+                  ? const PhosphorIcon(PhosphorIconsDuotone.arrowRight)
+                  : null,
               iconAlignment: .end,
             ),
           ),

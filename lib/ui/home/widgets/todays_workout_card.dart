@@ -1,5 +1,6 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/core/widgets/exercise_side_badge.dart";
 import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
@@ -158,8 +159,8 @@ class TodaysWorkoutCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.check_circle_rounded,
+            PhosphorIcon(
+              PhosphorIconsDuotone.checkCircle,
               color: colorScheme.primary,
               size: 36,
             ),
@@ -173,12 +174,12 @@ class TodaysWorkoutCard extends StatelessWidget {
         Row(
           children: [
             _StatChip(
-              icon: Icons.repeat_rounded,
+              icon: PhosphorIconsDuotone.repeat,
               label: "${workout.workout.sets} sets",
             ),
             const SizedBox(width: 8),
             _StatChip(
-              icon: Icons.fitness_center_outlined,
+              icon: PhosphorIconsDuotone.barbell,
               label: "${exercises.length} exercises",
             ),
           ],
@@ -229,7 +230,7 @@ class _StatChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
+          PhosphorIcon(icon, size: 14, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
           Text(
             label,

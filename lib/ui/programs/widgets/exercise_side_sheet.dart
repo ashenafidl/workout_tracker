@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 
 /// Asks which side a bilateral exercise is performed on when it is added to a
@@ -73,7 +74,7 @@ class _ExerciseSideSheetState extends State<ExerciseSideSheet> {
                     value: option,
                     title: Text(option.name),
                     subtitle: Text(option.description),
-                    secondary: Icon(option.icon),
+                    secondary: PhosphorIcon(option.icon),
                     controlAffinity: ListTileControlAffinity.trailing,
                     contentPadding: EdgeInsets.zero,
                   ),

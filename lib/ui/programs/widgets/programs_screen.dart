@@ -1,5 +1,6 @@
 import "package:go_router/go_router.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/ui/programs/view_models/programs_view_model.dart";
 import "package:workout_tracker/ui/programs/widgets/program_form_sheet.dart";
@@ -20,7 +21,7 @@ class ProgramsScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: "add_program",
         onPressed: () => _createProgram(context),
-        child: const Icon(Icons.add),
+        child: const PhosphorIcon(PhosphorIconsDuotone.plus),
       ),
     );
   }

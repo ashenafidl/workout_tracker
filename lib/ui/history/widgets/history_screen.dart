@@ -1,5 +1,6 @@
 import "package:intl/intl.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/config/dependencies.dart";
 import "package:workout_tracker/data/models/session_history.dart";
 import "package:workout_tracker/ui/history/view_models/history_view_model.dart";
@@ -26,8 +27,8 @@ class HistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: .min,
                 children: [
-                  Icon(
-                    Icons.history_toggle_off,
+                  PhosphorIcon(
+                    PhosphorIconsDuotone.clockCounterClockwise,
                     size: 56,
                     color: Theme.of(context).disabledColor,
                   ),
@@ -139,27 +140,27 @@ class _SessionCard extends StatelessWidget {
               runSpacing: 6,
               children: [
                 _Stat(
-                  icon: Icons.timer_outlined,
+                  icon: PhosphorIconsDuotone.timer,
                   text: formatDuration(entry.duration),
                 ),
                 if (entry.isChallenge) ...[
                   _Stat(
-                    icon: Icons.repeat_rounded,
+                    icon: PhosphorIconsDuotone.repeat,
                     text: "${entry.totalReps} reps",
                   ),
                   _Stat(
-                    icon: Icons.hourglass_bottom,
+                    icon: PhosphorIconsDuotone.hourglassMedium,
                     text: formatDuration(
                       Duration(seconds: entry.totalDurationSeconds),
                     ),
                   ),
                 ] else ...[
                   _Stat(
-                    icon: Icons.repeat_rounded,
+                    icon: PhosphorIconsDuotone.repeat,
                     text: "${entry.circuitCount} circuits",
                   ),
                   _Stat(
-                    icon: Icons.fitness_center,
+                    icon: PhosphorIconsDuotone.barbell,
                     text: "${entry.exerciseCount} exercises",
                   ),
                 ],
@@ -183,7 +184,7 @@ class _Stat extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16),
+        PhosphorIcon(icon, size: 16),
         const SizedBox(width: 4),
         Text(text, style: Theme.of(context).textTheme.bodySmall),
       ],

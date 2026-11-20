@@ -1,4 +1,5 @@
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 
 class ExerciseSideBadge extends StatelessWidget {
@@ -42,8 +43,8 @@ class BilateralMarker extends StatelessWidget {
         color: colorScheme.secondaryContainer,
         borderRadius: .circular(4),
       ),
-      child: Icon(
-        Icons.swap_horiz,
+      child: PhosphorIcon(
+        PhosphorIconsDuotone.arrowsLeftRight,
         size: 12,
         color: colorScheme.onSecondaryContainer,
       ),

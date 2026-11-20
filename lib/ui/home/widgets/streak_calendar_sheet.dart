@@ -2,6 +2,7 @@ import "dart:math" as math;
 
 import "package:intl/intl.dart";
 import "package:material_ui/material_ui.dart";
+import "package:phosphor_icons/phosphor_icons.dart";
 import "package:workout_tracker/data/models/daily_activity.dart";
 import "package:workout_tracker/utils/format_time.dart";
 
@@ -78,8 +79,8 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Icon(
-              Icons.local_fire_department_rounded,
+            PhosphorIcon(
+              PhosphorIconsDuotone.fire,
               color: streakColor,
               size: 36,
             ),
@@ -159,7 +160,7 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
             IconButton(
               tooltip: "Previous month",
               onPressed: () => _changeMonth(-1),
-              icon: const Icon(Icons.chevron_left_rounded),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.caretLeft),
               style: const ButtonStyle(visualDensity: VisualDensity.compact),
             ),
             Expanded(
@@ -176,7 +177,7 @@ class _StreakCalendarSheetState extends State<StreakCalendarSheet> {
             IconButton(
               tooltip: "Next month",
               onPressed: canGoForward ? () => _changeMonth(1) : null,
-              icon: const Icon(Icons.chevron_right_rounded),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.caretRight),
               style: const ButtonStyle(visualDensity: VisualDensity.compact),
             ),
           ],
