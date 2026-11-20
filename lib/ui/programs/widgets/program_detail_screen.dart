@@ -21,6 +21,10 @@ class ProgramDetailScreen extends StatefulWidget {
 class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   late final ProgramDetailViewModel vm;
 
+  /// In the active program, completed workouts are folded into one group at
+  /// the top (collapsed by default) so the next workout needs no scrolling.
+  bool _showCompleted = false;
+
   @override
   void initState() {
     super.initState();
@@ -166,144 +170,190 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
       return const Center(child: Text("No workouts yet"));
     }
 
+    final completedIndexes = <int>[];
+    final remainingIndexes = <int>[];
+    for (var index = 0; index < vm.workouts.length; index++) {
+      final id = vm.workouts[index].workout.id;
+      (vm.completedWorkoutIds.contains(id)
+              ? completedIndexes
+              : remainingIndexes)
+          .add(index);
+    }
+    final groupCompleted = vm.isProgramActive && completedIndexes.isNotEmpty;
+
+    // -1 marks the completed-group header; other values index vm.workouts.
+    final items = groupCompleted
+        ? [-1, if (_showCompleted) ...completedIndexes, ...remainingIndexes]
+        : [for (var index = 0; index < vm.workouts.length; index++) index];
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      itemCount: vm.workouts.length,
-      itemBuilder: (context, index) {
-        final workoutWithExercises = vm.workouts[index];
-        final workout = workoutWithExercises.workout;
-        final exercises = workoutWithExercises.exercises;
-        final completed = vm.completedWorkoutIds.contains(workout.id);
-        final isNext =
-            vm.isProgramActive && vm.nextWorkout?.workout.id == workout.id;
-        final colorScheme = Theme.of(context).colorScheme;
+      itemCount: items.length,
+      itemBuilder: (context, position) {
+        final index = items[position];
+        if (index == -1) {
+          return _buildCompletedGroupHeader(completedIndexes.length);
+        }
+        return _buildWorkoutCard(context, index);
+      },
+    );
+  }
 
-        return Opacity(
-          opacity: completed ? 0.75 : 1,
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: isNext
-                  ? const BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    )
-                  : BorderRadius.circular(12),
+  Widget _buildCompletedGroupHeader(int count) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: () => setState(() => _showCompleted = !_showCompleted),
+        leading: PhosphorIcon(
+          PhosphorIconsDuotone.checkCircle,
+          color: colorScheme.primary,
+        ),
+        title: Text("$count completed workout${count == 1 ? "" : "s"}"),
+        subtitle: Text(_showCompleted ? "Tap to hide" : "Tap to show"),
+        trailing: PhosphorIcon(
+          _showCompleted
+              ? PhosphorIconsDuotone.caretUp
+              : PhosphorIconsDuotone.caretDown,
+          size: 18,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkoutCard(BuildContext context, int index) {
+    final workoutWithExercises = vm.workouts[index];
+    final workout = workoutWithExercises.workout;
+    final exercises = workoutWithExercises.exercises;
+    final completed = vm.completedWorkoutIds.contains(workout.id);
+    final isNext =
+        vm.isProgramActive && vm.nextWorkout?.workout.id == workout.id;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Opacity(
+      opacity: completed ? 0.75 : 1,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: isNext
+              ? const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                )
+              : BorderRadius.circular(12),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: isNext
+                ? Border(left: BorderSide(color: colorScheme.primary, width: 3))
+                : null,
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => _openWorkoutScreen(
+              workoutId: workout.id,
+              kind: workout.kind,
+              name: workout.name,
+              sets: workout.sets,
+              restDurationSeconds: workout.restDurationSeconds,
+              exercises: exercises,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: isNext
-                    ? Border(
-                        left: BorderSide(color: colorScheme.primary, width: 3),
-                      )
-                    : null,
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => _openWorkoutScreen(
-                  workoutId: workout.id,
-                  kind: workout.kind,
-                  name: workout.name,
-                  sets: workout.sets,
-                  restDurationSeconds: workout.restDurationSeconds,
-                  exercises: exercises,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Day ${index + 1}",
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Row(
                     children: [
-                      Text(
-                        "Day ${index + 1}",
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      Expanded(
+                        child: Text(
+                          workout.name,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              workout.name,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                          if (workout.kind == WorkoutKind.standard)
-                            Text(
-                              "${workout.sets} set${workout.sets == 1 ? "" : "s"}",
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            )
-                          else
-                            const PhosphorIcon(
-                              PhosphorIconsDuotone.trophy,
-                              size: 18,
-                            ),
-                          if (vm.isProgramActive && completed) ...[
-                            const SizedBox(width: 8),
-                            PhosphorIcon(
-                              PhosphorIconsDuotone.checkCircle,
-                              color: colorScheme.primary,
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (completed)
+                      if (workout.kind == WorkoutKind.standard)
                         Text(
-                          "Completed",
+                          "${workout.sets} set${workout.sets == 1 ? "" : "s"}",
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
-                        )
-                      else if (isNext)
-                        Text(
-                          "Up next",
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.primary),
-                        ),
-                      const SizedBox(height: 8),
-                      for (final we in exercises) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            children: [
-                              PhosphorIcon(
-                                PhosphorIconsDuotone.barbell,
-                                size: 16,
+                              ?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurfaceVariant,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ExerciseTitleWithSide(
-                                  name: we.exercise.name,
-                                  side: we.side,
-                                ),
-                              ),
-                              Text(
-                                we.targetLabel,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
-                          ),
+                        )
+                      else
+                        const PhosphorIcon(
+                          PhosphorIconsDuotone.trophy,
+                          size: 18,
+                        ),
+                      if (vm.isProgramActive && completed) ...[
+                        const SizedBox(width: 8),
+                        PhosphorIcon(
+                          PhosphorIconsDuotone.checkCircle,
+                          color: colorScheme.primary,
                         ),
                       ],
                     ],
                   ),
-                ),
+                  if (completed)
+                    Text(
+                      "Completed",
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
+                    )
+                  else if (isNext)
+                    Text(
+                      "Up next",
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.primary),
+                    ),
+                  const SizedBox(height: 8),
+                  for (final we in exercises) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          PhosphorIcon(
+                            PhosphorIconsDuotone.barbell,
+                            size: 16,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ExerciseTitleWithSide(
+                              name: we.exercise.name,
+                              side: we.side,
+                            ),
+                          ),
+                          Text(
+                            we.targetLabel,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

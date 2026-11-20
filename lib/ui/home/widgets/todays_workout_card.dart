@@ -6,6 +6,7 @@ import "package:workout_tracker/data/models/challenge.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
 import "package:workout_tracker/data/models/workout.dart";
+import "package:workout_tracker/ui/home/widgets/workout_preview_sheet.dart";
 
 class TodaysWorkoutCard extends StatelessWidget {
   const new({
@@ -106,16 +107,25 @@ class TodaysWorkoutCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () => _start(context),
-            child: Text(
-              workout.workout.kind == WorkoutKind.challenge
-                  ? "Open challenge"
-                  : "Start workout",
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton(
+                onPressed: () => _start(context),
+                child: Text(
+                  workout.workout.kind == WorkoutKind.challenge
+                      ? "Open challenge"
+                      : "Start workout",
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              tooltip: "Show workout",
+              onPressed: () => _showDetails(context),
+              icon: const PhosphorIcon(PhosphorIconsDuotone.listBullets),
+            ),
+          ],
         ),
       ],
     );
@@ -185,6 +195,39 @@ class TodaysWorkoutCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _showDetails(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (sheetContext) => WorkoutPreviewSheet(
+        workout: workout,
+        programName: programName,
+        // Navigate with the card's context; the sheet's is gone after pop.
+        onEdit: () => _edit(context),
+        onStart: () => _start(context),
+        onOpenProgram: () =>
+            context.push("/programs/${workout.workout.programId}"),
+      ),
+    );
+  }
+
+  void _edit(BuildContext context) {
+    final details = workout.workout;
+    context.push(
+      "/programs/workout",
+      extra: WorkoutScreenArgs(
+        programId: details.programId,
+        workoutId: details.id,
+        initialName: details.name,
+        initialSets: details.sets,
+        initialKind: details.kind,
+        initialRestDurationSeconds: details.restDurationSeconds,
+        initialExercises: workout.exercises,
+      ),
     );
   }
 
