@@ -4,7 +4,7 @@
 //
 import 'package:drift/drift.dart';
 
-class Exercises extends Table with TableInfo<Exercises, ExercisesData> {
+class Exercises extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -33,15 +33,6 @@ class Exercises extends Table with TableInfo<Exercises, ExercisesData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
-  );
-  late final GeneratedColumn<int> type = GeneratedColumn<int>(
-    'type',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0',
-    defaultValue: const CustomExpression('0'),
   );
   late final GeneratedColumn<int> isBilateral = GeneratedColumn<int>(
     'is_bilateral',
@@ -73,7 +64,6 @@ class Exercises extends Table with TableInfo<Exercises, ExercisesData> {
     id,
     name,
     description,
-    type,
     isBilateral,
     createdAt,
     updatedAt,
@@ -86,38 +76,8 @@ class Exercises extends Table with TableInfo<Exercises, ExercisesData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ExercisesData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ExercisesData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      description: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}description'],
-      ),
-      type: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}type'],
-      )!,
-      isBilateral: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_bilateral'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}updated_at'],
-      )!,
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -129,262 +89,55 @@ class Exercises extends Table with TableInfo<Exercises, ExercisesData> {
   bool get dontWriteConstraints => true;
 }
 
-class ExercisesData extends DataClass implements Insertable<ExercisesData> {
-  final int id;
-  final String name;
-  final String? description;
-  final int type;
-  final int isBilateral;
-  final int createdAt;
-  final int updatedAt;
-  const ExercisesData({
-    required this.id,
-    required this.name,
-    this.description,
-    required this.type,
-    required this.isBilateral,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+class ExerciseSupportedTypes extends Table with TableInfo {
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String>(description);
-    }
-    map['type'] = Variable<int>(type);
-    map['is_bilateral'] = Variable<int>(isBilateral);
-    map['created_at'] = Variable<int>(createdAt);
-    map['updated_at'] = Variable<int>(updatedAt);
-    return map;
-  }
-
-  ExercisesCompanion toCompanion(bool nullToAbsent) {
-    return ExercisesCompanion(
-      id: Value(id),
-      name: Value(name),
-      description: description == null && nullToAbsent
-          ? const Value.absent()
-          : Value(description),
-      type: Value(type),
-      isBilateral: Value(isBilateral),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-    );
-  }
-
-  factory ExercisesData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ExercisesData(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      description: serializer.fromJson<String?>(json['description']),
-      type: serializer.fromJson<int>(json['type']),
-      isBilateral: serializer.fromJson<int>(json['isBilateral']),
-      createdAt: serializer.fromJson<int>(json['createdAt']),
-      updatedAt: serializer.fromJson<int>(json['updatedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'description': serializer.toJson<String?>(description),
-      'type': serializer.toJson<int>(type),
-      'isBilateral': serializer.toJson<int>(isBilateral),
-      'createdAt': serializer.toJson<int>(createdAt),
-      'updatedAt': serializer.toJson<int>(updatedAt),
-    };
-  }
-
-  ExercisesData copyWith({
-    int? id,
-    String? name,
-    Value<String?> description = const Value.absent(),
-    int? type,
-    int? isBilateral,
-    int? createdAt,
-    int? updatedAt,
-  }) => ExercisesData(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    description: description.present ? description.value : this.description,
-    type: type ?? this.type,
-    isBilateral: isBilateral ?? this.isBilateral,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ExerciseSupportedTypes(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> exerciseId = GeneratedColumn<int>(
+    'exercise_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL REFERENCES exercises(id)ON DELETE CASCADE',
   );
-  ExercisesData copyWithCompanion(ExercisesCompanion data) {
-    return ExercisesData(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      description: data.description.present
-          ? data.description.value
-          : this.description,
-      type: data.type.present ? data.type.value : this.type,
-      isBilateral: data.isBilateral.present
-          ? data.isBilateral.value
-          : this.isBilateral,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ExercisesData(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('description: $description, ')
-          ..write('type: $type, ')
-          ..write('isBilateral: $isBilateral, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    description,
-    type,
-    isBilateral,
-    createdAt,
-    updatedAt,
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ExercisesData &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.description == this.description &&
-          other.type == this.type &&
-          other.isBilateral == this.isBilateral &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
-}
-
-class ExercisesCompanion extends UpdateCompanion<ExercisesData> {
-  final Value<int> id;
-  final Value<String> name;
-  final Value<String?> description;
-  final Value<int> type;
-  final Value<int> isBilateral;
-  final Value<int> createdAt;
-  final Value<int> updatedAt;
-  const ExercisesCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.description = const Value.absent(),
-    this.type = const Value.absent(),
-    this.isBilateral = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-  });
-  ExercisesCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
-    this.description = const Value.absent(),
-    this.type = const Value.absent(),
-    this.isBilateral = const Value.absent(),
-    required int createdAt,
-    required int updatedAt,
-  }) : name = Value(name),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
-  static Insertable<ExercisesData> custom({
-    Expression<int>? id,
-    Expression<String>? name,
-    Expression<String>? description,
-    Expression<int>? type,
-    Expression<int>? isBilateral,
-    Expression<int>? createdAt,
-    Expression<int>? updatedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (description != null) 'description': description,
-      if (type != null) 'type': type,
-      if (isBilateral != null) 'is_bilateral': isBilateral,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-    });
-  }
-
-  ExercisesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
-    Value<String?>? description,
-    Value<int>? type,
-    Value<int>? isBilateral,
-    Value<int>? createdAt,
-    Value<int>? updatedAt,
-  }) {
-    return ExercisesCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      type: type ?? this.type,
-      isBilateral: isBilateral ?? this.isBilateral,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
+  List<GeneratedColumn> get $columns => [exerciseId, type];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'exercise_supported_types';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {exerciseId, type};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    if (type.present) {
-      map['type'] = Variable<int>(type.value);
-    }
-    if (isBilateral.present) {
-      map['is_bilateral'] = Variable<int>(isBilateral.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<int>(updatedAt.value);
-    }
-    return map;
+  ExerciseSupportedTypes createAlias(String alias) {
+    return ExerciseSupportedTypes(attachedDatabase, alias);
   }
 
   @override
-  String toString() {
-    return (StringBuffer('ExercisesCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('description: $description, ')
-          ..write('type: $type, ')
-          ..write('isBilateral: $isBilateral, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
+  List<String> get customConstraints => const [
+    'PRIMARY KEY(exercise_id, type)',
+  ];
+  @override
+  bool get dontWriteConstraints => true;
 }
 
-class Programs extends Table with TableInfo<Programs, ProgramsData> {
+class Programs extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -433,26 +186,8 @@ class Programs extends Table with TableInfo<Programs, ProgramsData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ProgramsData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ProgramsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      isActive: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_active'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}created_at'],
-      )!,
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -464,179 +199,7 @@ class Programs extends Table with TableInfo<Programs, ProgramsData> {
   bool get dontWriteConstraints => true;
 }
 
-class ProgramsData extends DataClass implements Insertable<ProgramsData> {
-  final int id;
-  final String name;
-  final int isActive;
-  final int createdAt;
-  const ProgramsData({
-    required this.id,
-    required this.name,
-    required this.isActive,
-    required this.createdAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    map['is_active'] = Variable<int>(isActive);
-    map['created_at'] = Variable<int>(createdAt);
-    return map;
-  }
-
-  ProgramsCompanion toCompanion(bool nullToAbsent) {
-    return ProgramsCompanion(
-      id: Value(id),
-      name: Value(name),
-      isActive: Value(isActive),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory ProgramsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ProgramsData(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      isActive: serializer.fromJson<int>(json['isActive']),
-      createdAt: serializer.fromJson<int>(json['createdAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'isActive': serializer.toJson<int>(isActive),
-      'createdAt': serializer.toJson<int>(createdAt),
-    };
-  }
-
-  ProgramsData copyWith({
-    int? id,
-    String? name,
-    int? isActive,
-    int? createdAt,
-  }) => ProgramsData(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    isActive: isActive ?? this.isActive,
-    createdAt: createdAt ?? this.createdAt,
-  );
-  ProgramsData copyWithCompanion(ProgramsCompanion data) {
-    return ProgramsData(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ProgramsData(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('isActive: $isActive, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, name, isActive, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ProgramsData &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.isActive == this.isActive &&
-          other.createdAt == this.createdAt);
-}
-
-class ProgramsCompanion extends UpdateCompanion<ProgramsData> {
-  final Value<int> id;
-  final Value<String> name;
-  final Value<int> isActive;
-  final Value<int> createdAt;
-  const ProgramsCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.isActive = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  ProgramsCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
-    this.isActive = const Value.absent(),
-    required int createdAt,
-  }) : name = Value(name),
-       createdAt = Value(createdAt);
-  static Insertable<ProgramsData> custom({
-    Expression<int>? id,
-    Expression<String>? name,
-    Expression<int>? isActive,
-    Expression<int>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (isActive != null) 'is_active': isActive,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  ProgramsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
-    Value<int>? isActive,
-    Value<int>? createdAt,
-  }) {
-    return ProgramsCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      isActive: isActive ?? this.isActive,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (isActive.present) {
-      map['is_active'] = Variable<int>(isActive.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ProgramsCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('isActive: $isActive, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
+class Workouts extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -666,6 +229,15 @@ class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<int> kind = GeneratedColumn<int>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
   late final GeneratedColumn<int> sets = GeneratedColumn<int>(
     'sets',
     aliasedName,
@@ -673,6 +245,14 @@ class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> restDurationSeconds = GeneratedColumn<int>(
+    'rest_duration_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<int> position = GeneratedColumn<int>(
     'position',
@@ -703,7 +283,9 @@ class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
     id,
     programId,
     name,
+    kind,
     sets,
+    restDurationSeconds,
     position,
     createdAt,
     updatedAt,
@@ -716,38 +298,8 @@ class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  WorkoutsData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return WorkoutsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      programId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}program_id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      sets: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sets'],
-      )!,
-      position: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}position'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}created_at'],
-      )!,
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}updated_at'],
-      )!,
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -759,251 +311,7 @@ class Workouts extends Table with TableInfo<Workouts, WorkoutsData> {
   bool get dontWriteConstraints => true;
 }
 
-class WorkoutsData extends DataClass implements Insertable<WorkoutsData> {
-  final int id;
-  final int programId;
-  final String name;
-  final int sets;
-  final int position;
-  final int createdAt;
-  final int updatedAt;
-  const WorkoutsData({
-    required this.id,
-    required this.programId,
-    required this.name,
-    required this.sets,
-    required this.position,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['program_id'] = Variable<int>(programId);
-    map['name'] = Variable<String>(name);
-    map['sets'] = Variable<int>(sets);
-    map['position'] = Variable<int>(position);
-    map['created_at'] = Variable<int>(createdAt);
-    map['updated_at'] = Variable<int>(updatedAt);
-    return map;
-  }
-
-  WorkoutsCompanion toCompanion(bool nullToAbsent) {
-    return WorkoutsCompanion(
-      id: Value(id),
-      programId: Value(programId),
-      name: Value(name),
-      sets: Value(sets),
-      position: Value(position),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-    );
-  }
-
-  factory WorkoutsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return WorkoutsData(
-      id: serializer.fromJson<int>(json['id']),
-      programId: serializer.fromJson<int>(json['programId']),
-      name: serializer.fromJson<String>(json['name']),
-      sets: serializer.fromJson<int>(json['sets']),
-      position: serializer.fromJson<int>(json['position']),
-      createdAt: serializer.fromJson<int>(json['createdAt']),
-      updatedAt: serializer.fromJson<int>(json['updatedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'programId': serializer.toJson<int>(programId),
-      'name': serializer.toJson<String>(name),
-      'sets': serializer.toJson<int>(sets),
-      'position': serializer.toJson<int>(position),
-      'createdAt': serializer.toJson<int>(createdAt),
-      'updatedAt': serializer.toJson<int>(updatedAt),
-    };
-  }
-
-  WorkoutsData copyWith({
-    int? id,
-    int? programId,
-    String? name,
-    int? sets,
-    int? position,
-    int? createdAt,
-    int? updatedAt,
-  }) => WorkoutsData(
-    id: id ?? this.id,
-    programId: programId ?? this.programId,
-    name: name ?? this.name,
-    sets: sets ?? this.sets,
-    position: position ?? this.position,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
-  WorkoutsData copyWithCompanion(WorkoutsCompanion data) {
-    return WorkoutsData(
-      id: data.id.present ? data.id.value : this.id,
-      programId: data.programId.present ? data.programId.value : this.programId,
-      name: data.name.present ? data.name.value : this.name,
-      sets: data.sets.present ? data.sets.value : this.sets,
-      position: data.position.present ? data.position.value : this.position,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutsData(')
-          ..write('id: $id, ')
-          ..write('programId: $programId, ')
-          ..write('name: $name, ')
-          ..write('sets: $sets, ')
-          ..write('position: $position, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, programId, name, sets, position, createdAt, updatedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is WorkoutsData &&
-          other.id == this.id &&
-          other.programId == this.programId &&
-          other.name == this.name &&
-          other.sets == this.sets &&
-          other.position == this.position &&
-          other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
-}
-
-class WorkoutsCompanion extends UpdateCompanion<WorkoutsData> {
-  final Value<int> id;
-  final Value<int> programId;
-  final Value<String> name;
-  final Value<int> sets;
-  final Value<int> position;
-  final Value<int> createdAt;
-  final Value<int> updatedAt;
-  const WorkoutsCompanion({
-    this.id = const Value.absent(),
-    this.programId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.sets = const Value.absent(),
-    this.position = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-  });
-  WorkoutsCompanion.insert({
-    this.id = const Value.absent(),
-    required int programId,
-    required String name,
-    required int sets,
-    required int position,
-    required int createdAt,
-    required int updatedAt,
-  }) : programId = Value(programId),
-       name = Value(name),
-       sets = Value(sets),
-       position = Value(position),
-       createdAt = Value(createdAt),
-       updatedAt = Value(updatedAt);
-  static Insertable<WorkoutsData> custom({
-    Expression<int>? id,
-    Expression<int>? programId,
-    Expression<String>? name,
-    Expression<int>? sets,
-    Expression<int>? position,
-    Expression<int>? createdAt,
-    Expression<int>? updatedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (programId != null) 'program_id': programId,
-      if (name != null) 'name': name,
-      if (sets != null) 'sets': sets,
-      if (position != null) 'position': position,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updatedAt != null) 'updated_at': updatedAt,
-    });
-  }
-
-  WorkoutsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? programId,
-    Value<String>? name,
-    Value<int>? sets,
-    Value<int>? position,
-    Value<int>? createdAt,
-    Value<int>? updatedAt,
-  }) {
-    return WorkoutsCompanion(
-      id: id ?? this.id,
-      programId: programId ?? this.programId,
-      name: name ?? this.name,
-      sets: sets ?? this.sets,
-      position: position ?? this.position,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (programId.present) {
-      map['program_id'] = Variable<int>(programId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (sets.present) {
-      map['sets'] = Variable<int>(sets.value);
-    }
-    if (position.present) {
-      map['position'] = Variable<int>(position.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(createdAt.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<int>(updatedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutsCompanion(')
-          ..write('id: $id, ')
-          ..write('programId: $programId, ')
-          ..write('name: $name, ')
-          ..write('sets: $sets, ')
-          ..write('position: $position, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class WorkoutExercises extends Table
-    with TableInfo<WorkoutExercises, WorkoutExercisesData> {
+class WorkoutExercises extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1041,14 +349,22 @@ class WorkoutExercises extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  late final GeneratedColumn<int> side = GeneratedColumn<int>(
-    'side',
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+    'type',
     aliasedName,
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     $customConstraints: 'NOT NULL DEFAULT 0',
     defaultValue: const CustomExpression('0'),
+  );
+  late final GeneratedColumn<int> side = GeneratedColumn<int>(
+    'side',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<int> targetReps = GeneratedColumn<int>(
     'target_reps',
@@ -1072,6 +388,7 @@ class WorkoutExercises extends Table
     workoutId,
     exerciseId,
     position,
+    type,
     side,
     targetReps,
     targetDurationSeconds,
@@ -1084,38 +401,8 @@ class WorkoutExercises extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  WorkoutExercisesData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return WorkoutExercisesData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      workoutId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}workout_id'],
-      )!,
-      exerciseId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}exercise_id'],
-      )!,
-      position: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}position'],
-      )!,
-      side: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}side'],
-      )!,
-      targetReps: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}target_reps'],
-      ),
-      targetDurationSeconds: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}target_duration_seconds'],
-      ),
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -1127,278 +414,7 @@ class WorkoutExercises extends Table
   bool get dontWriteConstraints => true;
 }
 
-class WorkoutExercisesData extends DataClass
-    implements Insertable<WorkoutExercisesData> {
-  final int id;
-  final int workoutId;
-  final int exerciseId;
-  final int position;
-  final int side;
-  final int? targetReps;
-  final int? targetDurationSeconds;
-  const WorkoutExercisesData({
-    required this.id,
-    required this.workoutId,
-    required this.exerciseId,
-    required this.position,
-    required this.side,
-    this.targetReps,
-    this.targetDurationSeconds,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['workout_id'] = Variable<int>(workoutId);
-    map['exercise_id'] = Variable<int>(exerciseId);
-    map['position'] = Variable<int>(position);
-    map['side'] = Variable<int>(side);
-    if (!nullToAbsent || targetReps != null) {
-      map['target_reps'] = Variable<int>(targetReps);
-    }
-    if (!nullToAbsent || targetDurationSeconds != null) {
-      map['target_duration_seconds'] = Variable<int>(targetDurationSeconds);
-    }
-    return map;
-  }
-
-  WorkoutExercisesCompanion toCompanion(bool nullToAbsent) {
-    return WorkoutExercisesCompanion(
-      id: Value(id),
-      workoutId: Value(workoutId),
-      exerciseId: Value(exerciseId),
-      position: Value(position),
-      side: Value(side),
-      targetReps: targetReps == null && nullToAbsent
-          ? const Value.absent()
-          : Value(targetReps),
-      targetDurationSeconds: targetDurationSeconds == null && nullToAbsent
-          ? const Value.absent()
-          : Value(targetDurationSeconds),
-    );
-  }
-
-  factory WorkoutExercisesData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return WorkoutExercisesData(
-      id: serializer.fromJson<int>(json['id']),
-      workoutId: serializer.fromJson<int>(json['workoutId']),
-      exerciseId: serializer.fromJson<int>(json['exerciseId']),
-      position: serializer.fromJson<int>(json['position']),
-      side: serializer.fromJson<int>(json['side']),
-      targetReps: serializer.fromJson<int?>(json['targetReps']),
-      targetDurationSeconds: serializer.fromJson<int?>(
-        json['targetDurationSeconds'],
-      ),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'workoutId': serializer.toJson<int>(workoutId),
-      'exerciseId': serializer.toJson<int>(exerciseId),
-      'position': serializer.toJson<int>(position),
-      'side': serializer.toJson<int>(side),
-      'targetReps': serializer.toJson<int?>(targetReps),
-      'targetDurationSeconds': serializer.toJson<int?>(targetDurationSeconds),
-    };
-  }
-
-  WorkoutExercisesData copyWith({
-    int? id,
-    int? workoutId,
-    int? exerciseId,
-    int? position,
-    int? side,
-    Value<int?> targetReps = const Value.absent(),
-    Value<int?> targetDurationSeconds = const Value.absent(),
-  }) => WorkoutExercisesData(
-    id: id ?? this.id,
-    workoutId: workoutId ?? this.workoutId,
-    exerciseId: exerciseId ?? this.exerciseId,
-    position: position ?? this.position,
-    side: side ?? this.side,
-    targetReps: targetReps.present ? targetReps.value : this.targetReps,
-    targetDurationSeconds: targetDurationSeconds.present
-        ? targetDurationSeconds.value
-        : this.targetDurationSeconds,
-  );
-  WorkoutExercisesData copyWithCompanion(WorkoutExercisesCompanion data) {
-    return WorkoutExercisesData(
-      id: data.id.present ? data.id.value : this.id,
-      workoutId: data.workoutId.present ? data.workoutId.value : this.workoutId,
-      exerciseId: data.exerciseId.present
-          ? data.exerciseId.value
-          : this.exerciseId,
-      position: data.position.present ? data.position.value : this.position,
-      side: data.side.present ? data.side.value : this.side,
-      targetReps: data.targetReps.present
-          ? data.targetReps.value
-          : this.targetReps,
-      targetDurationSeconds: data.targetDurationSeconds.present
-          ? data.targetDurationSeconds.value
-          : this.targetDurationSeconds,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutExercisesData(')
-          ..write('id: $id, ')
-          ..write('workoutId: $workoutId, ')
-          ..write('exerciseId: $exerciseId, ')
-          ..write('position: $position, ')
-          ..write('side: $side, ')
-          ..write('targetReps: $targetReps, ')
-          ..write('targetDurationSeconds: $targetDurationSeconds')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    workoutId,
-    exerciseId,
-    position,
-    side,
-    targetReps,
-    targetDurationSeconds,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is WorkoutExercisesData &&
-          other.id == this.id &&
-          other.workoutId == this.workoutId &&
-          other.exerciseId == this.exerciseId &&
-          other.position == this.position &&
-          other.side == this.side &&
-          other.targetReps == this.targetReps &&
-          other.targetDurationSeconds == this.targetDurationSeconds);
-}
-
-class WorkoutExercisesCompanion extends UpdateCompanion<WorkoutExercisesData> {
-  final Value<int> id;
-  final Value<int> workoutId;
-  final Value<int> exerciseId;
-  final Value<int> position;
-  final Value<int> side;
-  final Value<int?> targetReps;
-  final Value<int?> targetDurationSeconds;
-  const WorkoutExercisesCompanion({
-    this.id = const Value.absent(),
-    this.workoutId = const Value.absent(),
-    this.exerciseId = const Value.absent(),
-    this.position = const Value.absent(),
-    this.side = const Value.absent(),
-    this.targetReps = const Value.absent(),
-    this.targetDurationSeconds = const Value.absent(),
-  });
-  WorkoutExercisesCompanion.insert({
-    this.id = const Value.absent(),
-    required int workoutId,
-    required int exerciseId,
-    required int position,
-    this.side = const Value.absent(),
-    this.targetReps = const Value.absent(),
-    this.targetDurationSeconds = const Value.absent(),
-  }) : workoutId = Value(workoutId),
-       exerciseId = Value(exerciseId),
-       position = Value(position);
-  static Insertable<WorkoutExercisesData> custom({
-    Expression<int>? id,
-    Expression<int>? workoutId,
-    Expression<int>? exerciseId,
-    Expression<int>? position,
-    Expression<int>? side,
-    Expression<int>? targetReps,
-    Expression<int>? targetDurationSeconds,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (workoutId != null) 'workout_id': workoutId,
-      if (exerciseId != null) 'exercise_id': exerciseId,
-      if (position != null) 'position': position,
-      if (side != null) 'side': side,
-      if (targetReps != null) 'target_reps': targetReps,
-      if (targetDurationSeconds != null)
-        'target_duration_seconds': targetDurationSeconds,
-    });
-  }
-
-  WorkoutExercisesCompanion copyWith({
-    Value<int>? id,
-    Value<int>? workoutId,
-    Value<int>? exerciseId,
-    Value<int>? position,
-    Value<int>? side,
-    Value<int?>? targetReps,
-    Value<int?>? targetDurationSeconds,
-  }) {
-    return WorkoutExercisesCompanion(
-      id: id ?? this.id,
-      workoutId: workoutId ?? this.workoutId,
-      exerciseId: exerciseId ?? this.exerciseId,
-      position: position ?? this.position,
-      side: side ?? this.side,
-      targetReps: targetReps ?? this.targetReps,
-      targetDurationSeconds:
-          targetDurationSeconds ?? this.targetDurationSeconds,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (workoutId.present) {
-      map['workout_id'] = Variable<int>(workoutId.value);
-    }
-    if (exerciseId.present) {
-      map['exercise_id'] = Variable<int>(exerciseId.value);
-    }
-    if (position.present) {
-      map['position'] = Variable<int>(position.value);
-    }
-    if (side.present) {
-      map['side'] = Variable<int>(side.value);
-    }
-    if (targetReps.present) {
-      map['target_reps'] = Variable<int>(targetReps.value);
-    }
-    if (targetDurationSeconds.present) {
-      map['target_duration_seconds'] = Variable<int>(
-        targetDurationSeconds.value,
-      );
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutExercisesCompanion(')
-          ..write('id: $id, ')
-          ..write('workoutId: $workoutId, ')
-          ..write('exerciseId: $exerciseId, ')
-          ..write('position: $position, ')
-          ..write('side: $side, ')
-          ..write('targetReps: $targetReps, ')
-          ..write('targetDurationSeconds: $targetDurationSeconds')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class WorkoutSessions extends Table
-    with TableInfo<WorkoutSessions, WorkoutSessionsData> {
+class WorkoutSessions extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1460,30 +476,8 @@ class WorkoutSessions extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  WorkoutSessionsData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return WorkoutSessionsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      workoutId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}workout_id'],
-      )!,
-      programId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}program_id'],
-      )!,
-      startedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}started_at'],
-      )!,
-      completedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}completed_at'],
-      ),
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -1495,211 +489,7 @@ class WorkoutSessions extends Table
   bool get dontWriteConstraints => true;
 }
 
-class WorkoutSessionsData extends DataClass
-    implements Insertable<WorkoutSessionsData> {
-  final int id;
-  final int workoutId;
-  final int programId;
-  final int startedAt;
-  final int? completedAt;
-  const WorkoutSessionsData({
-    required this.id,
-    required this.workoutId,
-    required this.programId,
-    required this.startedAt,
-    this.completedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['workout_id'] = Variable<int>(workoutId);
-    map['program_id'] = Variable<int>(programId);
-    map['started_at'] = Variable<int>(startedAt);
-    if (!nullToAbsent || completedAt != null) {
-      map['completed_at'] = Variable<int>(completedAt);
-    }
-    return map;
-  }
-
-  WorkoutSessionsCompanion toCompanion(bool nullToAbsent) {
-    return WorkoutSessionsCompanion(
-      id: Value(id),
-      workoutId: Value(workoutId),
-      programId: Value(programId),
-      startedAt: Value(startedAt),
-      completedAt: completedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(completedAt),
-    );
-  }
-
-  factory WorkoutSessionsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return WorkoutSessionsData(
-      id: serializer.fromJson<int>(json['id']),
-      workoutId: serializer.fromJson<int>(json['workoutId']),
-      programId: serializer.fromJson<int>(json['programId']),
-      startedAt: serializer.fromJson<int>(json['startedAt']),
-      completedAt: serializer.fromJson<int?>(json['completedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'workoutId': serializer.toJson<int>(workoutId),
-      'programId': serializer.toJson<int>(programId),
-      'startedAt': serializer.toJson<int>(startedAt),
-      'completedAt': serializer.toJson<int?>(completedAt),
-    };
-  }
-
-  WorkoutSessionsData copyWith({
-    int? id,
-    int? workoutId,
-    int? programId,
-    int? startedAt,
-    Value<int?> completedAt = const Value.absent(),
-  }) => WorkoutSessionsData(
-    id: id ?? this.id,
-    workoutId: workoutId ?? this.workoutId,
-    programId: programId ?? this.programId,
-    startedAt: startedAt ?? this.startedAt,
-    completedAt: completedAt.present ? completedAt.value : this.completedAt,
-  );
-  WorkoutSessionsData copyWithCompanion(WorkoutSessionsCompanion data) {
-    return WorkoutSessionsData(
-      id: data.id.present ? data.id.value : this.id,
-      workoutId: data.workoutId.present ? data.workoutId.value : this.workoutId,
-      programId: data.programId.present ? data.programId.value : this.programId,
-      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-      completedAt: data.completedAt.present
-          ? data.completedAt.value
-          : this.completedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutSessionsData(')
-          ..write('id: $id, ')
-          ..write('workoutId: $workoutId, ')
-          ..write('programId: $programId, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, workoutId, programId, startedAt, completedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is WorkoutSessionsData &&
-          other.id == this.id &&
-          other.workoutId == this.workoutId &&
-          other.programId == this.programId &&
-          other.startedAt == this.startedAt &&
-          other.completedAt == this.completedAt);
-}
-
-class WorkoutSessionsCompanion extends UpdateCompanion<WorkoutSessionsData> {
-  final Value<int> id;
-  final Value<int> workoutId;
-  final Value<int> programId;
-  final Value<int> startedAt;
-  final Value<int?> completedAt;
-  const WorkoutSessionsCompanion({
-    this.id = const Value.absent(),
-    this.workoutId = const Value.absent(),
-    this.programId = const Value.absent(),
-    this.startedAt = const Value.absent(),
-    this.completedAt = const Value.absent(),
-  });
-  WorkoutSessionsCompanion.insert({
-    this.id = const Value.absent(),
-    required int workoutId,
-    required int programId,
-    required int startedAt,
-    this.completedAt = const Value.absent(),
-  }) : workoutId = Value(workoutId),
-       programId = Value(programId),
-       startedAt = Value(startedAt);
-  static Insertable<WorkoutSessionsData> custom({
-    Expression<int>? id,
-    Expression<int>? workoutId,
-    Expression<int>? programId,
-    Expression<int>? startedAt,
-    Expression<int>? completedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (workoutId != null) 'workout_id': workoutId,
-      if (programId != null) 'program_id': programId,
-      if (startedAt != null) 'started_at': startedAt,
-      if (completedAt != null) 'completed_at': completedAt,
-    });
-  }
-
-  WorkoutSessionsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? workoutId,
-    Value<int>? programId,
-    Value<int>? startedAt,
-    Value<int?>? completedAt,
-  }) {
-    return WorkoutSessionsCompanion(
-      id: id ?? this.id,
-      workoutId: workoutId ?? this.workoutId,
-      programId: programId ?? this.programId,
-      startedAt: startedAt ?? this.startedAt,
-      completedAt: completedAt ?? this.completedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (workoutId.present) {
-      map['workout_id'] = Variable<int>(workoutId.value);
-    }
-    if (programId.present) {
-      map['program_id'] = Variable<int>(programId.value);
-    }
-    if (startedAt.present) {
-      map['started_at'] = Variable<int>(startedAt.value);
-    }
-    if (completedAt.present) {
-      map['completed_at'] = Variable<int>(completedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('WorkoutSessionsCompanion(')
-          ..write('id: $id, ')
-          ..write('workoutId: $workoutId, ')
-          ..write('programId: $programId, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class SessionCircuits extends Table
-    with TableInfo<SessionCircuits, SessionCircuitsData> {
+class SessionCircuits extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1762,30 +552,8 @@ class SessionCircuits extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SessionCircuitsData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SessionCircuitsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      sessionId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}session_id'],
-      )!,
-      circuitNumber: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}circuit_number'],
-      )!,
-      startedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}started_at'],
-      )!,
-      completedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}completed_at'],
-      ),
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -1797,213 +565,7 @@ class SessionCircuits extends Table
   bool get dontWriteConstraints => true;
 }
 
-class SessionCircuitsData extends DataClass
-    implements Insertable<SessionCircuitsData> {
-  final int id;
-  final int sessionId;
-  final int circuitNumber;
-  final int startedAt;
-  final int? completedAt;
-  const SessionCircuitsData({
-    required this.id,
-    required this.sessionId,
-    required this.circuitNumber,
-    required this.startedAt,
-    this.completedAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['session_id'] = Variable<int>(sessionId);
-    map['circuit_number'] = Variable<int>(circuitNumber);
-    map['started_at'] = Variable<int>(startedAt);
-    if (!nullToAbsent || completedAt != null) {
-      map['completed_at'] = Variable<int>(completedAt);
-    }
-    return map;
-  }
-
-  SessionCircuitsCompanion toCompanion(bool nullToAbsent) {
-    return SessionCircuitsCompanion(
-      id: Value(id),
-      sessionId: Value(sessionId),
-      circuitNumber: Value(circuitNumber),
-      startedAt: Value(startedAt),
-      completedAt: completedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(completedAt),
-    );
-  }
-
-  factory SessionCircuitsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SessionCircuitsData(
-      id: serializer.fromJson<int>(json['id']),
-      sessionId: serializer.fromJson<int>(json['sessionId']),
-      circuitNumber: serializer.fromJson<int>(json['circuitNumber']),
-      startedAt: serializer.fromJson<int>(json['startedAt']),
-      completedAt: serializer.fromJson<int?>(json['completedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'sessionId': serializer.toJson<int>(sessionId),
-      'circuitNumber': serializer.toJson<int>(circuitNumber),
-      'startedAt': serializer.toJson<int>(startedAt),
-      'completedAt': serializer.toJson<int?>(completedAt),
-    };
-  }
-
-  SessionCircuitsData copyWith({
-    int? id,
-    int? sessionId,
-    int? circuitNumber,
-    int? startedAt,
-    Value<int?> completedAt = const Value.absent(),
-  }) => SessionCircuitsData(
-    id: id ?? this.id,
-    sessionId: sessionId ?? this.sessionId,
-    circuitNumber: circuitNumber ?? this.circuitNumber,
-    startedAt: startedAt ?? this.startedAt,
-    completedAt: completedAt.present ? completedAt.value : this.completedAt,
-  );
-  SessionCircuitsData copyWithCompanion(SessionCircuitsCompanion data) {
-    return SessionCircuitsData(
-      id: data.id.present ? data.id.value : this.id,
-      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
-      circuitNumber: data.circuitNumber.present
-          ? data.circuitNumber.value
-          : this.circuitNumber,
-      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-      completedAt: data.completedAt.present
-          ? data.completedAt.value
-          : this.completedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SessionCircuitsData(')
-          ..write('id: $id, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('circuitNumber: $circuitNumber, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, sessionId, circuitNumber, startedAt, completedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SessionCircuitsData &&
-          other.id == this.id &&
-          other.sessionId == this.sessionId &&
-          other.circuitNumber == this.circuitNumber &&
-          other.startedAt == this.startedAt &&
-          other.completedAt == this.completedAt);
-}
-
-class SessionCircuitsCompanion extends UpdateCompanion<SessionCircuitsData> {
-  final Value<int> id;
-  final Value<int> sessionId;
-  final Value<int> circuitNumber;
-  final Value<int> startedAt;
-  final Value<int?> completedAt;
-  const SessionCircuitsCompanion({
-    this.id = const Value.absent(),
-    this.sessionId = const Value.absent(),
-    this.circuitNumber = const Value.absent(),
-    this.startedAt = const Value.absent(),
-    this.completedAt = const Value.absent(),
-  });
-  SessionCircuitsCompanion.insert({
-    this.id = const Value.absent(),
-    required int sessionId,
-    required int circuitNumber,
-    required int startedAt,
-    this.completedAt = const Value.absent(),
-  }) : sessionId = Value(sessionId),
-       circuitNumber = Value(circuitNumber),
-       startedAt = Value(startedAt);
-  static Insertable<SessionCircuitsData> custom({
-    Expression<int>? id,
-    Expression<int>? sessionId,
-    Expression<int>? circuitNumber,
-    Expression<int>? startedAt,
-    Expression<int>? completedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (sessionId != null) 'session_id': sessionId,
-      if (circuitNumber != null) 'circuit_number': circuitNumber,
-      if (startedAt != null) 'started_at': startedAt,
-      if (completedAt != null) 'completed_at': completedAt,
-    });
-  }
-
-  SessionCircuitsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? sessionId,
-    Value<int>? circuitNumber,
-    Value<int>? startedAt,
-    Value<int?>? completedAt,
-  }) {
-    return SessionCircuitsCompanion(
-      id: id ?? this.id,
-      sessionId: sessionId ?? this.sessionId,
-      circuitNumber: circuitNumber ?? this.circuitNumber,
-      startedAt: startedAt ?? this.startedAt,
-      completedAt: completedAt ?? this.completedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (sessionId.present) {
-      map['session_id'] = Variable<int>(sessionId.value);
-    }
-    if (circuitNumber.present) {
-      map['circuit_number'] = Variable<int>(circuitNumber.value);
-    }
-    if (startedAt.present) {
-      map['started_at'] = Variable<int>(startedAt.value);
-    }
-    if (completedAt.present) {
-      map['completed_at'] = Variable<int>(completedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SessionCircuitsCompanion(')
-          ..write('id: $id, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('circuitNumber: $circuitNumber, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class SessionExerciseLogs extends Table
-    with TableInfo<SessionExerciseLogs, SessionExerciseLogsData> {
+class SessionExerciseLogs extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2054,11 +616,10 @@ class SessionExerciseLogs extends Table
   late final GeneratedColumn<int> side = GeneratedColumn<int>(
     'side',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0',
-    defaultValue: const CustomExpression('0'),
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<int> targetReps = GeneratedColumn<int>(
     'target_reps',
@@ -2131,61 +692,8 @@ class SessionExerciseLogs extends Table
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SessionExerciseLogsData map(
-    Map<String, dynamic> data, {
-    String? tablePrefix,
-  }) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SessionExerciseLogsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      circuitId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}circuit_id'],
-      )!,
-      exerciseId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}exercise_id'],
-      )!,
-      position: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}position'],
-      )!,
-      exerciseType: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}exercise_type'],
-      )!,
-      side: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}side'],
-      )!,
-      targetReps: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}target_reps'],
-      ),
-      actualReps: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}actual_reps'],
-      ),
-      targetDurationSeconds: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}target_duration_seconds'],
-      ),
-      actualDurationSeconds: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}actual_duration_seconds'],
-      ),
-      startedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}started_at'],
-      )!,
-      completedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}completed_at'],
-      ),
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -2197,422 +705,111 @@ class SessionExerciseLogs extends Table
   bool get dontWriteConstraints => true;
 }
 
-class SessionExerciseLogsData extends DataClass
-    implements Insertable<SessionExerciseLogsData> {
-  final int id;
-  final int circuitId;
-  final int exerciseId;
-  final int position;
-  final int exerciseType;
-  final int side;
-  final int? targetReps;
-  final int? actualReps;
-  final int? targetDurationSeconds;
-  final int? actualDurationSeconds;
-  final int startedAt;
-  final int? completedAt;
-  const SessionExerciseLogsData({
-    required this.id,
-    required this.circuitId,
-    required this.exerciseId,
-    required this.position,
-    required this.exerciseType,
-    required this.side,
-    this.targetReps,
-    this.actualReps,
-    this.targetDurationSeconds,
-    this.actualDurationSeconds,
-    required this.startedAt,
-    this.completedAt,
-  });
+class ChallengeLogs extends Table with TableInfo {
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['circuit_id'] = Variable<int>(circuitId);
-    map['exercise_id'] = Variable<int>(exerciseId);
-    map['position'] = Variable<int>(position);
-    map['exercise_type'] = Variable<int>(exerciseType);
-    map['side'] = Variable<int>(side);
-    if (!nullToAbsent || targetReps != null) {
-      map['target_reps'] = Variable<int>(targetReps);
-    }
-    if (!nullToAbsent || actualReps != null) {
-      map['actual_reps'] = Variable<int>(actualReps);
-    }
-    if (!nullToAbsent || targetDurationSeconds != null) {
-      map['target_duration_seconds'] = Variable<int>(targetDurationSeconds);
-    }
-    if (!nullToAbsent || actualDurationSeconds != null) {
-      map['actual_duration_seconds'] = Variable<int>(actualDurationSeconds);
-    }
-    map['started_at'] = Variable<int>(startedAt);
-    if (!nullToAbsent || completedAt != null) {
-      map['completed_at'] = Variable<int>(completedAt);
-    }
-    return map;
-  }
-
-  SessionExerciseLogsCompanion toCompanion(bool nullToAbsent) {
-    return SessionExerciseLogsCompanion(
-      id: Value(id),
-      circuitId: Value(circuitId),
-      exerciseId: Value(exerciseId),
-      position: Value(position),
-      exerciseType: Value(exerciseType),
-      side: Value(side),
-      targetReps: targetReps == null && nullToAbsent
-          ? const Value.absent()
-          : Value(targetReps),
-      actualReps: actualReps == null && nullToAbsent
-          ? const Value.absent()
-          : Value(actualReps),
-      targetDurationSeconds: targetDurationSeconds == null && nullToAbsent
-          ? const Value.absent()
-          : Value(targetDurationSeconds),
-      actualDurationSeconds: actualDurationSeconds == null && nullToAbsent
-          ? const Value.absent()
-          : Value(actualDurationSeconds),
-      startedAt: Value(startedAt),
-      completedAt: completedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(completedAt),
-    );
-  }
-
-  factory SessionExerciseLogsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SessionExerciseLogsData(
-      id: serializer.fromJson<int>(json['id']),
-      circuitId: serializer.fromJson<int>(json['circuitId']),
-      exerciseId: serializer.fromJson<int>(json['exerciseId']),
-      position: serializer.fromJson<int>(json['position']),
-      exerciseType: serializer.fromJson<int>(json['exerciseType']),
-      side: serializer.fromJson<int>(json['side']),
-      targetReps: serializer.fromJson<int?>(json['targetReps']),
-      actualReps: serializer.fromJson<int?>(json['actualReps']),
-      targetDurationSeconds: serializer.fromJson<int?>(
-        json['targetDurationSeconds'],
-      ),
-      actualDurationSeconds: serializer.fromJson<int?>(
-        json['actualDurationSeconds'],
-      ),
-      startedAt: serializer.fromJson<int>(json['startedAt']),
-      completedAt: serializer.fromJson<int?>(json['completedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'circuitId': serializer.toJson<int>(circuitId),
-      'exerciseId': serializer.toJson<int>(exerciseId),
-      'position': serializer.toJson<int>(position),
-      'exerciseType': serializer.toJson<int>(exerciseType),
-      'side': serializer.toJson<int>(side),
-      'targetReps': serializer.toJson<int?>(targetReps),
-      'actualReps': serializer.toJson<int?>(actualReps),
-      'targetDurationSeconds': serializer.toJson<int?>(targetDurationSeconds),
-      'actualDurationSeconds': serializer.toJson<int?>(actualDurationSeconds),
-      'startedAt': serializer.toJson<int>(startedAt),
-      'completedAt': serializer.toJson<int?>(completedAt),
-    };
-  }
-
-  SessionExerciseLogsData copyWith({
-    int? id,
-    int? circuitId,
-    int? exerciseId,
-    int? position,
-    int? exerciseType,
-    int? side,
-    Value<int?> targetReps = const Value.absent(),
-    Value<int?> actualReps = const Value.absent(),
-    Value<int?> targetDurationSeconds = const Value.absent(),
-    Value<int?> actualDurationSeconds = const Value.absent(),
-    int? startedAt,
-    Value<int?> completedAt = const Value.absent(),
-  }) => SessionExerciseLogsData(
-    id: id ?? this.id,
-    circuitId: circuitId ?? this.circuitId,
-    exerciseId: exerciseId ?? this.exerciseId,
-    position: position ?? this.position,
-    exerciseType: exerciseType ?? this.exerciseType,
-    side: side ?? this.side,
-    targetReps: targetReps.present ? targetReps.value : this.targetReps,
-    actualReps: actualReps.present ? actualReps.value : this.actualReps,
-    targetDurationSeconds: targetDurationSeconds.present
-        ? targetDurationSeconds.value
-        : this.targetDurationSeconds,
-    actualDurationSeconds: actualDurationSeconds.present
-        ? actualDurationSeconds.value
-        : this.actualDurationSeconds,
-    startedAt: startedAt ?? this.startedAt,
-    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ChallengeLogs(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL PRIMARY KEY AUTOINCREMENT',
   );
-  SessionExerciseLogsData copyWithCompanion(SessionExerciseLogsCompanion data) {
-    return SessionExerciseLogsData(
-      id: data.id.present ? data.id.value : this.id,
-      circuitId: data.circuitId.present ? data.circuitId.value : this.circuitId,
-      exerciseId: data.exerciseId.present
-          ? data.exerciseId.value
-          : this.exerciseId,
-      position: data.position.present ? data.position.value : this.position,
-      exerciseType: data.exerciseType.present
-          ? data.exerciseType.value
-          : this.exerciseType,
-      side: data.side.present ? data.side.value : this.side,
-      targetReps: data.targetReps.present
-          ? data.targetReps.value
-          : this.targetReps,
-      actualReps: data.actualReps.present
-          ? data.actualReps.value
-          : this.actualReps,
-      targetDurationSeconds: data.targetDurationSeconds.present
-          ? data.targetDurationSeconds.value
-          : this.targetDurationSeconds,
-      actualDurationSeconds: data.actualDurationSeconds.present
-          ? data.actualDurationSeconds.value
-          : this.actualDurationSeconds,
-      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-      completedAt: data.completedAt.present
-          ? data.completedAt.value
-          : this.completedAt,
-    );
-  }
-
+  late final GeneratedColumn<int> sessionId = GeneratedColumn<int>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints:
+        'NOT NULL REFERENCES workout_sessions(id)ON DELETE CASCADE',
+  );
+  late final GeneratedColumn<int> exerciseId = GeneratedColumn<int>(
+    'exercise_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL REFERENCES exercises(id)ON DELETE RESTRICT',
+  );
+  late final GeneratedColumn<int> exerciseType = GeneratedColumn<int>(
+    'exercise_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
+  late final GeneratedColumn<int> side = GeneratedColumn<int>(
+    'side',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> reps = GeneratedColumn<int>(
+    'reps',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> loggedAt = GeneratedColumn<int>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
-  String toString() {
-    return (StringBuffer('SessionExerciseLogsData(')
-          ..write('id: $id, ')
-          ..write('circuitId: $circuitId, ')
-          ..write('exerciseId: $exerciseId, ')
-          ..write('position: $position, ')
-          ..write('exerciseType: $exerciseType, ')
-          ..write('side: $side, ')
-          ..write('targetReps: $targetReps, ')
-          ..write('actualReps: $actualReps, ')
-          ..write('targetDurationSeconds: $targetDurationSeconds, ')
-          ..write('actualDurationSeconds: $actualDurationSeconds, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
+  List<GeneratedColumn> get $columns => [
     id,
-    circuitId,
+    sessionId,
     exerciseId,
-    position,
     exerciseType,
     side,
-    targetReps,
-    actualReps,
-    targetDurationSeconds,
-    actualDurationSeconds,
-    startedAt,
-    completedAt,
-  );
+    reps,
+    durationSeconds,
+    loggedAt,
+  ];
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SessionExerciseLogsData &&
-          other.id == this.id &&
-          other.circuitId == this.circuitId &&
-          other.exerciseId == this.exerciseId &&
-          other.position == this.position &&
-          other.exerciseType == this.exerciseType &&
-          other.side == this.side &&
-          other.targetReps == this.targetReps &&
-          other.actualReps == this.actualReps &&
-          other.targetDurationSeconds == this.targetDurationSeconds &&
-          other.actualDurationSeconds == this.actualDurationSeconds &&
-          other.startedAt == this.startedAt &&
-          other.completedAt == this.completedAt);
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'challenge_logs';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  ChallengeLogs createAlias(String alias) {
+    return ChallengeLogs(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
 }
 
-class SessionExerciseLogsCompanion
-    extends UpdateCompanion<SessionExerciseLogsData> {
-  final Value<int> id;
-  final Value<int> circuitId;
-  final Value<int> exerciseId;
-  final Value<int> position;
-  final Value<int> exerciseType;
-  final Value<int> side;
-  final Value<int?> targetReps;
-  final Value<int?> actualReps;
-  final Value<int?> targetDurationSeconds;
-  final Value<int?> actualDurationSeconds;
-  final Value<int> startedAt;
-  final Value<int?> completedAt;
-  const SessionExerciseLogsCompanion({
-    this.id = const Value.absent(),
-    this.circuitId = const Value.absent(),
-    this.exerciseId = const Value.absent(),
-    this.position = const Value.absent(),
-    this.exerciseType = const Value.absent(),
-    this.side = const Value.absent(),
-    this.targetReps = const Value.absent(),
-    this.actualReps = const Value.absent(),
-    this.targetDurationSeconds = const Value.absent(),
-    this.actualDurationSeconds = const Value.absent(),
-    this.startedAt = const Value.absent(),
-    this.completedAt = const Value.absent(),
-  });
-  SessionExerciseLogsCompanion.insert({
-    this.id = const Value.absent(),
-    required int circuitId,
-    required int exerciseId,
-    required int position,
-    this.exerciseType = const Value.absent(),
-    this.side = const Value.absent(),
-    this.targetReps = const Value.absent(),
-    this.actualReps = const Value.absent(),
-    this.targetDurationSeconds = const Value.absent(),
-    this.actualDurationSeconds = const Value.absent(),
-    required int startedAt,
-    this.completedAt = const Value.absent(),
-  }) : circuitId = Value(circuitId),
-       exerciseId = Value(exerciseId),
-       position = Value(position),
-       startedAt = Value(startedAt);
-  static Insertable<SessionExerciseLogsData> custom({
-    Expression<int>? id,
-    Expression<int>? circuitId,
-    Expression<int>? exerciseId,
-    Expression<int>? position,
-    Expression<int>? exerciseType,
-    Expression<int>? side,
-    Expression<int>? targetReps,
-    Expression<int>? actualReps,
-    Expression<int>? targetDurationSeconds,
-    Expression<int>? actualDurationSeconds,
-    Expression<int>? startedAt,
-    Expression<int>? completedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (circuitId != null) 'circuit_id': circuitId,
-      if (exerciseId != null) 'exercise_id': exerciseId,
-      if (position != null) 'position': position,
-      if (exerciseType != null) 'exercise_type': exerciseType,
-      if (side != null) 'side': side,
-      if (targetReps != null) 'target_reps': targetReps,
-      if (actualReps != null) 'actual_reps': actualReps,
-      if (targetDurationSeconds != null)
-        'target_duration_seconds': targetDurationSeconds,
-      if (actualDurationSeconds != null)
-        'actual_duration_seconds': actualDurationSeconds,
-      if (startedAt != null) 'started_at': startedAt,
-      if (completedAt != null) 'completed_at': completedAt,
-    });
-  }
-
-  SessionExerciseLogsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? circuitId,
-    Value<int>? exerciseId,
-    Value<int>? position,
-    Value<int>? exerciseType,
-    Value<int>? side,
-    Value<int?>? targetReps,
-    Value<int?>? actualReps,
-    Value<int?>? targetDurationSeconds,
-    Value<int?>? actualDurationSeconds,
-    Value<int>? startedAt,
-    Value<int?>? completedAt,
-  }) {
-    return SessionExerciseLogsCompanion(
-      id: id ?? this.id,
-      circuitId: circuitId ?? this.circuitId,
-      exerciseId: exerciseId ?? this.exerciseId,
-      position: position ?? this.position,
-      exerciseType: exerciseType ?? this.exerciseType,
-      side: side ?? this.side,
-      targetReps: targetReps ?? this.targetReps,
-      actualReps: actualReps ?? this.actualReps,
-      targetDurationSeconds:
-          targetDurationSeconds ?? this.targetDurationSeconds,
-      actualDurationSeconds:
-          actualDurationSeconds ?? this.actualDurationSeconds,
-      startedAt: startedAt ?? this.startedAt,
-      completedAt: completedAt ?? this.completedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (circuitId.present) {
-      map['circuit_id'] = Variable<int>(circuitId.value);
-    }
-    if (exerciseId.present) {
-      map['exercise_id'] = Variable<int>(exerciseId.value);
-    }
-    if (position.present) {
-      map['position'] = Variable<int>(position.value);
-    }
-    if (exerciseType.present) {
-      map['exercise_type'] = Variable<int>(exerciseType.value);
-    }
-    if (side.present) {
-      map['side'] = Variable<int>(side.value);
-    }
-    if (targetReps.present) {
-      map['target_reps'] = Variable<int>(targetReps.value);
-    }
-    if (actualReps.present) {
-      map['actual_reps'] = Variable<int>(actualReps.value);
-    }
-    if (targetDurationSeconds.present) {
-      map['target_duration_seconds'] = Variable<int>(
-        targetDurationSeconds.value,
-      );
-    }
-    if (actualDurationSeconds.present) {
-      map['actual_duration_seconds'] = Variable<int>(
-        actualDurationSeconds.value,
-      );
-    }
-    if (startedAt.present) {
-      map['started_at'] = Variable<int>(startedAt.value);
-    }
-    if (completedAt.present) {
-      map['completed_at'] = Variable<int>(completedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SessionExerciseLogsCompanion(')
-          ..write('id: $id, ')
-          ..write('circuitId: $circuitId, ')
-          ..write('exerciseId: $exerciseId, ')
-          ..write('position: $position, ')
-          ..write('exerciseType: $exerciseType, ')
-          ..write('side: $side, ')
-          ..write('targetReps: $targetReps, ')
-          ..write('actualReps: $actualReps, ')
-          ..write('targetDurationSeconds: $targetDurationSeconds, ')
-          ..write('actualDurationSeconds: $actualDurationSeconds, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('completedAt: $completedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class StreakStats extends Table with TableInfo<StreakStats, StreakStatsData> {
+class StreakStats extends Table with TableInfo {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2693,38 +890,8 @@ class StreakStats extends Table with TableInfo<StreakStats, StreakStatsData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  StreakStatsData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StreakStatsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      currentStreak: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}current_streak'],
-      )!,
-      longestStreak: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}longest_streak'],
-      )!,
-      currentStreakStartDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}current_streak_start_date'],
-      ),
-      currentStreakEndDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}current_streak_end_date'],
-      ),
-      longestStreakStartDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}longest_streak_start_date'],
-      ),
-      longestStreakEndDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}longest_streak_end_date'],
-      ),
-    );
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
@@ -2738,312 +905,112 @@ class StreakStats extends Table with TableInfo<StreakStats, StreakStatsData> {
   bool get dontWriteConstraints => true;
 }
 
-class StreakStatsData extends DataClass implements Insertable<StreakStatsData> {
-  final int id;
-  final int currentStreak;
-  final int longestStreak;
-  final int? currentStreakStartDate;
-  final int? currentStreakEndDate;
-  final int? longestStreakStartDate;
-  final int? longestStreakEndDate;
-  const StreakStatsData({
-    required this.id,
-    required this.currentStreak,
-    required this.longestStreak,
-    this.currentStreakStartDate,
-    this.currentStreakEndDate,
-    this.longestStreakStartDate,
-    this.longestStreakEndDate,
-  });
+class WorkoutScheduleChanges extends Table with TableInfo {
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['current_streak'] = Variable<int>(currentStreak);
-    map['longest_streak'] = Variable<int>(longestStreak);
-    if (!nullToAbsent || currentStreakStartDate != null) {
-      map['current_streak_start_date'] = Variable<int>(currentStreakStartDate);
-    }
-    if (!nullToAbsent || currentStreakEndDate != null) {
-      map['current_streak_end_date'] = Variable<int>(currentStreakEndDate);
-    }
-    if (!nullToAbsent || longestStreakStartDate != null) {
-      map['longest_streak_start_date'] = Variable<int>(longestStreakStartDate);
-    }
-    if (!nullToAbsent || longestStreakEndDate != null) {
-      map['longest_streak_end_date'] = Variable<int>(longestStreakEndDate);
-    }
-    return map;
-  }
-
-  StreakStatsCompanion toCompanion(bool nullToAbsent) {
-    return StreakStatsCompanion(
-      id: Value(id),
-      currentStreak: Value(currentStreak),
-      longestStreak: Value(longestStreak),
-      currentStreakStartDate: currentStreakStartDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(currentStreakStartDate),
-      currentStreakEndDate: currentStreakEndDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(currentStreakEndDate),
-      longestStreakStartDate: longestStreakStartDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(longestStreakStartDate),
-      longestStreakEndDate: longestStreakEndDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(longestStreakEndDate),
-    );
-  }
-
-  factory StreakStatsData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return StreakStatsData(
-      id: serializer.fromJson<int>(json['id']),
-      currentStreak: serializer.fromJson<int>(json['currentStreak']),
-      longestStreak: serializer.fromJson<int>(json['longestStreak']),
-      currentStreakStartDate: serializer.fromJson<int?>(
-        json['currentStreakStartDate'],
-      ),
-      currentStreakEndDate: serializer.fromJson<int?>(
-        json['currentStreakEndDate'],
-      ),
-      longestStreakStartDate: serializer.fromJson<int?>(
-        json['longestStreakStartDate'],
-      ),
-      longestStreakEndDate: serializer.fromJson<int?>(
-        json['longestStreakEndDate'],
-      ),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'currentStreak': serializer.toJson<int>(currentStreak),
-      'longestStreak': serializer.toJson<int>(longestStreak),
-      'currentStreakStartDate': serializer.toJson<int?>(currentStreakStartDate),
-      'currentStreakEndDate': serializer.toJson<int?>(currentStreakEndDate),
-      'longestStreakStartDate': serializer.toJson<int?>(longestStreakStartDate),
-      'longestStreakEndDate': serializer.toJson<int?>(longestStreakEndDate),
-    };
-  }
-
-  StreakStatsData copyWith({
-    int? id,
-    int? currentStreak,
-    int? longestStreak,
-    Value<int?> currentStreakStartDate = const Value.absent(),
-    Value<int?> currentStreakEndDate = const Value.absent(),
-    Value<int?> longestStreakStartDate = const Value.absent(),
-    Value<int?> longestStreakEndDate = const Value.absent(),
-  }) => StreakStatsData(
-    id: id ?? this.id,
-    currentStreak: currentStreak ?? this.currentStreak,
-    longestStreak: longestStreak ?? this.longestStreak,
-    currentStreakStartDate: currentStreakStartDate.present
-        ? currentStreakStartDate.value
-        : this.currentStreakStartDate,
-    currentStreakEndDate: currentStreakEndDate.present
-        ? currentStreakEndDate.value
-        : this.currentStreakEndDate,
-    longestStreakStartDate: longestStreakStartDate.present
-        ? longestStreakStartDate.value
-        : this.longestStreakStartDate,
-    longestStreakEndDate: longestStreakEndDate.present
-        ? longestStreakEndDate.value
-        : this.longestStreakEndDate,
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  WorkoutScheduleChanges(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> effectiveFrom = GeneratedColumn<int>(
+    'effective_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 946674000',
+    defaultValue: const CustomExpression('946674000'),
   );
-  StreakStatsData copyWithCompanion(StreakStatsCompanion data) {
-    return StreakStatsData(
-      id: data.id.present ? data.id.value : this.id,
-      currentStreak: data.currentStreak.present
-          ? data.currentStreak.value
-          : this.currentStreak,
-      longestStreak: data.longestStreak.present
-          ? data.longestStreak.value
-          : this.longestStreak,
-      currentStreakStartDate: data.currentStreakStartDate.present
-          ? data.currentStreakStartDate.value
-          : this.currentStreakStartDate,
-      currentStreakEndDate: data.currentStreakEndDate.present
-          ? data.currentStreakEndDate.value
-          : this.currentStreakEndDate,
-      longestStreakStartDate: data.longestStreakStartDate.present
-          ? data.longestStreakStartDate.value
-          : this.longestStreakStartDate,
-      longestStreakEndDate: data.longestStreakEndDate.present
-          ? data.longestStreakEndDate.value
-          : this.longestStreakEndDate,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StreakStatsData(')
-          ..write('id: $id, ')
-          ..write('currentStreak: $currentStreak, ')
-          ..write('longestStreak: $longestStreak, ')
-          ..write('currentStreakStartDate: $currentStreakStartDate, ')
-          ..write('currentStreakEndDate: $currentStreakEndDate, ')
-          ..write('longestStreakStartDate: $longestStreakStartDate, ')
-          ..write('longestStreakEndDate: $longestStreakEndDate')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    currentStreak,
-    longestStreak,
-    currentStreakStartDate,
-    currentStreakEndDate,
-    longestStreakStartDate,
-    longestStreakEndDate,
+  late final GeneratedColumn<int> weekdayMask = GeneratedColumn<int>(
+    'weekday_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 127',
+    defaultValue: const CustomExpression('127'),
   );
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StreakStatsData &&
-          other.id == this.id &&
-          other.currentStreak == this.currentStreak &&
-          other.longestStreak == this.longestStreak &&
-          other.currentStreakStartDate == this.currentStreakStartDate &&
-          other.currentStreakEndDate == this.currentStreakEndDate &&
-          other.longestStreakStartDate == this.longestStreakStartDate &&
-          other.longestStreakEndDate == this.longestStreakEndDate);
+  List<GeneratedColumn> get $columns => [effectiveFrom, weekdayMask];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'workout_schedule_changes';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {effectiveFrom};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
+  }
+
+  @override
+  WorkoutScheduleChanges createAlias(String alias) {
+    return WorkoutScheduleChanges(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(effective_from)'];
+  @override
+  bool get dontWriteConstraints => true;
 }
 
-class StreakStatsCompanion extends UpdateCompanion<StreakStatsData> {
-  final Value<int> id;
-  final Value<int> currentStreak;
-  final Value<int> longestStreak;
-  final Value<int?> currentStreakStartDate;
-  final Value<int?> currentStreakEndDate;
-  final Value<int?> longestStreakStartDate;
-  final Value<int?> longestStreakEndDate;
-  const StreakStatsCompanion({
-    this.id = const Value.absent(),
-    this.currentStreak = const Value.absent(),
-    this.longestStreak = const Value.absent(),
-    this.currentStreakStartDate = const Value.absent(),
-    this.currentStreakEndDate = const Value.absent(),
-    this.longestStreakStartDate = const Value.absent(),
-    this.longestStreakEndDate = const Value.absent(),
-  });
-  StreakStatsCompanion.insert({
-    this.id = const Value.absent(),
-    this.currentStreak = const Value.absent(),
-    this.longestStreak = const Value.absent(),
-    this.currentStreakStartDate = const Value.absent(),
-    this.currentStreakEndDate = const Value.absent(),
-    this.longestStreakStartDate = const Value.absent(),
-    this.longestStreakEndDate = const Value.absent(),
-  });
-  static Insertable<StreakStatsData> custom({
-    Expression<int>? id,
-    Expression<int>? currentStreak,
-    Expression<int>? longestStreak,
-    Expression<int>? currentStreakStartDate,
-    Expression<int>? currentStreakEndDate,
-    Expression<int>? longestStreakStartDate,
-    Expression<int>? longestStreakEndDate,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (currentStreak != null) 'current_streak': currentStreak,
-      if (longestStreak != null) 'longest_streak': longestStreak,
-      if (currentStreakStartDate != null)
-        'current_streak_start_date': currentStreakStartDate,
-      if (currentStreakEndDate != null)
-        'current_streak_end_date': currentStreakEndDate,
-      if (longestStreakStartDate != null)
-        'longest_streak_start_date': longestStreakStartDate,
-      if (longestStreakEndDate != null)
-        'longest_streak_end_date': longestStreakEndDate,
-    });
-  }
-
-  StreakStatsCompanion copyWith({
-    Value<int>? id,
-    Value<int>? currentStreak,
-    Value<int>? longestStreak,
-    Value<int?>? currentStreakStartDate,
-    Value<int?>? currentStreakEndDate,
-    Value<int?>? longestStreakStartDate,
-    Value<int?>? longestStreakEndDate,
-  }) {
-    return StreakStatsCompanion(
-      id: id ?? this.id,
-      currentStreak: currentStreak ?? this.currentStreak,
-      longestStreak: longestStreak ?? this.longestStreak,
-      currentStreakStartDate:
-          currentStreakStartDate ?? this.currentStreakStartDate,
-      currentStreakEndDate: currentStreakEndDate ?? this.currentStreakEndDate,
-      longestStreakStartDate:
-          longestStreakStartDate ?? this.longestStreakStartDate,
-      longestStreakEndDate: longestStreakEndDate ?? this.longestStreakEndDate,
-    );
+class BodyWeightLogs extends Table with TableInfo {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  BodyWeightLogs(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL PRIMARY KEY AUTOINCREMENT',
+  );
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> loggedAt = GeneratedColumn<int>(
+    'logged_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, weightKg, loggedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'body_weight_logs';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
+    throw UnsupportedError('TableInfo.map in schema verification code');
   }
 
   @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (currentStreak.present) {
-      map['current_streak'] = Variable<int>(currentStreak.value);
-    }
-    if (longestStreak.present) {
-      map['longest_streak'] = Variable<int>(longestStreak.value);
-    }
-    if (currentStreakStartDate.present) {
-      map['current_streak_start_date'] = Variable<int>(
-        currentStreakStartDate.value,
-      );
-    }
-    if (currentStreakEndDate.present) {
-      map['current_streak_end_date'] = Variable<int>(
-        currentStreakEndDate.value,
-      );
-    }
-    if (longestStreakStartDate.present) {
-      map['longest_streak_start_date'] = Variable<int>(
-        longestStreakStartDate.value,
-      );
-    }
-    if (longestStreakEndDate.present) {
-      map['longest_streak_end_date'] = Variable<int>(
-        longestStreakEndDate.value,
-      );
-    }
-    return map;
+  BodyWeightLogs createAlias(String alias) {
+    return BodyWeightLogs(attachedDatabase, alias);
   }
 
   @override
-  String toString() {
-    return (StringBuffer('StreakStatsCompanion(')
-          ..write('id: $id, ')
-          ..write('currentStreak: $currentStreak, ')
-          ..write('longestStreak: $longestStreak, ')
-          ..write('currentStreakStartDate: $currentStreakStartDate, ')
-          ..write('currentStreakEndDate: $currentStreakEndDate, ')
-          ..write('longestStreakStartDate: $longestStreakStartDate, ')
-          ..write('longestStreakEndDate: $longestStreakEndDate')
-          ..write(')'))
-        .toString();
-  }
+  bool get dontWriteConstraints => true;
 }
 
 class DatabaseAtV1 extends GeneratedDatabase {
   DatabaseAtV1(QueryExecutor e) : super(e);
   late final Exercises exercises = Exercises(this);
+  late final ExerciseSupportedTypes exerciseSupportedTypes =
+      ExerciseSupportedTypes(this);
   late final Programs programs = Programs(this);
   late final Workouts workouts = Workouts(this);
   late final WorkoutExercises workoutExercises = WorkoutExercises(this);
@@ -3052,23 +1019,40 @@ class DatabaseAtV1 extends GeneratedDatabase {
   late final SessionExerciseLogs sessionExerciseLogs = SessionExerciseLogs(
     this,
   );
+  late final ChallengeLogs challengeLogs = ChallengeLogs(this);
   late final StreakStats streakStats = StreakStats(this);
+  late final WorkoutScheduleChanges workoutScheduleChanges =
+      WorkoutScheduleChanges(this);
+  late final BodyWeightLogs bodyWeightLogs = BodyWeightLogs(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     exercises,
+    exerciseSupportedTypes,
     programs,
     workouts,
     workoutExercises,
     workoutSessions,
     sessionCircuits,
     sessionExerciseLogs,
+    challengeLogs,
     streakStats,
+    workoutScheduleChanges,
+    bodyWeightLogs,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'exercises',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('exercise_supported_types', kind: UpdateKind.delete),
+      ],
+    ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'workouts',
@@ -3089,6 +1073,13 @@ class DatabaseAtV1 extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('session_exercise_logs', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'workout_sessions',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('challenge_logs', kind: UpdateKind.delete)],
     ),
   ]);
   @override

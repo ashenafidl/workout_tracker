@@ -8,7 +8,7 @@ flutter run                     # Android only; no iOS/web/desktop targets
 
 # After ANY edit to lib/database/database.dart:
 dart run build_runner build --delete-conflicting-outputs
-# emits lib/database/database.g.dart AND lib/database/database.steps.dart
+# emits lib/database/database.g.dart (and database.steps.dart once a v2+ snapshot exists)
 
 # For a new schema version (snapshots are NOT produced by build_runner):
 dart run drift_dev schema dump \
@@ -18,16 +18,13 @@ dart run drift_dev schema generate \
   drift_schemas/workout_tracker test/drift/workout_tracker/generated
 
 flutter analyze                 # verification gate: keep at 0 issues
-flutter test                    # currently RED, see below
+flutter test
 flutter test test/backup/backup_service_test.dart --plain-name "..."
 ```
 
 Verification order: build_runner -> `flutter analyze` -> `flutter test`.
 
-`flutter analyze` is clean. `flutter test` currently fails ~10 tests:
-- Migration tests: `drift_schema_v1.json` already contains `is_bilateral`, which the v1->v2 migration adds, so it fails with `duplicate column name: is_bilateral`. Snapshots must be immutable historical records - do not regenerate old ones.
-- Backup tests: fixture declares `databaseSchemaVersion: 6`, app is 7; `BackupService` requires an exact match.
-- `migration_test.dart` still has an unfilled TODO-templated data-integrity test.
+`flutter analyze` is clean and `flutter test` is green. `test/drift/workout_tracker/schema_test.dart` checks a fresh install lands at v1 and matches the snapshot.
 
 ## Code style (repo-specific)
 
@@ -51,8 +48,8 @@ Verification order: build_runner -> `flutter analyze` -> `flutter test`.
 
 ## Database / schema
 
-- `schemaVersion` is **7**. `MigrationStrategy` has `onCreate` plus `onUpgrade` via `stepByStep()` from generated `lib/database/database.steps.dart`; the `from1To2` ... `from6To7` bodies live in `extension Migrations on GeneratedDatabase` at the bottom of `database.dart`. Never hand-edit `database.g.dart`, `database.steps.dart`, or `test/drift/**/generated/*`.
-- Tracked snapshots: `drift_schemas/workout_tracker/drift_schema_v*.json`. Bump the version, dump a new snapshot, regenerate the test schemas, and add the matching `fromNToN+1` step together.
+- `schemaVersion` is **1**; migration history was reset (all earlier databases were discarded). `MigrationStrategy` has only `onCreate`, no `onUpgrade`, so opening an older/newer database file throws (Drift's default). Never hand-edit `database.g.dart`, `database.steps.dart`, or `test/drift/**/generated/*`.
+- Tracked snapshots: `drift_schemas/workout_tracker/drift_schema_v*.json` (only v1 now). For v2: bump the version, dump a new snapshot (snapshots are immutable - never regenerate old ones), regenerate the test schemas, add `onUpgrade: stepByStep(from1To2: ...)` and a migration test together.
 - `StreakStats` is a singleton table (one row, `id == 1`) seeded in `onCreate`; `getSingle()` throws without it. Any upgrade that recreates it must reseed. Streak logic uses the schedule (`StreakService` depends on `ScheduleRepo` / `WorkoutScheduleChanges.weekdayMask`), not only session history.
 - FK delete behaviour is mixed and deliberate: cascade on `ExerciseSupportedTypes.exerciseId`, `WorkoutExercises.workoutId`, `SessionCircuits.sessionId`, `SessionExerciseLogs.circuitId`, `ChallengeLogs.sessionId`; restrict on `WorkoutExercises.exerciseId`, `WorkoutSessions.workoutId`/`programId`, `SessionExerciseLogs.exerciseId`, `ChallengeLogs.exerciseId`. `Workouts.programId` has no `onDelete` (NO ACTION), so `deleteProgram` throws while workouts remain.
 - Exactly one active program; `ProgramRepo.setActiveProgram` clears the others in a transaction.

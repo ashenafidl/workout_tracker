@@ -4,8 +4,6 @@ import "package:path_provider/path_provider.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
 
-import "database.steps.dart";
-
 part "database.g.dart";
 
 class Exercises extends Table {
@@ -183,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -191,7 +189,6 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
       await _seedStreakStats();
     },
-    onUpgrade: _schemaUpgrade,
   );
 
   Future<void> _seedStreakStats() {
@@ -207,45 +204,4 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
   }
-}
-
-extension Migrations on GeneratedDatabase {
-  OnUpgrade get _schemaUpgrade => stepByStep(
-    from1To2: (m, s) async {
-      await m.addColumn(s.exercises, s.exercises.isBilateral);
-      await m.addColumn(s.workoutExercises, s.workoutExercises.side);
-      await m.addColumn(s.sessionExerciseLogs, s.sessionExerciseLogs.side);
-    },
-    from2To3: (m, s) async {
-      await m.addColumn(s.workouts, s.workouts.kind);
-      await m.createTable(s.challengeLogs);
-    },
-    from3To4: (m, s) async {
-      await m.addColumn(s.workouts, s.workouts.restDurationSeconds);
-    },
-    from4To5: (m, s) async {
-      await m.createTable(s.exerciseSupportedTypes);
-      await m.database.customStatement("""
-    INSERT INTO exercise_supported_types (exercise_id, type)
-    SELECT id, type FROM exercises
-  """);
-      await m.addColumn(s.workoutExercises, s.workoutExercises.type);
-      await m.database.customStatement("""
-    UPDATE workout_exercises
-    SET type = CASE
-      WHEN target_duration_seconds IS NOT NULL THEN 1
-      ELSE 0
-    END
-  """);
-      await m.alterTable(
-        TableMigration(s.exercises, newColumns: [], columnTransformer: {}),
-      );
-    },
-    from5To6: (m, s) async {
-      await m.createTable(s.bodyWeightLogs);
-    },
-    from6To7: (m, s) async {
-      await m.createTable(s.workoutScheduleChanges);
-    },
-  );
 }

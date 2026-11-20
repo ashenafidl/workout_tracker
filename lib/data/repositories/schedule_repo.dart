@@ -41,8 +41,8 @@ class ScheduleRepo {
         .into(_db.workoutScheduleChanges)
         .insertOnConflictUpdate(
           WorkoutScheduleChangesCompanion.insert(
-            effectiveFrom: effectiveToday,
-            weekdayMask: weekdayMaskFor(weekdays),
+            effectiveFrom: Value(effectiveToday),
+            weekdayMask: Value(weekdayMaskFor(weekdays)),
           ),
         );
   }

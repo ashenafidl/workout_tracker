@@ -4597,7 +4597,8 @@ class $WorkoutScheduleChangesTable extends WorkoutScheduleChanges
         aliasedName,
         false,
         type: DriftSqlType.dateTime,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
+        defaultValue: Constant(DateTime(2000, 1, 1)),
       );
   static const VerificationMeta _weekdayMaskMeta = const VerificationMeta(
     'weekdayMask',
@@ -4608,7 +4609,8 @@ class $WorkoutScheduleChangesTable extends WorkoutScheduleChanges
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(127),
   );
   @override
   List<GeneratedColumn> get $columns => [effectiveFrom, weekdayMask];
@@ -4632,8 +4634,6 @@ class $WorkoutScheduleChangesTable extends WorkoutScheduleChanges
           _effectiveFromMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_effectiveFromMeta);
     }
     if (data.containsKey('weekday_mask')) {
       context.handle(
@@ -4643,8 +4643,6 @@ class $WorkoutScheduleChangesTable extends WorkoutScheduleChanges
           _weekdayMaskMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_weekdayMaskMeta);
     }
     return context;
   }
@@ -4762,11 +4760,10 @@ class WorkoutScheduleChangesCompanion
     this.rowid = const Value.absent(),
   });
   WorkoutScheduleChangesCompanion.insert({
-    required DateTime effectiveFrom,
-    required int weekdayMask,
+    this.effectiveFrom = const Value.absent(),
+    this.weekdayMask = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : effectiveFrom = Value(effectiveFrom),
-       weekdayMask = Value(weekdayMask);
+  });
   static Insertable<WorkoutScheduleChange> custom({
     Expression<DateTime>? effectiveFrom,
     Expression<int>? weekdayMask,
@@ -9767,8 +9764,8 @@ typedef $$StreakStatsTableProcessedTableManager =
     >;
 typedef $$WorkoutScheduleChangesTableCreateCompanionBuilder =
     WorkoutScheduleChangesCompanion Function({
-      required DateTime effectiveFrom,
-      required int weekdayMask,
+      Value<DateTime> effectiveFrom,
+      Value<int> weekdayMask,
       Value<int> rowid,
     });
 typedef $$WorkoutScheduleChangesTableUpdateCompanionBuilder =
@@ -9894,8 +9891,8 @@ class $$WorkoutScheduleChangesTableTableManager
               ),
           createCompanionCallback:
               ({
-                required DateTime effectiveFrom,
-                required int weekdayMask,
+                Value<DateTime> effectiveFrom = const Value.absent(),
+                Value<int> weekdayMask = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WorkoutScheduleChangesCompanion.insert(
                 effectiveFrom: effectiveFrom,

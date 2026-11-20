@@ -245,7 +245,7 @@ Uint8List _validBackupBytes() {
   final backup = {
     "format": "workout_tracker_backup",
     "backupVersion": 1,
-    "databaseSchemaVersion": 6,
+    "databaseSchemaVersion": 1,
     "exportedAt": exportedAt,
     "database": database,
     "preferences": {
