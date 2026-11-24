@@ -91,7 +91,26 @@ class SessionBottomPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          vm.nextExercise != null
+          vm.isRestNext
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Rest",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      formatDuration(Duration(seconds: vm.restDurationSeconds)),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                )
+              : vm.nextExercise != null
               ? Row(
                   children: [
                     Expanded(

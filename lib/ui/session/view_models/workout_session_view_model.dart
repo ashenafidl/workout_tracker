@@ -117,6 +117,15 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   WorkoutExerciseDetail? get nextExercise => nextStep?.exercise;
   ExerciseSide? get nextSide => nextStep?.side;
 
+  bool get isRestNext =>
+      _phase != SessionPhase.resting &&
+      _currentStepIndex == _steps.length - 1 &&
+      _currentCircuit < totalSets;
+
+  int get restDurationSeconds =>
+      args.workoutWithExercises.workout.restDurationSeconds ??
+      sharedPreferenceService.restDurationSeconds;
+
   SegmentStatus exerciseStatus(int index) {
     if (index < _currentStepIndex) {
       return SegmentStatus.completed;
@@ -303,9 +312,7 @@ class WorkoutSessionViewModel extends ChangeNotifier {
   void _startRest() {
     _timer?.cancel();
     _phase = SessionPhase.resting;
-    _restSecondsRemaining =
-        args.workoutWithExercises.workout.restDurationSeconds ??
-        sharedPreferenceService.restDurationSeconds;
+    _restSecondsRemaining = restDurationSeconds;
     soundService.playRestStart();
     notifyListeners();
 
