@@ -4058,6 +4058,311 @@ class ChallengeLogsCompanion extends UpdateCompanion<ChallengeLog> {
   }
 }
 
+class $ChallengeScreenVisitsTable extends ChallengeScreenVisits
+    with TableInfo<$ChallengeScreenVisitsTable, ChallengeScreenVisit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChallengeScreenVisitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<int> sessionId = GeneratedColumn<int>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES workout_sessions (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _openedAtMeta = const VerificationMeta(
+    'openedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> openedAt = GeneratedColumn<DateTime>(
+    'opened_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, sessionId, openedAt, closedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'challenge_screen_visits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChallengeScreenVisit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('opened_at')) {
+      context.handle(
+        _openedAtMeta,
+        openedAt.isAcceptableOrUnknown(data['opened_at']!, _openedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_openedAtMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChallengeScreenVisit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChallengeScreenVisit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}session_id'],
+      )!,
+      openedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}opened_at'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ChallengeScreenVisitsTable createAlias(String alias) {
+    return $ChallengeScreenVisitsTable(attachedDatabase, alias);
+  }
+}
+
+class ChallengeScreenVisit extends DataClass
+    implements Insertable<ChallengeScreenVisit> {
+  final int id;
+  final int sessionId;
+  final DateTime openedAt;
+  final DateTime closedAt;
+  const ChallengeScreenVisit({
+    required this.id,
+    required this.sessionId,
+    required this.openedAt,
+    required this.closedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['session_id'] = Variable<int>(sessionId);
+    map['opened_at'] = Variable<DateTime>(openedAt);
+    map['closed_at'] = Variable<DateTime>(closedAt);
+    return map;
+  }
+
+  ChallengeScreenVisitsCompanion toCompanion(bool nullToAbsent) {
+    return ChallengeScreenVisitsCompanion(
+      id: Value(id),
+      sessionId: Value(sessionId),
+      openedAt: Value(openedAt),
+      closedAt: Value(closedAt),
+    );
+  }
+
+  factory ChallengeScreenVisit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChallengeScreenVisit(
+      id: serializer.fromJson<int>(json['id']),
+      sessionId: serializer.fromJson<int>(json['sessionId']),
+      openedAt: serializer.fromJson<DateTime>(json['openedAt']),
+      closedAt: serializer.fromJson<DateTime>(json['closedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'sessionId': serializer.toJson<int>(sessionId),
+      'openedAt': serializer.toJson<DateTime>(openedAt),
+      'closedAt': serializer.toJson<DateTime>(closedAt),
+    };
+  }
+
+  ChallengeScreenVisit copyWith({
+    int? id,
+    int? sessionId,
+    DateTime? openedAt,
+    DateTime? closedAt,
+  }) => ChallengeScreenVisit(
+    id: id ?? this.id,
+    sessionId: sessionId ?? this.sessionId,
+    openedAt: openedAt ?? this.openedAt,
+    closedAt: closedAt ?? this.closedAt,
+  );
+  ChallengeScreenVisit copyWithCompanion(ChallengeScreenVisitsCompanion data) {
+    return ChallengeScreenVisit(
+      id: data.id.present ? data.id.value : this.id,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      openedAt: data.openedAt.present ? data.openedAt.value : this.openedAt,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChallengeScreenVisit(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, sessionId, openedAt, closedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChallengeScreenVisit &&
+          other.id == this.id &&
+          other.sessionId == this.sessionId &&
+          other.openedAt == this.openedAt &&
+          other.closedAt == this.closedAt);
+}
+
+class ChallengeScreenVisitsCompanion
+    extends UpdateCompanion<ChallengeScreenVisit> {
+  final Value<int> id;
+  final Value<int> sessionId;
+  final Value<DateTime> openedAt;
+  final Value<DateTime> closedAt;
+  const ChallengeScreenVisitsCompanion({
+    this.id = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.closedAt = const Value.absent(),
+  });
+  ChallengeScreenVisitsCompanion.insert({
+    this.id = const Value.absent(),
+    required int sessionId,
+    required DateTime openedAt,
+    required DateTime closedAt,
+  }) : sessionId = Value(sessionId),
+       openedAt = Value(openedAt),
+       closedAt = Value(closedAt);
+  static Insertable<ChallengeScreenVisit> custom({
+    Expression<int>? id,
+    Expression<int>? sessionId,
+    Expression<DateTime>? openedAt,
+    Expression<DateTime>? closedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sessionId != null) 'session_id': sessionId,
+      if (openedAt != null) 'opened_at': openedAt,
+      if (closedAt != null) 'closed_at': closedAt,
+    });
+  }
+
+  ChallengeScreenVisitsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? sessionId,
+    Value<DateTime>? openedAt,
+    Value<DateTime>? closedAt,
+  }) {
+    return ChallengeScreenVisitsCompanion(
+      id: id ?? this.id,
+      sessionId: sessionId ?? this.sessionId,
+      openedAt: openedAt ?? this.openedAt,
+      closedAt: closedAt ?? this.closedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<int>(sessionId.value);
+    }
+    if (openedAt.present) {
+      map['opened_at'] = Variable<DateTime>(openedAt.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChallengeScreenVisitsCompanion(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $StreakStatsTable extends StreakStats
     with TableInfo<$StreakStatsTable, StreakStat> {
   @override
@@ -5083,6 +5388,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SessionExerciseLogsTable sessionExerciseLogs =
       $SessionExerciseLogsTable(this);
   late final $ChallengeLogsTable challengeLogs = $ChallengeLogsTable(this);
+  late final $ChallengeScreenVisitsTable challengeScreenVisits =
+      $ChallengeScreenVisitsTable(this);
   late final $StreakStatsTable streakStats = $StreakStatsTable(this);
   late final $WorkoutScheduleChangesTable workoutScheduleChanges =
       $WorkoutScheduleChangesTable(this);
@@ -5101,6 +5408,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sessionCircuits,
     sessionExerciseLogs,
     challengeLogs,
+    challengeScreenVisits,
     streakStats,
     workoutScheduleChanges,
     bodyWeightLogs,
@@ -5143,6 +5451,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('challenge_logs', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'workout_sessions',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('challenge_screen_visits', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -7563,6 +7878,31 @@ final class $$WorkoutSessionsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ChallengeScreenVisitsTable,
+    List<ChallengeScreenVisit>
+  >
+  _challengeScreenVisitsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.challengeScreenVisits,
+        aliasName: 'workout_sessions__id__challenge_screen_visits__session_id',
+      );
+
+  $$ChallengeScreenVisitsTableProcessedTableManager
+  get challengeScreenVisitsRefs {
+    final manager = $$ChallengeScreenVisitsTableTableManager(
+      $_db,
+      $_db.challengeScreenVisits,
+    ).filter((f) => f.sessionId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _challengeScreenVisitsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$WorkoutSessionsTableFilterComposer
@@ -7682,6 +8022,32 @@ class $$WorkoutSessionsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> challengeScreenVisitsRefs(
+    Expression<bool> Function($$ChallengeScreenVisitsTableFilterComposer f) f,
+  ) {
+    final $$ChallengeScreenVisitsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.challengeScreenVisits,
+          getReferencedColumn: (t) => t.sessionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ChallengeScreenVisitsTableFilterComposer(
+                $db: $db,
+                $table: $db.challengeScreenVisits,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -7872,6 +8238,32 @@ class $$WorkoutSessionsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> challengeScreenVisitsRefs<T extends Object>(
+    Expression<T> Function($$ChallengeScreenVisitsTableAnnotationComposer a) f,
+  ) {
+    final $$ChallengeScreenVisitsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.challengeScreenVisits,
+          getReferencedColumn: (t) => t.sessionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ChallengeScreenVisitsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.challengeScreenVisits,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$WorkoutSessionsTableTableManager
@@ -7892,6 +8284,7 @@ class $$WorkoutSessionsTableTableManager
             bool programId,
             bool sessionCircuitsRefs,
             bool challengeLogsRefs,
+            bool challengeScreenVisitsRefs,
           })
         > {
   $$WorkoutSessionsTableTableManager(
@@ -7949,12 +8342,14 @@ class $$WorkoutSessionsTableTableManager
                 programId = false,
                 sessionCircuitsRefs = false,
                 challengeLogsRefs = false,
+                challengeScreenVisitsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (sessionCircuitsRefs) db.sessionCircuits,
                     if (challengeLogsRefs) db.challengeLogs,
+                    if (challengeScreenVisitsRefs) db.challengeScreenVisits,
                   ],
                   addJoins:
                       <
@@ -8039,6 +8434,26 @@ class $$WorkoutSessionsTableTableManager
                           referencedColumn: 'session_id',
                           typedResults: items,
                         ),
+                      if (challengeScreenVisitsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          WorkoutSession,
+                          $WorkoutSessionsTable,
+                          ChallengeScreenVisit,
+                          $ChallengeScreenVisitsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$WorkoutSessionsTableReferences
+                              ._challengeScreenVisitsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$WorkoutSessionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).challengeScreenVisitsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'session_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -8064,6 +8479,7 @@ typedef $$WorkoutSessionsTableProcessedTableManager =
         bool programId,
         bool sessionCircuitsRefs,
         bool challengeLogsRefs,
+        bool challengeScreenVisitsRefs,
       })
     >;
 typedef $$SessionCircuitsTableCreateCompanionBuilder =
@@ -9509,6 +9925,320 @@ typedef $$ChallengeLogsTableProcessedTableManager =
       ChallengeLog,
       PrefetchHooks Function({bool sessionId, bool exerciseId})
     >;
+typedef $$ChallengeScreenVisitsTableCreateCompanionBuilder =
+    ChallengeScreenVisitsCompanion Function({
+      Value<int> id,
+      required int sessionId,
+      required DateTime openedAt,
+      required DateTime closedAt,
+    });
+typedef $$ChallengeScreenVisitsTableUpdateCompanionBuilder =
+    ChallengeScreenVisitsCompanion Function({
+      Value<int> id,
+      Value<int> sessionId,
+      Value<DateTime> openedAt,
+      Value<DateTime> closedAt,
+    });
+
+final class $$ChallengeScreenVisitsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ChallengeScreenVisitsTable,
+          ChallengeScreenVisit
+        > {
+  $$ChallengeScreenVisitsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $WorkoutSessionsTable _sessionIdTable(_$AppDatabase db) => db
+      .workoutSessions
+      .createAlias('challenge_screen_visits__session_id__workout_sessions__id');
+
+  $$WorkoutSessionsTableProcessedTableManager get sessionId {
+    final $_column = $_itemColumn<int>('session_id')!;
+
+    final manager = $$WorkoutSessionsTableTableManager(
+      $_db,
+      $_db.workoutSessions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sessionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChallengeScreenVisitsTableFilterComposer
+    extends Composer<_$AppDatabase, $ChallengeScreenVisitsTable> {
+  $$ChallengeScreenVisitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$WorkoutSessionsTableFilterComposer get sessionId {
+    final $$WorkoutSessionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.workoutSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutSessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.workoutSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChallengeScreenVisitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChallengeScreenVisitsTable> {
+  $$ChallengeScreenVisitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$WorkoutSessionsTableOrderingComposer get sessionId {
+    final $$WorkoutSessionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.workoutSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutSessionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.workoutSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChallengeScreenVisitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChallengeScreenVisitsTable> {
+  $$ChallengeScreenVisitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get openedAt =>
+      $composableBuilder(column: $table.openedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  $$WorkoutSessionsTableAnnotationComposer get sessionId {
+    final $$WorkoutSessionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionId,
+      referencedTable: $db.workoutSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkoutSessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.workoutSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChallengeScreenVisitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChallengeScreenVisitsTable,
+          ChallengeScreenVisit,
+          $$ChallengeScreenVisitsTableFilterComposer,
+          $$ChallengeScreenVisitsTableOrderingComposer,
+          $$ChallengeScreenVisitsTableAnnotationComposer,
+          $$ChallengeScreenVisitsTableCreateCompanionBuilder,
+          $$ChallengeScreenVisitsTableUpdateCompanionBuilder,
+          (ChallengeScreenVisit, $$ChallengeScreenVisitsTableReferences),
+          ChallengeScreenVisit,
+          PrefetchHooks Function({bool sessionId})
+        > {
+  $$ChallengeScreenVisitsTableTableManager(
+    _$AppDatabase db,
+    $ChallengeScreenVisitsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChallengeScreenVisitsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ChallengeScreenVisitsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ChallengeScreenVisitsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> sessionId = const Value.absent(),
+                Value<DateTime> openedAt = const Value.absent(),
+                Value<DateTime> closedAt = const Value.absent(),
+              }) => ChallengeScreenVisitsCompanion(
+                id: id,
+                sessionId: sessionId,
+                openedAt: openedAt,
+                closedAt: closedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int sessionId,
+                required DateTime openedAt,
+                required DateTime closedAt,
+              }) => ChallengeScreenVisitsCompanion.insert(
+                id: id,
+                sessionId: sessionId,
+                openedAt: openedAt,
+                closedAt: closedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ChallengeScreenVisitsTable,
+                    ChallengeScreenVisit
+                  >(table),
+                  $$ChallengeScreenVisitsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({sessionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (sessionId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.sessionId,
+                        referencedTable: $$ChallengeScreenVisitsTableReferences
+                            ._sessionIdTable(db),
+                        referencedColumn: $$ChallengeScreenVisitsTableReferences
+                            ._sessionIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChallengeScreenVisitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChallengeScreenVisitsTable,
+      ChallengeScreenVisit,
+      $$ChallengeScreenVisitsTableFilterComposer,
+      $$ChallengeScreenVisitsTableOrderingComposer,
+      $$ChallengeScreenVisitsTableAnnotationComposer,
+      $$ChallengeScreenVisitsTableCreateCompanionBuilder,
+      $$ChallengeScreenVisitsTableUpdateCompanionBuilder,
+      (ChallengeScreenVisit, $$ChallengeScreenVisitsTableReferences),
+      ChallengeScreenVisit,
+      PrefetchHooks Function({bool sessionId})
+    >;
 typedef $$StreakStatsTableCreateCompanionBuilder =
     StreakStatsCompanion Function({
       Value<int> id,
@@ -10132,6 +10862,8 @@ class $AppDatabaseManager {
       $$SessionExerciseLogsTableTableManager(_db, _db.sessionExerciseLogs);
   $$ChallengeLogsTableTableManager get challengeLogs =>
       $$ChallengeLogsTableTableManager(_db, _db.challengeLogs);
+  $$ChallengeScreenVisitsTableTableManager get challengeScreenVisits =>
+      $$ChallengeScreenVisitsTableTableManager(_db, _db.challengeScreenVisits);
   $$StreakStatsTableTableManager get streakStats =>
       $$StreakStatsTableTableManager(_db, _db.streakStats);
   $$WorkoutScheduleChangesTableTableManager get workoutScheduleChanges =>

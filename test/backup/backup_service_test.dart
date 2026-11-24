@@ -117,6 +117,42 @@ void main() {
     expect(sharedPreferences.getInt("workout_index_999"), 2);
   });
 
+  test("restores schema 2 backups with challenge screen visits", () async {
+    final backup = _schemaV2Backup();
+    final parsed = backupService.parseBackupBytes(_encode(backup));
+    expect(parsed.recordCount, 12);
+
+    await backupService.restoreBackup(parsed);
+    final visit = await database
+        .select(database.challengeScreenVisits)
+        .getSingle();
+    expect(visit.id, 3);
+    expect(visit.sessionId, 15);
+  });
+
+  test("schema 2 backups must include challenge screen visits", () {
+    final backup = _schemaV2Backup();
+    (backup["database"]! as Map<String, Object?>).remove(
+      "challengeScreenVisits",
+    );
+
+    expect(
+      () => backupService.parseBackupBytes(_encode(backup)),
+      throwsA(isA<BackupException>()),
+    );
+  });
+
+  test("rejects unknown schema versions", () {
+    final backup =
+        jsonDecode(utf8.decode(_validBackupBytes())) as Map<String, Object?>;
+    backup["databaseSchemaVersion"] = 3;
+
+    expect(
+      () => backupService.parseBackupBytes(_encode(backup)),
+      throwsA(isA<BackupException>()),
+    );
+  });
+
   test("accepts empty tables and an empty preference set", () {
     final backup =
         jsonDecode(utf8.decode(_validBackupBytes())) as Map<String, Object?>;
@@ -134,6 +170,22 @@ void main() {
     expect(parsed.exercises, isEmpty);
     expect(parsed.bodyWeightLogs, isEmpty);
   });
+}
+
+Uint8List _encode(Map<String, Object?> backup) =>
+    Uint8List.fromList(utf8.encode(jsonEncode(backup)));
+
+Map<String, Object?> _schemaV2Backup() {
+  final backup =
+      jsonDecode(utf8.decode(_validBackupBytes())) as Map<String, Object?>;
+  backup["databaseSchemaVersion"] = 2;
+  final database = backup["database"]! as Map<String, Object?>;
+  final loggedAt = (database["challengeLogs"]! as List<Object?>).single;
+  final date = (loggedAt! as Map<String, Object?>)["loggedAt"];
+  database["challengeScreenVisits"] = [
+    {"id": 3, "sessionId": 15, "openedAt": date, "closedAt": date},
+  ];
+  return backup;
 }
 
 Uint8List _validBackupBytes() {

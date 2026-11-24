@@ -24,7 +24,7 @@ flutter test test/backup/backup_service_test.dart --plain-name "..."
 
 Verification order: build_runner -> `flutter analyze` -> `flutter test`.
 
-`flutter analyze` is clean and `flutter test` is green. `test/drift/workout_tracker/schema_test.dart` checks a fresh install lands at v1 and matches the snapshot.
+`flutter analyze` is clean and `flutter test` is green. `test/drift/workout_tracker/schema_test.dart` checks a fresh install lands at v2 and matches the snapshot; `migration_test.dart` covers v1 -> v2.
 
 ## Code style (repo-specific)
 
@@ -48,18 +48,19 @@ Verification order: build_runner -> `flutter analyze` -> `flutter test`.
 
 ## Database / schema
 
-- `schemaVersion` is **1**; migration history was reset (all earlier databases were discarded). `MigrationStrategy` has only `onCreate`, no `onUpgrade`, so opening an older/newer database file throws (Drift's default). Never hand-edit `database.g.dart`, `database.steps.dart`, or `test/drift/**/generated/*`.
-- Tracked snapshots: `drift_schemas/workout_tracker/drift_schema_v*.json` (only v1 now). For v2: bump the version, dump a new snapshot (snapshots are immutable - never regenerate old ones), regenerate the test schemas, add `onUpgrade: stepByStep(from1To2: ...)` and a migration test together.
+- `schemaVersion` is **2** (v2 added `ChallengeScreenVisits`). `onUpgrade` uses `stepByStep` from `database.steps.dart` (regenerate with `dart run drift_dev make-migrations`). Never hand-edit `database.g.dart`, `database.steps.dart`, or `test/drift/**/generated/*`.
+- Tracked snapshots: `drift_schemas/workout_tracker/drift_schema_v*.json` (v1, v2). For a new version: bump it, dump a new snapshot (snapshots are immutable - never regenerate old ones), run `make-migrations`, add the `fromNToN+1` step and extend the migration test together.
 - `StreakStats` is a singleton table (one row, `id == 1`) seeded in `onCreate`; `getSingle()` throws without it. Any upgrade that recreates it must reseed. Streak logic uses the schedule (`StreakService` depends on `ScheduleRepo` / `WorkoutScheduleChanges.weekdayMask`), not only session history.
 - FK delete behaviour is mixed and deliberate: cascade on `ExerciseSupportedTypes.exerciseId`, `WorkoutExercises.workoutId`, `SessionCircuits.sessionId`, `SessionExerciseLogs.circuitId`, `ChallengeLogs.sessionId`; restrict on `WorkoutExercises.exerciseId`, `WorkoutSessions.workoutId`/`programId`, `SessionExerciseLogs.exerciseId`, `ChallengeLogs.exerciseId`. `Workouts.programId` has no `onDelete` (NO ACTION), so `deleteProgram` throws while workouts remain.
 - Exactly one active program; `ProgramRepo.setActiveProgram` clears the others in a transaction.
 - `WorkoutExercises` is the template; `SessionExerciseLogs` snapshots `target*`, `exerciseType`, and `side` at session start so history survives template edits.
 - `ExerciseSide` is `left`/`right`/`both`, persisted with `intEnum`; `side` columns are nullable and `null` means no side. Never reorder intEnum values - ordinals are stored in the DB. `isBilateral` is an `Exercises` trait, independent of the per-workout `side`.
+- All workout/rest durations come from `SessionDurations` (`lib/data/services/session_durations.dart`); history, stats, the streak calendar and the session summary read from it. Circuit sessions: rest = gaps between circuits, workout = elapsed - rest. Challenges: timed entries count for their length; with rep entries, the first-to-last span also counts but only inside `ChallengeScreenVisits` (foreground stretches, created on first log, `closedAt` = last log). No visits (pre-v2 data) falls back to the full span.
 - Timestamps use client-side `DateTime.now()` defaults, never DB-side; set `updatedAt` manually on updates.
 
 ## Backup / restore
 
-- JSON uses `format: workout_tracker_backup`, `backupVersion: 1`, and `databaseSchemaVersion` must exactly equal `AppDatabase.schemaVersion`. A schema bump invalidates existing backups unless `BackupService._parseBackup` gains version handling.
+- JSON uses `format: workout_tracker_backup`, `backupVersion: 1`, and `databaseSchemaVersion` in `_supportedSchemaVersions` (1, 2). Schema 1 backups omit `challengeScreenVisits` and restore it empty; schema 2 requires it. A schema bump needs `_parseBackup` updated the same way.
 - Only these SharedPreferences keys are backed up/restored: `rest_duration_seconds`, `workout_index_<programId>`, `program_run_start_<programId>` (see `SharedPreferenceService`). Restore is transactional across DB + prefs and removes obsolete scoped keys.
 - Backups include private workout/body-weight history.
 

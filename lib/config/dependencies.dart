@@ -68,7 +68,7 @@ Future<void> setupDependencies() async {
     () => SessionRepo(getIt<AppDatabase>()),
   );
   getIt.registerLazySingleton<StreakRepo>(
-    () => StreakRepo(getIt<AppDatabase>()),
+    () => StreakRepo(getIt<AppDatabase>(), getIt<SessionRepo>()),
   );
   getIt.registerLazySingleton<StatsRepo>(StatsRepo.new);
   getIt.registerLazySingleton<BodyWeightRepo>(

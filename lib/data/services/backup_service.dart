@@ -16,6 +16,7 @@ const _autoIncrementTables = [
   "session_circuits",
   "session_exercise_logs",
   "challenge_logs",
+  "challenge_screen_visits",
   "body_weight_logs",
 ];
 const _databaseTables = {
@@ -31,12 +32,19 @@ const _databaseTables = {
   "streakStats",
   "bodyWeightLogs",
 };
+
+/// Tables added after schema 1. Schema 1 backups omit them and restore them
+/// empty.
+const _schemaV2Tables = {"challengeScreenVisits"};
+const _supportedSchemaVersions = {1, 2};
 const _dateFields = {
   "createdAt",
   "updatedAt",
   "startedAt",
   "completedAt",
   "loggedAt",
+  "openedAt",
+  "closedAt",
   "currentStreakStartDate",
   "currentStreakEndDate",
   "longestStreakStartDate",
@@ -69,6 +77,7 @@ class BackupContents {
     required this.sessionCircuits,
     required this.sessionExerciseLogs,
     required this.challengeLogs,
+    required this.challengeScreenVisits,
     required this.streakStats,
     required this.bodyWeightLogs,
   });
@@ -83,6 +92,7 @@ class BackupContents {
   final List<SessionCircuit> sessionCircuits;
   final List<SessionExerciseLog> sessionExerciseLogs;
   final List<ChallengeLog> challengeLogs;
+  final List<ChallengeScreenVisit> challengeScreenVisits;
   final List<StreakStat> streakStats;
   final List<BodyWeightLog> bodyWeightLogs;
 
@@ -96,6 +106,7 @@ class BackupContents {
       sessionCircuits.length +
       sessionExerciseLogs.length +
       challengeLogs.length +
+      challengeScreenVisits.length +
       streakStats.length +
       bodyWeightLogs.length;
 
@@ -195,6 +206,10 @@ class BackupService {
         "challengeLogs": (await _database.select(_database.challengeLogs).get())
             .map((row) => row.toJson(serializer: _jsonSerializer))
             .toList(),
+        "challengeScreenVisits":
+            (await _database.select(_database.challengeScreenVisits).get())
+                .map((row) => row.toJson(serializer: _jsonSerializer))
+                .toList(),
         "streakStats": (await _database.select(_database.streakStats).get())
             .map((row) => row.toJson(serializer: _jsonSerializer))
             .toList(),
@@ -244,18 +259,21 @@ class BackupService {
         "Unsupported backup format version: ${root["backupVersion"]}.",
       );
     }
-    if (root["databaseSchemaVersion"] is! int ||
-        root["databaseSchemaVersion"] != _database.schemaVersion) {
+    final schemaVersion = root["databaseSchemaVersion"];
+    if (schemaVersion is! int ||
+        !_supportedSchemaVersions.contains(schemaVersion)) {
       throw BackupException(
-        "This backup uses database schema "
-        "${root["databaseSchemaVersion"]}; this app supports "
-        "${_database.schemaVersion}.",
+        "This backup uses database schema $schemaVersion; this app supports "
+        "${_supportedSchemaVersions.join(", ")}.",
       );
     }
     _readDate(root["exportedAt"], "exportedAt");
 
     final rawDatabase = _asMap(root["database"], "database");
-    _requireKeys(rawDatabase, _databaseTables, "database");
+    _requireKeys(rawDatabase, {
+      ..._databaseTables,
+      if (schemaVersion >= 2) ..._schemaV2Tables,
+    }, "database");
 
     final exercises = _readRows(rawDatabase["exercises"], "exercises", const {
       "id",
@@ -349,6 +367,14 @@ class BackupService {
       },
       ChallengeLog.fromJson,
     );
+    final challengeScreenVisits = schemaVersion >= 2
+        ? _readRows(
+            rawDatabase["challengeScreenVisits"],
+            "challengeScreenVisits",
+            const {"id", "sessionId", "openedAt", "closedAt"},
+            ChallengeScreenVisit.fromJson,
+          )
+        : const <ChallengeScreenVisit>[];
     final streakStats = _readRows(
       rawDatabase["streakStats"],
       "streakStats",
@@ -382,6 +408,7 @@ class BackupService {
       sessionCircuits: sessionCircuits,
       sessionExerciseLogs: sessionExerciseLogs,
       challengeLogs: challengeLogs,
+      challengeScreenVisits: challengeScreenVisits,
       streakStats: streakStats,
     );
 
@@ -396,6 +423,7 @@ class BackupService {
       sessionCircuits: List.unmodifiable(sessionCircuits),
       sessionExerciseLogs: List.unmodifiable(sessionExerciseLogs),
       challengeLogs: List.unmodifiable(challengeLogs),
+      challengeScreenVisits: List.unmodifiable(challengeScreenVisits),
       streakStats: List.unmodifiable(streakStats),
       bodyWeightLogs: List.unmodifiable(bodyWeightLogs),
     );
@@ -470,6 +498,7 @@ class BackupService {
     required List<SessionCircuit> sessionCircuits,
     required List<SessionExerciseLog> sessionExerciseLogs,
     required List<ChallengeLog> challengeLogs,
+    required List<ChallengeScreenVisit> challengeScreenVisits,
     required List<StreakStat> streakStats,
   }) {
     _requireUnique(exercises.map((row) => row.id), "exercises.id");
@@ -486,6 +515,10 @@ class BackupService {
       "sessionExerciseLogs.id",
     );
     _requireUnique(challengeLogs.map((row) => row.id), "challengeLogs.id");
+    _requireUnique(
+      challengeScreenVisits.map((row) => row.id),
+      "challengeScreenVisits.id",
+    );
     _requireUnique(streakStats.map((row) => row.id), "streakStats.id");
 
     final exerciseIds = exercises.map((row) => row.id).toSet();
@@ -548,6 +581,11 @@ class BackupService {
       exerciseIds,
       "challengeLogs.exerciseId",
     );
+    _requireReferences(
+      challengeScreenVisits.map((row) => row.sessionId),
+      sessionIds,
+      "challengeScreenVisits.sessionId",
+    );
 
     _requireUnique(
       exerciseSupportedTypes.map(
@@ -604,6 +642,7 @@ class BackupService {
   Future<void> _clearDatabase() async {
     await _database.delete(_database.sessionExerciseLogs).go();
     await _database.delete(_database.challengeLogs).go();
+    await _database.delete(_database.challengeScreenVisits).go();
     await _database.delete(_database.sessionCircuits).go();
     await _database.delete(_database.workoutSessions).go();
     await _database.delete(_database.workoutExercises).go();
@@ -636,6 +675,10 @@ class BackupService {
         backup.sessionExerciseLogs,
       );
       batch.insertAll(_database.challengeLogs, backup.challengeLogs);
+      batch.insertAll(
+        _database.challengeScreenVisits,
+        backup.challengeScreenVisits,
+      );
       batch.insertAll(_database.streakStats, backup.streakStats);
       batch.insertAll(_database.bodyWeightLogs, backup.bodyWeightLogs);
     });

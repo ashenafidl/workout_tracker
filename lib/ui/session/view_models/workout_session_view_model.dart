@@ -5,6 +5,7 @@ import "package:flutter/foundation.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/session_summary.dart";
 import "package:workout_tracker/data/models/workout.dart";
+import "package:workout_tracker/data/services/session_durations.dart";
 import "package:workout_tracker/data/services/shared_preference_service.dart";
 import "package:workout_tracker/data/services/sound_service.dart";
 import "package:workout_tracker/data/services/streak_service.dart";
@@ -502,9 +503,8 @@ class WorkoutSessionViewModel extends ChangeNotifier {
         );
       }).toList();
 
-      final restDuration =
-          index < circuits.length - 1 && circuit.completedAt != null
-          ? circuits[index + 1].startedAt.difference(circuit.completedAt!)
+      final restDuration = index < circuits.length - 1
+          ? SessionDurations.restAfterCircuit(circuit, circuits[index + 1])
           : Duration.zero;
 
       circuitSummaries.add(
@@ -519,10 +519,16 @@ class WorkoutSessionViewModel extends ChangeNotifier {
       );
     }
 
+    final completedAt = session.completedAt ?? session.startedAt;
     _summary = WorkoutSessionSummary(
       workoutName: args.workoutWithExercises.workout.name,
       startedAt: session.startedAt,
-      completedAt: session.completedAt ?? session.startedAt,
+      completedAt: completedAt,
+      durations: SessionDurations.forCircuitSession(
+        startedAt: session.startedAt,
+        completedAt: completedAt,
+        circuits: circuits,
+      ),
       circuits: circuitSummaries,
     );
   }

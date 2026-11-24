@@ -3,6 +3,7 @@ import "package:drift_flutter/drift_flutter.dart";
 import "package:path_provider/path_provider.dart";
 import "package:workout_tracker/data/models/exercises.dart";
 import "package:workout_tracker/data/models/programs.dart";
+import "package:workout_tracker/database/database.steps.dart";
 
 part "database.g.dart";
 
@@ -131,6 +132,19 @@ class ChallengeLogs extends Table {
   DateTimeColumn get loggedAt => dateTime().clientDefault(DateTime.now)();
 }
 
+// A stretch of time the challenge screen was in the foreground for a session.
+// Rows are written lazily on the first log of a stretch; closedAt is pushed
+// forward on every later log, so it marks the last activity, not the moment
+// the screen closed. Used to keep rep-challenge durations from counting time
+// the app was closed.
+class ChallengeScreenVisits extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionId =>
+      integer().references(WorkoutSessions, #id, onDelete: KeyAction.cascade)();
+  DateTimeColumn get openedAt => dateTime()();
+  DateTimeColumn get closedAt => dateTime()();
+}
+
 // Singleton table: always exactly one row (id = 1) holding the streak counters.
 // Updated incrementally on every completed session, never recomputed from scratch.
 class StreakStats extends Table {
@@ -172,6 +186,7 @@ class BodyWeightLogs extends Table {
     SessionCircuits,
     SessionExerciseLogs,
     ChallengeLogs,
+    ChallengeScreenVisits,
     StreakStats,
     WorkoutScheduleChanges,
     BodyWeightLogs,
@@ -181,7 +196,7 @@ class AppDatabase extends _$AppDatabase {
   new([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -189,6 +204,11 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
       await _seedStreakStats();
     },
+    onUpgrade: stepByStep(
+      from1To2: (m, schema) async {
+        await m.createTable(schema.challengeScreenVisits);
+      },
+    ),
   );
 
   Future<void> _seedStreakStats() {

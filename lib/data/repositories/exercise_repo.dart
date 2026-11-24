@@ -23,17 +23,14 @@ class ExerciseRepo {
   Stream<List<ExerciseWithTypes>> watchAllExercisesWithTypes() {
     final query =
         _db.select(_db.exercises).join([
-            leftOuterJoin(
-              _db.exerciseSupportedTypes,
-              _db.exerciseSupportedTypes.exerciseId.equalsExp(
-                _db.exercises.id,
-              ),
-            ),
-          ])
-          ..orderBy([
-            OrderingTerm(expression: _db.exercises.name),
-            OrderingTerm(expression: _db.exerciseSupportedTypes.type),
-          ]);
+          leftOuterJoin(
+            _db.exerciseSupportedTypes,
+            _db.exerciseSupportedTypes.exerciseId.equalsExp(_db.exercises.id),
+          ),
+        ])..orderBy([
+          OrderingTerm(expression: _db.exercises.name),
+          OrderingTerm(expression: _db.exerciseSupportedTypes.type),
+        ]);
 
     return query.watch().map((rows) {
       final exercises = <int, _ExerciseGrouping>{};
@@ -152,12 +149,10 @@ class ExerciseRepo {
       if (supportedTypes.length == 1) {
         throw StateError("An exercise must support at least one type");
       }
-      await (_db.delete(_db.exerciseSupportedTypes)
-            ..where(
-              (row) =>
-                  row.exerciseId.equals(exerciseId) &
-                      row.type.equals(type.index),
-            ))
+      await (_db.delete(_db.exerciseSupportedTypes)..where(
+            (row) =>
+                row.exerciseId.equals(exerciseId) & row.type.equals(type.index),
+          ))
           .go();
     });
   }

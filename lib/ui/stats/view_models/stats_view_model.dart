@@ -1,14 +1,14 @@
 import "dart:async";
 
 import "package:flutter/foundation.dart";
+import "package:workout_tracker/data/models/session_history.dart";
 import "package:workout_tracker/data/models/stats.dart";
 import "package:workout_tracker/data/repositories/session_repo.dart";
 import "package:workout_tracker/data/repositories/stats_repo.dart";
-import "package:workout_tracker/database/database.dart";
 
 class StatsViewModel extends ChangeNotifier {
   new(this._statsRepo, this._sessionRepo) {
-    _sessionsSubscription = _sessionRepo.watchCompletedSessions().listen(
+    _sessionsSubscription = _sessionRepo.watchSessionHistory().listen(
       (sessions) {
         _sessions = sessions;
         unawaited(_loadStats());
@@ -23,8 +23,8 @@ class StatsViewModel extends ChangeNotifier {
 
   final StatsRepo _statsRepo;
   final SessionRepo _sessionRepo;
-  StreamSubscription<List<WorkoutSession>>? _sessionsSubscription;
-  List<WorkoutSession> _sessions = [];
+  StreamSubscription<List<SessionHistoryEntry>>? _sessionsSubscription;
+  List<SessionHistoryEntry> _sessions = [];
 
   StatsSnapshot? _stats;
   StatsSnapshot? get stats => _stats;

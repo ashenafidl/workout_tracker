@@ -98,6 +98,29 @@ class ChallengeRepo {
         );
   }
 
+  /// Records a foreground stretch of the challenge screen that saw activity.
+  Future<int> startVisit({
+    required int sessionId,
+    required DateTime openedAt,
+    required DateTime lastActivityAt,
+  }) {
+    return _db
+        .into(_db.challengeScreenVisits)
+        .insert(
+          ChallengeScreenVisitsCompanion.insert(
+            sessionId: sessionId,
+            openedAt: openedAt,
+            closedAt: lastActivityAt,
+          ),
+        );
+  }
+
+  Future<void> extendVisit(int visitId, DateTime lastActivityAt) async {
+    await (_db.update(_db.challengeScreenVisits)
+          ..where((visit) => visit.id.equals(visitId)))
+        .write(ChallengeScreenVisitsCompanion(closedAt: Value(lastActivityAt)));
+  }
+
   Future<void> completeSession(int sessionId) async {
     await (_db.update(_db.workoutSessions)
           ..where((session) => session.id.equals(sessionId)))

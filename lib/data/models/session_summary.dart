@@ -1,4 +1,5 @@
 import "package:workout_tracker/data/models/exercises.dart";
+import "package:workout_tracker/data/services/session_durations.dart";
 import "package:workout_tracker/utils/exercise_label.dart";
 
 class WorkoutSessionSummary {
@@ -6,19 +7,18 @@ class WorkoutSessionSummary {
     required this.workoutName,
     required this.startedAt,
     required this.completedAt,
+    required this.durations,
     required this.circuits,
   });
 
   final String workoutName;
   final DateTime startedAt;
   final DateTime completedAt;
+  final SessionDurations durations;
   final List<CircuitSummary> circuits;
 
-  Duration get totalDuration => completedAt.difference(startedAt);
-  Duration get totalRestDuration => circuits.fold(
-    Duration.zero,
-    (sum, circuit) => sum + circuit.restDuration,
-  );
+  Duration get totalDuration => durations.total;
+  Duration get totalRestDuration => durations.rest;
 }
 
 class CircuitSummary {

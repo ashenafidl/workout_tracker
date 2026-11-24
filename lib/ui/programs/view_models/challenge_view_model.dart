@@ -31,6 +31,23 @@ class ChallengeViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  /// When the screen last came to the foreground; null while it is hidden.
+  DateTime? _visibleSince = DateTime.now();
+
+  /// The visit row for the current foreground stretch, created on its first
+  /// log so stretches without activity leave nothing behind.
+  int? _visitId;
+  Future<void>? _visitWrite;
+
+  void onScreenShown() {
+    _visibleSince ??= DateTime.now();
+  }
+
+  void onScreenHidden() {
+    _visibleSince = null;
+    _visitId = null;
+  }
+
   Future<void> init(WorkoutWithExercises workout, int programId) async {
     try {
       final sessionId = await _challengeRepo.getOrCreateTodaySession(
@@ -68,16 +85,18 @@ class ChallengeViewModel extends ChangeNotifier {
         side: item.side,
         reps: value,
       );
-      return;
+    } else {
+      await _challengeRepo.logDuration(
+        sessionId: sessionId,
+        exerciseId: item.exercise.id,
+        exerciseType: item.type,
+        side: item.side,
+        durationSeconds: value,
+      );
     }
 
-    await _challengeRepo.logDuration(
-      sessionId: sessionId,
-      exerciseId: item.exercise.id,
-      exerciseType: item.type,
-      side: item.side,
-      durationSeconds: value,
-    );
+    // After the insert, so the visit never ends before its last log.
+    await _recordActivity(sessionId);
   }
 
   Future<void> markDone() async {
@@ -88,6 +107,26 @@ class ChallengeViewModel extends ChangeNotifier {
     await _streakService.recordCompletedSession(excludeSessionId: sessionId);
     _isCompleted = true;
     notifyListeners();
+  }
+
+  /// Serialised so two quick logs cannot both create a visit row.
+  Future<void> _recordActivity(int sessionId) {
+    final previous = _visitWrite ?? Future<void>.value();
+    final write = previous.then((_) async {
+      final now = DateTime.now();
+      final visitId = _visitId;
+      if (visitId != null) {
+        await _challengeRepo.extendVisit(visitId, now);
+        return;
+      }
+      _visitId = await _challengeRepo.startVisit(
+        sessionId: sessionId,
+        openedAt: _visibleSince ?? now,
+        lastActivityAt: now,
+      );
+    });
+    _visitWrite = write;
+    return write;
   }
 
   bool get allTargetsMet =>

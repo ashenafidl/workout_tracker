@@ -27,6 +27,7 @@ class ChallengeScreen extends StatefulWidget {
 
 class _ChallengeScreenState extends State<ChallengeScreen> {
   late final ChallengeViewModel _viewModel;
+  late final AppLifecycleListener _lifecycleListener;
 
   @override
   void initState() {
@@ -36,10 +37,17 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       param1: widget.workoutWithExercises,
       param2: widget.programId,
     );
+    // Time with the app in the background must not count towards the
+    // challenge duration, so each return to the foreground starts a new visit.
+    _lifecycleListener = AppLifecycleListener(
+      onShow: _viewModel.onScreenShown,
+      onHide: _viewModel.onScreenHidden,
+    );
   }
 
   @override
   void dispose() {
+    _lifecycleListener.dispose();
     _viewModel.dispose();
     WakelockPlus.disable();
     super.dispose();
